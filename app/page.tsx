@@ -1,14 +1,30 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { GridConfig, createDefaultGridConfig } from "@/types/grid"
 // Note: CellMerge removed — grid is now a flat N-cell layout
 import { GridPreview } from "@/lib/grid-render"
 import { GridEditor } from "@/components/grid/grid-editor"
 import { cn } from "@/lib/utils"
-import { PanelLeftClose, PanelLeft, Monitor, Smartphone, Tablet } from "lucide-react"
+import { PanelLeftClose, PanelLeft, Monitor, Smartphone, Tablet, Save, Trash2 } from "lucide-react"
 
 export type ViewportSize = "desktop" | "tablet" | "mobile"
+
+type Preset = { name: string; config: GridConfig }
+const STORAGE_KEY = "grid-presets"
+
+function loadUserPresets(): Preset[] {
+  try {
+    const raw = typeof window !== "undefined" ? localStorage.getItem(STORAGE_KEY) : null
+    return raw ? JSON.parse(raw) : []
+  } catch {
+    return []
+  }
+}
+
+function persistUserPresets(presets: Preset[]) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(presets))
+}
 
 const VIEWPORT_WIDTHS: Record<ViewportSize, number> = {
   mobile: 375,
@@ -317,8 +333,41 @@ export default function GridEditorPage() {
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [viewport, setViewport] = useState<ViewportSize>("desktop")
   const [selectedPreset, setSelectedPreset] = useState("")
+  const [userPresets, setUserPresets] = useState<Preset[]>([])
+
+  useEffect(() => {
+    setUserPresets(loadUserPresets())
+  }, [])
 
   const vp = VIEWPORT_CONFIG[viewport]
+
+  const savePreset = () => {
+    const name = window.prompt("Preset name:")
+    if (!name?.trim()) return
+    const updated = [...userPresets.filter(p => p.name !== name.trim()), { name: name.trim(), config }]
+    setUserPresets(updated)
+    persistUserPresets(updated)
+    setSelectedPreset(`user:${name.trim()}`)
+  }
+
+  const deletePreset = (name: string) => {
+    const updated = userPresets.filter(p => p.name !== name)
+    setUserPresets(updated)
+    persistUserPresets(updated)
+    setSelectedPreset("")
+  }
+
+  const handlePresetChange = (value: string) => {
+    if (value.startsWith("factory:")) {
+      const preset = SAMPLE_CONFIGS.find(c => c.name === value.slice(8))
+      if (preset) { setConfig(preset.config); setSelectedPreset(value) }
+    } else if (value.startsWith("user:")) {
+      const preset = userPresets.find(p => p.name === value.slice(5))
+      if (preset) { setConfig(preset.config); setSelectedPreset(value) }
+    }
+  }
+
+  const selectedIsUserPreset = selectedPreset.startsWith("user:")
 
   return (
     <div className="h-screen flex flex-col bg-background overflow-hidden">
@@ -365,22 +414,44 @@ export default function GridEditorPage() {
           </div>
 
           {/* Presets */}
-          <select
-            className="h-8 px-2.5 text-xs bg-muted border border-border rounded-lg text-foreground"
-            value={selectedPreset}
-            onChange={(e) => {
-              const preset = SAMPLE_CONFIGS.find((c) => c.name === e.target.value)
-              if (preset) {
-                setConfig(preset.config)
-                setSelectedPreset(e.target.value)
-              }
-            }}
-          >
-            <option value="" disabled>Load Preset</option>
-            {SAMPLE_CONFIGS.map((preset) => (
-              <option key={preset.name} value={preset.name}>{preset.name}</option>
-            ))}
-          </select>
+          <div className="flex items-center gap-1.5">
+            <select
+              className="h-8 px-2.5 text-xs bg-muted border border-border rounded-lg text-foreground"
+              value={selectedPreset}
+              onChange={(e) => handlePresetChange(e.target.value)}
+            >
+              <option value="" disabled>Load Preset</option>
+              <optgroup label="Factory">
+                {SAMPLE_CONFIGS.map((preset) => (
+                  <option key={preset.name} value={`factory:${preset.name}`}>{preset.name}</option>
+                ))}
+              </optgroup>
+              {userPresets.length > 0 && (
+                <optgroup label="Saved">
+                  {userPresets.map((preset) => (
+                    <option key={preset.name} value={`user:${preset.name}`}>{preset.name}</option>
+                  ))}
+                </optgroup>
+              )}
+            </select>
+            <button
+              onClick={savePreset}
+              className="h-8 px-2.5 flex items-center gap-1.5 text-xs bg-muted border border-border rounded-lg text-foreground hover:bg-background transition-colors"
+              title="Save current config as preset"
+            >
+              <Save className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Save</span>
+            </button>
+            {selectedIsUserPreset && (
+              <button
+                onClick={() => deletePreset(selectedPreset.slice(5))}
+                className="h-8 px-2 flex items-center text-destructive hover:bg-destructive/10 border border-destructive/30 rounded-lg transition-colors"
+                title="Delete this preset"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </button>
+            )}
+          </div>
         </div>
       </header>
 
