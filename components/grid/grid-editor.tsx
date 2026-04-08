@@ -1,31 +1,41 @@
-/* eslint-disable */
-// Cache bust: fix-rowstart-let-2025
 "use client"
 
 import { useState } from "react"
-import { GridConfig, GridCell } from "@/types/grid"
+import { GridConfig, GridCell, GridStyle, RowStyle, rebuildRows } from "@/types/grid"
+import { Copy, ChevronRight } from "lucide-react"
 import { MiniGridEditor } from "./mini-grid-editor"
 import { CellEditor } from "./cell-editor"
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
-import { ChevronUp, ChevronDown, Plus, Trash2 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { GridStyle } from "@/types/grid"
+import { ColorPicker } from "./color-picker"
+import { cn } from "@/lib/utils"
 
 interface GridEditorProps {
   config: GridConfig
   onChange: (config: GridConfig) => void
 }
 
-export function GridEditor({ config, onChange }: GridEditorProps) {
-  const [focusedCellIndex, setFocusedCellIndex] = useState(0)
+type Scope = "grid" | "row" | "cell"
 
-  const updateGridStyle = (updates: Partial<GridStyle>) => {
-    onChange({
-      ...config,
-      gridStyle: { ...config.gridStyle, ...updates },
-    })
+export function GridEditor({ config, onChange }: GridEditorProps) {
+  const [selectedCellIndex, setSelectedCellIndex] = useState(0)
+  const [selectedRowIndex, setSelectedRowIndex] = useState(0)
+  const [scope, setScope] = useState<Scope>("grid")
+  const [gridAdvancedOpen, setGridAdvancedOpen] = useState(false)
+
+  const rows = config.rows ?? []
+  const selectedRow = rows[selectedRowIndex]
+  const selectedCell = config.cells[selectedCellIndex]
+
+  const updateGridStyle = (updates: Partial<GridStyle>) =>
+    onChange({ ...config, gridStyle: { ...config.gridStyle, ...updates } })
+
+  const updateRowStyle = (rowIndex: number, updates: Partial<RowStyle>) => {
+    const newRows = rows.map((r, i) =>
+      i === rowIndex ? { ...r, style: { ...r.style, ...updates } } : r
+    )
+    onChange({ ...config, rows: newRows })
   }
 
   const updateCell = (index: number, updatedCell: GridCell) => {
@@ -34,334 +44,253 @@ export function GridEditor({ config, onChange }: GridEditorProps) {
     onChange({ ...config, cells: newCells })
   }
 
-  const removeCell = (index: number) => {
-    if (config.cells.length <= 1) return
-    const newCells = config.cells.filter((_, i) => i !== index)
-    onChange({ ...config, cells: newCells })
-    setFocusedCellIndex(Math.max(0, index - 1))
+  const handleCellsChange = (newCells: GridCell[]) => {
+    const newRows = rebuildRows(newCells, config.rows)
+    onChange({ ...config, cells: newCells, rows: newRows })
   }
 
-  const duplicateCell = (index: number) => {
-    const cell = config.cells[index]
-    const newCell: GridCell = {
+  const cloneRow = (rowIndex: number) => {
+    const row = rows[rowIndex]
+    if (!row) return
+    const rowCells = row.cellIds
+      .map(id => config.cells.find(c => c.id === id))
+      .filter((c): c is GridCell => !!c)
+    const now = Date.now()
+    const cloned = rowCells.map((cell, i) => ({
       ...cell,
-      id: `cell-${Date.now()}`,
-      contents: cell.contents.map(c => ({
-        ...c,
-        id: `content-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-      })),
-    }
-    const newCells = [...config.cells.slice(0, index + 1), newCell, ...config.cells.slice(index + 1)]
-    onChange({ ...config, cells: newCells })
-  }
-
-  const getRowForCell = (cellIndex: number) => {
-    let currentWidth = 0
-    let rowStart = cellIndex
-    let rowEnd = cellIndex
-
-    // Find start of row - go backwards until width exceeds 100%
-    for (let i = cellIndex; i >= 0; i--) {
-      if (i === cellIndex) {
-        currentWidth = 0
-      }
-      const cellWidth = config.cells[i].width ?? 50
-      if (currentWidth + cellWidth > 100 && i < cellIndex) break
-      currentWidth += cellWidth
-      rowStart = i as any
-    }
-
-    // Find end of row - go forwards until width exceeds 100%
-    currentWidth = 0
-    for (let i = rowStart; i < config.cells.length; i++) {
-      const cellWidth = config.cells[i].width ?? 50
-      if (currentWidth + cellWidth > 100 && i > rowStart) break
-      currentWidth += cellWidth
-      rowEnd = i
-    }
-
-    const rowIndices = Array.from({ length: rowEnd - rowStart + 1 }, (_, i) => rowStart + i)
-    return {
-      startIndex: rowStart,
-      endIndex: rowEnd,
-      cells: rowIndices.map(i => config.cells[i]),
-      indices: rowIndices,
-    }
-  }
-
-  const duplicateRow = (cellIndex: number) => {
-    const row = getRowForCell(cellIndex)
-    
-    const clonedCells = row.cells.map((cell) => ({
-      ...cell,
-      id: `cell-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-      contents: cell.contents.map(c => ({
-        ...c,
-        id: `content-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+      id: `cell-clone-${now}-${i}`,
+      contents: cell.contents.map((content, j) => ({
+        ...content,
+        id: `content-clone-${now}-${i}-${j}`,
       })),
     }))
-
-    // Insert cloned cells after the last cell in the row
-    const insertIndex = row.endIndex + 1
+    const lastId = row.cellIds[row.cellIds.length - 1]
+    const insertAfter = config.cells.findIndex(c => c.id === lastId)
     const newCells = [
-      ...config.cells.slice(0, insertIndex),
-      ...clonedCells,
-      ...config.cells.slice(insertIndex),
+      ...config.cells.slice(0, insertAfter + 1),
+      ...cloned,
+      ...config.cells.slice(insertAfter + 1),
     ]
-    onChange({ ...config, cells: newCells })
+    onChange({ ...config, cells: newCells, rows: rebuildRows(newCells, config.rows) })
   }
 
-  const moveCell = (index: number, direction: "up" | "down") => {
-    const newCells = [...config.cells]
-    if (direction === "up" && index > 0) {
-      [newCells[index], newCells[index - 1]] = [newCells[index - 1], newCells[index]]
-      setFocusedCellIndex(index - 1)
-    } else if (direction === "down" && index < newCells.length - 1) {
-      [newCells[index], newCells[index + 1]] = [newCells[index + 1], newCells[index]]
-      setFocusedCellIndex(index + 1)
-    }
-    onChange({ ...config, cells: newCells })
+  const handleSelectCell = (cellIndex: number, rowIndex: number) => {
+    setSelectedCellIndex(cellIndex)
+    setSelectedRowIndex(rowIndex)
+    setScope("cell")
   }
 
-  const adjustCellWidthWithRowSiblings = (index: number, newWidth: number) => {
-    const newCells = [...config.cells]
-    newCells[index] = { ...newCells[index], width: newWidth }
-    onChange({ ...config, cells: newCells })
+  const handleSelectRow = (rowIndex: number) => {
+    setSelectedRowIndex(rowIndex)
+    setScope("row")
   }
 
   return (
-    <div className="h-full flex flex-col space-y-4 p-4 overflow-y-auto">
-      {/* Layout Section */}
+    <div className="flex flex-col space-y-4 p-4">
+
+      {/* Mini grid — primary selection control */}
       <div className="space-y-2 pb-4 border-b border-border">
-        <h2 className="text-sm font-semibold text-foreground">Layout</h2>
+        <h2 className="text-xs font-semibold text-foreground uppercase tracking-wide">Layout</h2>
         <MiniGridEditor
           cells={config.cells}
-          onChange={(cells) => onChange({ ...config, cells })}
-          selectedCellIndex={focusedCellIndex}
-          onSelectCell={(index) => setFocusedCellIndex(index)}
-          onMergeMode={() => {}}
+          onChange={handleCellsChange}
+          selectedCellIndex={selectedCellIndex}
+          onSelectCell={handleSelectCell}
+          selectedRowIndex={selectedRowIndex}
+          onSelectRow={handleSelectRow}
         />
       </div>
 
-      {/* Grid Styling Section */}
-      <Accordion type="single" collapsible className="w-full border-b border-border pb-4">
-        <AccordionItem value="grid-styling" className="border-b-0">
-          <AccordionTrigger className="hover:no-underline py-2 text-xs font-semibold">
-            Grid Styling
-          </AccordionTrigger>
-          <AccordionContent className="pt-2 space-y-3">
-            {/* Grid Padding & Gap */}
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1">
-                <Label className="text-xs text-muted-foreground">Padding (px)</Label>
-                <Input
-                  type="number"
-                  min={0}
-                  defaultValue={config.gridStyle.padding ?? 16}
-                  key={`grid-padding-${config.gridStyle.padding}`}
-                  onBlur={(e) => updateGridStyle({ padding: parseInt(e.target.value) || 0 })}
-                  className="h-8 text-xs"
-                />
-              </div>
-              <div className="space-y-1">
-                <Label className="text-xs text-muted-foreground">Gap (px)</Label>
-                <Input
-                  type="number"
-                  min={0}
-                  defaultValue={config.gridStyle.gap ?? 24}
-                  key={`grid-gap-${config.gridStyle.gap}`}
-                  onBlur={(e) => updateGridStyle({ gap: parseInt(e.target.value) || 0 })}
-                  className="h-8 text-xs"
-                />
-              </div>
-            </div>
-
-            {/* Border Radius & Width */}
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1">
-                <Label className="text-xs text-muted-foreground">Radius (px)</Label>
-                <Input
-                  type="number"
-                  min={0}
-                  defaultValue={config.gridStyle.borderRadius ?? 16}
-                  key={`grid-radius-${config.gridStyle.borderRadius}`}
-                  onBlur={(e) => updateGridStyle({ borderRadius: parseInt(e.target.value) || 0 })}
-                  className="h-8 text-xs"
-                />
-              </div>
-              <div className="space-y-1">
-                <Label className="text-xs text-muted-foreground">Border Width (px)</Label>
-                <Input
-                  type="number"
-                  min={0}
-                  defaultValue={config.gridStyle.borderWidth ?? 0}
-                  key={`grid-borderwidth-${config.gridStyle.borderWidth}`}
-                  onBlur={(e) => updateGridStyle({ borderWidth: parseInt(e.target.value) || 0 })}
-                  className="h-8 text-xs"
-                />
-              </div>
-            </div>
-
-            {/* Background & Border Colors */}
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1">
-                <Label className="text-xs text-muted-foreground">Background</Label>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="color"
-                    value={config.gridStyle.backgroundColor || "#ffffff"}
-                    onChange={(e) => updateGridStyle({ backgroundColor: e.target.value })}
-                    className="w-8 h-8 rounded border border-border cursor-pointer"
-                  />
-                  <Input
-                    type="text"
-                    value={config.gridStyle.backgroundColor || "#ffffff"}
-                    onChange={(e) => updateGridStyle({ backgroundColor: e.target.value })}
-                    className="h-8 text-xs flex-1"
-                  />
-                </div>
-              </div>
-              <div className="space-y-1">
-                <Label className="text-xs text-muted-foreground">Border Color</Label>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="color"
-                    value={config.gridStyle.borderColor || "#e5e7eb"}
-                    onChange={(e) => updateGridStyle({ borderColor: e.target.value })}
-                    className="w-8 h-8 rounded border border-border cursor-pointer"
-                  />
-                  <Input
-                    type="text"
-                    value={config.gridStyle.borderColor || "#e5e7eb"}
-                    onChange={(e) => updateGridStyle({ borderColor: e.target.value })}
-                    className="h-8 text-xs flex-1"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Border Style */}
-            <div className="space-y-1">
-              <Label className="text-xs text-muted-foreground">Border Style</Label>
-              <Select
-                value={config.gridStyle.borderStyle || "solid"}
-                onValueChange={(value: "solid" | "dashed" | "dotted" | "double") => updateGridStyle({ borderStyle: value })}
-              >
-                <SelectTrigger className="h-8 text-xs">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="solid">Solid</SelectItem>
-                  <SelectItem value="dashed">Dashed</SelectItem>
-                  <SelectItem value="dotted">Dotted</SelectItem>
-                  <SelectItem value="double">Double</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Shadow Toggle */}
-            <div className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                id="grid-shadow"
-                checked={config.gridStyle.shadowEnabled ?? false}
-                onChange={(e) => updateGridStyle({ shadowEnabled: e.target.checked })}
-                className="w-4 h-4"
-              />
-              <Label htmlFor="grid-shadow" className="text-xs text-muted-foreground cursor-pointer">
-                Enable Drop Shadow
-              </Label>
-            </div>
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
-
-      {/* Cells List Section */}
-      <div className="space-y-2 pb-4 border-b border-border">
-        <h3 className="text-xs font-semibold text-foreground">Cells</h3>
-        <div className="space-y-1 max-h-32 overflow-y-auto">
-          {config.cells.map((cell, index) => (
-            <button
-              key={cell.id}
-              onClick={() => setFocusedCellIndex(index)}
-              className={`w-full text-left px-3 py-2 rounded-lg transition-colors border text-xs ${
-                focusedCellIndex === index
-                  ? "border-primary bg-primary/10 text-primary"
-                  : "border-border hover:border-primary/50 text-foreground"
-              }`}
-            >
-              <div className="flex items-center justify-between">
-                <span className="font-medium">Cell {index + 1}</span>
-                <span className="text-[10px] text-muted-foreground">{cell.width ?? 50}%</span>
-              </div>
-            </button>
-          ))}
-        </div>
+      {/* Scope tabs */}
+      <div className="flex rounded-lg border border-border overflow-hidden shrink-0">
+        {(["grid", "row", "cell"] as Scope[]).map((s) => (
+          <button
+            key={s}
+            onClick={() => setScope(s)}
+            className={cn(
+              "flex-1 py-1.5 text-xs font-medium capitalize transition-colors border-r border-border last:border-r-0",
+              scope === s
+                ? "bg-primary text-primary-foreground"
+                : "bg-muted text-muted-foreground hover:text-foreground hover:bg-muted/80"
+            )}
+          >
+            {s === "grid" ? "Layout" : s === "row" ? `Row ${selectedRowIndex + 1}` : `Cell ${selectedCellIndex + 1}`}
+          </button>
+        ))}
       </div>
 
-      {/* Cell Editor - Expandable Accordion */}
-      {focusedCellIndex >= 0 && focusedCellIndex < config.cells.length && (
-        <Accordion type="single" collapsible defaultValue="editor" className="w-full">
-          <AccordionItem value="editor" className="border-b-0">
-            <AccordionTrigger className="hover:no-underline py-2 text-xs font-semibold">
-              Edit Cell {focusedCellIndex + 1}
-            </AccordionTrigger>
-            <AccordionContent className="pt-2 max-h-80 overflow-y-auto">
-              <CellEditor
-                cell={config.cells[focusedCellIndex]}
-                cellIndex={focusedCellIndex}
-                onUpdate={(updatedCell) => updateCell(focusedCellIndex, updatedCell)}
-                onWidthChange={(width) => adjustCellWidthWithRowSiblings(focusedCellIndex, width)}
-              />
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
-      )}
+      {/* Grid scope */}
+      {scope === "grid" && (
+        <div className="space-y-3">
+          {/* Mobile layout — only shown when any row has exactly 2 cells */}
+          {config.rows?.some(r => r.cellIds.length === 2) && (
+            <div className="space-y-1.5">
+              <Label className="text-xs text-muted-foreground">Mobile Layout</Label>
+              <div className="flex rounded-lg border border-border overflow-hidden">
+                {([
+                  { value: 1, label: "Stack (1 col)" },
+                  { value: 2, label: "Keep 2 cols" },
+                ] as const).map(({ value, label }) => (
+                  <button
+                    key={value}
+                    onClick={() => onChange({ ...config, mobileColumns: value === 1 ? undefined : value })}
+                    className={cn(
+                      "flex-1 py-1.5 text-xs font-medium transition-colors border-r border-border last:border-r-0",
+                      (config.mobileColumns ?? 1) === value
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-muted text-muted-foreground hover:text-foreground"
+                    )}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
-      {/* Actions Section */}
-      {focusedCellIndex >= 0 && focusedCellIndex < config.cells.length && (
-        <div className="pt-4 border-t border-border space-y-2 mt-auto">
-          <p className="text-xs font-semibold text-foreground">Actions</p>
-          <div className="flex flex-wrap gap-2 text-xs">
-            {focusedCellIndex > 0 && (
-              <button
-                onClick={() => moveCell(focusedCellIndex, "up")}
-                className="flex-1 px-2 py-1.5 rounded border border-border hover:bg-muted transition-colors"
-              >
-                ↑ Up
-              </button>
-            )}
-            {focusedCellIndex < config.cells.length - 1 && (
-              <button
-                onClick={() => moveCell(focusedCellIndex, "down")}
-                className="flex-1 px-2 py-1.5 rounded border border-border hover:bg-muted transition-colors"
-              >
-                ↓ Down
-              </button>
-            )}
+          {/* Gap — row and column, auto-scale per viewport */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <Label className="text-xs text-muted-foreground">Row Gap (px)</Label>
+              <Input
+                type="number" min={0}
+                defaultValue={config.gridStyle.gap ?? 24}
+                key={`gg-${config.gridStyle.gap}`}
+                onBlur={(e) => updateGridStyle({ gap: parseInt(e.target.value) || 0 })}
+                className="h-8 text-xs"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs text-muted-foreground">Col Gap (px)</Label>
+              <Input
+                type="number" min={0}
+                defaultValue={config.gridStyle.columnGap ?? config.rows?.[0]?.style?.gap ?? config.gridStyle.gap ?? 24}
+                key={`gcg-${config.gridStyle.columnGap}`}
+                onBlur={(e) => updateGridStyle({ columnGap: parseInt(e.target.value) || 0 })}
+                className="h-8 text-xs"
+              />
+            </div>
+          </div>
+          <p className="text-[10px] text-muted-foreground -mt-1">Tablet: ×0.75 · Mobile: ×0.6</p>
+          <div className="space-y-1">
+            <Label className="text-xs text-muted-foreground">Background</Label>
+            <ColorPicker value={config.gridStyle.backgroundColor ?? ""} onChange={(v) => updateGridStyle({ backgroundColor: v })} />
+          </div>
+
+          {/* Advanced (collapsed) */}
+          <div className="border border-border rounded-lg overflow-hidden">
             <button
-              onClick={() => duplicateCell(focusedCellIndex)}
-              className="flex-1 px-2 py-1.5 rounded border border-border hover:bg-muted transition-colors"
+              onClick={() => setGridAdvancedOpen(v => !v)}
+              className="w-full flex items-center justify-between px-3 py-2 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
             >
-              Duplicate
+              <span>Advanced</span>
+              <ChevronRight className={cn("h-3.5 w-3.5 transition-transform", gridAdvancedOpen && "rotate-90")} />
             </button>
-            <button
-              onClick={() => duplicateRow(focusedCellIndex)}
-              className="flex-1 px-2 py-1.5 rounded border border-border hover:bg-muted transition-colors"
-            >
-              Copy Row
-            </button>
-            {config.cells.length > 1 && (
-              <button
-                onClick={() => removeCell(focusedCellIndex)}
-                className="flex-1 px-2 py-1.5 rounded border border-destructive text-destructive hover:bg-destructive/10 transition-colors"
-              >
-                Delete
-              </button>
+            {gridAdvancedOpen && (
+              <div className="px-3 py-2 border-t border-border space-y-3">
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <Label className="text-xs text-muted-foreground">Radius (px)</Label>
+                    <Input type="number" min={0}
+                      defaultValue={config.gridStyle.borderRadius ?? 0}
+                      key={`gr-${config.gridStyle.borderRadius}`}
+                      onBlur={(e) => updateGridStyle({ borderRadius: parseInt(e.target.value) || 0 })}
+                      className="h-8 text-xs" />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs text-muted-foreground">Border Width (px)</Label>
+                    <Input type="number" min={0}
+                      defaultValue={config.gridStyle.borderWidth ?? 0}
+                      key={`gbw-${config.gridStyle.borderWidth}`}
+                      onBlur={(e) => updateGridStyle({ borderWidth: parseInt(e.target.value) || 0 })}
+                      className="h-8 text-xs" />
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs text-muted-foreground">Border Color</Label>
+                  <ColorPicker value={config.gridStyle.borderColor ?? ""} onChange={(v) => updateGridStyle({ borderColor: v })} />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs text-muted-foreground">Border Style</Label>
+                  <Select value={config.gridStyle.borderStyle || "solid"} onValueChange={(v: "solid" | "dashed" | "dotted" | "double") => updateGridStyle({ borderStyle: v })}>
+                    <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="solid">Solid</SelectItem>
+                      <SelectItem value="dashed">Dashed</SelectItem>
+                      <SelectItem value="dotted">Dotted</SelectItem>
+                      <SelectItem value="double">Double</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex items-center gap-2">
+                  <input type="checkbox" id="grid-shadow"
+                    checked={config.gridStyle.shadowEnabled ?? false}
+                    onChange={(e) => updateGridStyle({ shadowEnabled: e.target.checked })}
+                    className="w-4 h-4" />
+                  <Label htmlFor="grid-shadow" className="text-xs text-muted-foreground cursor-pointer">Drop Shadow</Label>
+                </div>
+              </div>
             )}
           </div>
         </div>
       )}
+
+      {/* Row scope */}
+      {scope === "row" && selectedRow && (
+        <div className="space-y-3">
+          <p className="text-xs text-muted-foreground">
+            Styling Row {selectedRowIndex + 1} — {selectedRow.cellIds.length} cell{selectedRow.cellIds.length !== 1 ? "s" : ""}
+          </p>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <Label className="text-xs text-muted-foreground">Cell Gap (px)</Label>
+              <Input type="number" min={0}
+                defaultValue={selectedRow.style.gap ?? 16}
+                key={`rg-${selectedRowIndex}-${selectedRow.style.gap}`}
+                onBlur={(e) => updateRowStyle(selectedRowIndex, { gap: parseInt(e.target.value) || 0 })}
+                className="h-8 text-xs" />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs text-muted-foreground">Padding Y (px)</Label>
+              <Input type="number" min={0}
+                defaultValue={selectedRow.style.paddingY ?? 0}
+                key={`rpy-${selectedRowIndex}-${selectedRow.style.paddingY}`}
+                onBlur={(e) => updateRowStyle(selectedRowIndex, { paddingY: parseInt(e.target.value) || 0 })}
+                className="h-8 text-xs" />
+            </div>
+          </div>
+          <div className="space-y-1">
+            <Label className="text-xs text-muted-foreground">Background</Label>
+            <ColorPicker
+              value={selectedRow.style.backgroundColor ?? ""}
+              onChange={(v) => updateRowStyle(selectedRowIndex, { backgroundColor: v })}
+            />
+          </div>
+          <button
+            onClick={() => cloneRow(selectedRowIndex)}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs border border-border rounded-lg hover:bg-muted transition-colors text-muted-foreground w-full justify-center"
+          >
+            <Copy className="h-3.5 w-3.5" />
+            Clone Row
+          </button>
+        </div>
+      )}
+
+      {/* Cell scope */}
+      {scope === "cell" && selectedCell && (
+        <CellEditor
+          cell={selectedCell}
+          cellIndex={selectedCellIndex}
+          onUpdate={(updatedCell) => updateCell(selectedCellIndex, updatedCell)}
+          onWidthChange={(width) => {
+            const newCells = [...config.cells]
+            newCells[selectedCellIndex] = { ...newCells[selectedCellIndex], width }
+            const newRows = rebuildRows(newCells, config.rows)
+            onChange({ ...config, cells: newCells, rows: newRows })
+          }}
+        />
+      )}
+
     </div>
   )
 }

@@ -3,21 +3,25 @@
 "use client"
 
 import { ContentType, CellContent } from "@/types/grid"
-import { 
-  Type, 
-  Image, 
-  Video, 
-  List, 
+import {
+  Type,
+  Image,
+  Video,
+  List,
   ListOrdered,
   LayoutList,
-  MousePointer2, 
+  MousePointer2,
   Sparkles,
   Minus,
   ArrowUpDown,
   Badge,
   Star,
   FileText,
-  BarChart3
+  BarChart3,
+  Megaphone,
+  PanelBottom,
+  Menu,
+  ChevronsDown,
 } from "lucide-react"
 
 export interface ComponentDefinition {
@@ -52,7 +56,29 @@ export const COMPONENT_LIBRARY: ComponentDefinition[] = [
     defaultContent: {
       type: "image",
       imageUrl: "",
-      imageAlt: "Describe this image",
+      imageAlt: "",
+      imageAspectRatio: "widescreen",
+      imageObjectFit: "cover",
+    },
+  },
+  {
+    type: "carousel",
+    label: "Carousel",
+    description: "Image carousel with thumbnails and navigation",
+    icon: <LayoutList className="h-5 w-5" />,
+    category: "media",
+    defaultContent: {
+      type: "carousel",
+      carouselImages: [
+        { url: "", alt: "Slide 1" },
+        { url: "", alt: "Slide 2" },
+      ],
+      carouselBorderRadius: 6,
+      carouselShowThumbnails: true,
+      carouselAutoplay: false,
+      carouselAutoplayInterval: 5000,
+      carouselThumbnailSize: 60,
+      carouselThumbnailGap: 8,
     },
   },
   {
@@ -64,6 +90,7 @@ export const COMPONENT_LIBRARY: ComponentDefinition[] = [
     defaultContent: {
       type: "video",
       videoUrl: "",
+      videoAspectRatio: "square",
     },
   },
   {
@@ -74,8 +101,7 @@ export const COMPONENT_LIBRARY: ComponentDefinition[] = [
     category: "media",
     defaultContent: {
       type: "iconBlock",
-      icon: "star",
-      iconLabel: "Feature highlight",
+      iconBlockItems: [],
     },
   },
   // Lists
@@ -124,6 +150,18 @@ export const COMPONENT_LIBRARY: ComponentDefinition[] = [
       ctaText: "Get Started",
       ctaUrl: "#",
       ctaVariant: "primary",
+    },
+  },
+  {
+    type: "stickyBottomCta",
+    label: "Sticky Bottom CTA",
+    description: "CTA button that sticks to bottom after scroll",
+    icon: <ChevronsDown className="h-5 w-5" />,
+    category: "actions",
+    defaultContent: {
+      type: "stickyBottomCta",
+      ctaText: "Get Started Now",
+      ctaUrl: "#",
     },
   },
   {
@@ -209,12 +247,50 @@ export const COMPONENT_LIBRARY: ComponentDefinition[] = [
     defaultContent: {
       type: "productComparison",
       productComparisonProducts: [
-        { name: "Product A", color: "#3b82f6" },
-        { name: "Product B", color: "#10b981" },
+        { name: "Us", color: "#EAFBFB" },
+        { name: "Competitor A" },
+        { name: "Competitor B" },
       ],
       productComparisonMetrics: [
-        { label: "Feature 1", emoji: "⭐", values: [true, true] },
-        { label: "Feature 2", emoji: "✓", values: [true, false] },
+        { label: "Feature 1", emoji: "⭐", values: ["✓", "✓", "✗"] },
+        { label: "Feature 2", emoji: "💪", values: ["✓", "✗", "✗"] },
+        { label: "Feature 3", emoji: "💵", values: ["✓", "✓", "✓"] },
+      ],
+    },
+  },
+  {
+    type: "banner",
+    label: "Banner",
+    description: "Sticky or static announcement banner with optional CTA and countdown",
+    icon: <Megaphone className="h-5 w-5" />,
+    category: "actions",
+    defaultContent: {
+      type: "banner",
+    },
+  },
+  {
+    type: "navbar",
+    label: "NavBar",
+    description: "Navigation bar with logo and links",
+    icon: <Menu className="h-5 w-5" />,
+    category: "layout",
+    defaultContent: {
+      type: "navbar",
+    },
+  },
+  {
+    type: "footer",
+    label: "Footer",
+    description: "Legal disclaimer, copyright line, and links (Terms / Privacy)",
+    icon: <PanelBottom className="h-5 w-5" />,
+    category: "layout",
+    defaultContent: {
+      type: "footer",
+      footerDisclaimer: "*Special offer valid only on first order. Subscription renews every 30 days. Max one offer per customer.",
+      footerCopyright: `© ${new Date().getFullYear()} Your Company. All rights reserved.`,
+      footerLinks: [
+        { label: "Terms of Service", url: "#" },
+        { label: "Privacy Policy", url: "#" },
       ],
     },
   },

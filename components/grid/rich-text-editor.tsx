@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import { useEditor, EditorContent, Editor } from "@tiptap/react"
 import { StarterKit } from "@tiptap/starter-kit"
 import { TextStyleKit } from "@tiptap/extension-text-style"
@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { cn } from "@/lib/utils"
-import { Bold, Italic, Underline as UnderlineIcon, Link as LinkIcon, Heading1, Heading2, Heading3, Heading4, Heading5, Heading6, Palette, Highlighter, List, ListOrdered, Undo, Redo, Unlink, Quote } from "lucide-react"
+import { Bold, Italic, Underline as UnderlineIcon, Link as LinkIcon, Heading1, Heading2, Heading3, Heading4, Heading5, Heading6, Palette, Highlighter, List, ListOrdered, Undo, Redo, Unlink, Quote, Minus } from "lucide-react"
 
 interface RichTextEditorProps {
   value: string
@@ -48,6 +48,12 @@ const MenuButton = ({
   </Button>
 )
 
+const PRESETS = [
+  "#000000", "#374151", "#6b7280", "#ef4444", "#f97316",
+  "#f59e0b", "#22c55e", "#3b82f6", "#8b5cf6", "#ec4899",
+  "#ffffff", "#e5e7eb",
+]
+
 const ColorPicker = ({
   editor,
   type,
@@ -55,47 +61,86 @@ const ColorPicker = ({
   editor: Editor | null
   type: "text" | "highlight"
 }) => {
-  const colors = [
-    "#000000", "#374151", "#6b7280", "#9ca3af", "#ef4444",
-    "#f97316", "#f59e0b", "#eab308", "#84cc16", "#22c55e",
-    "#10b981", "#14b8a6", "#06b6d4", "#0ea5e9", "#3b82f6",
-    "#6366f1", "#8b5cf6", "#a855f7", "#d946ef", "#ec4899",
-  ]
+  const [open, setOpen] = useState(false)
+  const [hex, setHex] = useState("#000000")
+  const nativeRef = useRef<HTMLInputElement>(null)
+
+  const getEditorColor = () => {
+    if (!editor) return ""
+    return type === "text"
+      ? (editor.getAttributes("textStyle").color || "")
+      : (editor.getAttributes("highlight").color || "")
+  }
+
+  const handleOpenChange = (v: boolean) => {
+    if (v) {
+      const cur = getEditorColor()
+      if (cur && /^#[0-9a-fA-F]{6}/i.test(cur)) setHex(cur.slice(0, 7))
+    }
+    setOpen(v)
+  }
 
   const applyColor = (color: string) => {
     if (!editor) return
-    if (type === "text") {
-      editor.chain().focus().setColor(color).run()
-    } else {
-      editor.chain().focus().toggleHighlight({ color }).run()
-    }
+    if (type === "text") editor.chain().focus().setColor(color).run()
+    else editor.chain().focus().toggleHighlight({ color }).run()
+    setHex(color.slice(0, 7))
   }
 
   const clearColor = () => {
     if (!editor) return
-    if (type === "text") {
-      editor.chain().focus().unsetColor().run()
-    } else {
-      editor.chain().focus().unsetHighlight().run()
-    }
+    if (type === "text") editor.chain().focus().unsetColor().run()
+    else editor.chain().focus().unsetHighlight().run()
   }
 
+  const activeColor = getEditorColor()
+
   return (
-    <Popover>
+    <Popover open={open} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
         <Button
           type="button"
           variant="ghost"
           size="sm"
-          className="h-7 w-7 p-0"
+          className="h-7 w-7 p-0 relative"
           title={type === "text" ? "Text Color" : "Highlight"}
         >
           {type === "text" ? <Palette className="h-4 w-4" /> : <Highlighter className="h-4 w-4" />}
+          {activeColor && (
+            <span
+              className="absolute bottom-0.5 right-0.5 w-2 h-2 rounded-full border border-background"
+              style={{ backgroundColor: activeColor }}
+            />
+          )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-auto p-2" align="start">
-        <div className="grid grid-cols-5 gap-1">
-          {colors.map((color) => (
+      <PopoverContent className="w-52 p-3 space-y-3" align="start">
+        {/* Swatch + hex input */}
+        <div className="flex items-center gap-2">
+          <div className="relative w-8 h-8 shrink-0 rounded border border-border overflow-hidden cursor-pointer">
+            <div className="absolute inset-0" style={{ backgroundColor: hex }} />
+            <input
+              ref={nativeRef}
+              type="color"
+              value={hex}
+              onChange={(e) => applyColor(e.target.value)}
+              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+            />
+          </div>
+          <Input
+            value={hex}
+            onChange={(e) => {
+              setHex(e.target.value)
+              if (/^#[0-9a-fA-F]{6}$/i.test(e.target.value)) applyColor(e.target.value)
+            }}
+            className="h-8 flex-1 font-mono text-xs"
+            placeholder="#000000"
+            spellCheck={false}
+          />
+        </div>
+        {/* Preset swatches */}
+        <div className="grid grid-cols-6 gap-1">
+          {PRESETS.map((color) => (
             <button
               key={color}
               type="button"
@@ -105,7 +150,7 @@ const ColorPicker = ({
             />
           ))}
         </div>
-        <Button type="button" variant="ghost" size="sm" className="w-full mt-2 text-xs" onClick={clearColor}>
+        <Button type="button" variant="ghost" size="sm" className="w-full text-xs" onClick={clearColor}>
           Clear {type === "text" ? "Color" : "Highlight"}
         </Button>
       </PopoverContent>
@@ -198,14 +243,14 @@ export function RichTextEditor({
     extensions: [
       StarterKit.configure({
         heading: { levels: [1, 2, 3, 4, 5, 6] },
-      }),
-      TextStyleKit.configure({
         link: {
           openOnClick: false,
           HTMLAttributes: { class: "text-primary underline" },
         },
-        color: true,
-        underline: true,
+        underline: {},
+      }),
+      TextStyleKit.configure({
+        color: {},
       }),
       Highlight.configure({ multicolor: true }),
     ],
@@ -216,11 +261,12 @@ export function RichTextEditor({
     editorProps: {
       attributes: {
         class: cn(
-          "prose prose-sm dark:prose-invert max-w-none focus:outline-none min-h-[60px] px-3 py-2",
+          "prose prose-sm max-w-none focus:outline-none min-h-[60px] px-3 py-2 bg-[#e5e7eb]",
           "prose-headings:my-2 prose-p:my-1 prose-ul:my-1 prose-ol:my-1 prose-blockquote:my-2",
           "[&_h1]:text-2xl [&_h2]:text-xl [&_h3]:text-lg [&_h4]:text-base [&_h5]:text-sm [&_h6]:text-xs",
           "[&_h1]:font-bold [&_h2]:font-bold [&_h3]:font-semibold [&_h4]:font-semibold [&_h5]:font-medium [&_h6]:font-medium",
-          "[&_blockquote]:border-l-4 [&_blockquote]:border-foreground [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-muted-foreground [&_blockquote]:bg-muted/50 [&_blockquote]:rounded-r [&_blockquote]:py-2 [&_blockquote]:pr-3"
+          "[&_blockquote]:border-l-4 [&_blockquote]:border-foreground [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:text-muted-foreground [&_blockquote]:bg-muted/50 [&_blockquote]:rounded-r [&_blockquote]:py-2 [&_blockquote]:pr-3",
+          "[&_hr]:border-t [&_hr]:border-border [&_hr]:my-3"
         ),
       },
     },
@@ -242,7 +288,7 @@ export function RichTextEditor({
   }
 
   return (
-    <div className={cn("border border-input rounded-lg bg-background overflow-hidden", className)}>
+    <div className={cn("border border-input rounded-lg overflow-hidden", className)}>
       <div className={cn("flex flex-wrap items-center gap-0.5 p-1 border-b border-border bg-muted/30", minimal && "p-0.5")}>
         <MenuButton onClick={() => editor.chain().focus().undo().run()} disabled={!editor.can().undo()} title="Undo">
           <Undo className="h-4 w-4" />
@@ -299,6 +345,9 @@ export function RichTextEditor({
             </MenuButton>
             <MenuButton onClick={() => editor.chain().focus().toggleBlockquote().run()} isActive={editor.isActive("blockquote")} title="Blockquote">
               <Quote className="h-4 w-4" />
+            </MenuButton>
+            <MenuButton onClick={() => editor.chain().focus().setHorizontalRule().run()} title="Divider">
+              <Minus className="h-4 w-4" />
             </MenuButton>
           </>
         )}
