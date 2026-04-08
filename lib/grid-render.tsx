@@ -184,7 +184,7 @@ function ContentRenderer({ content, cellStyle, viewport = "desktop" }: {
 
       return (
         <div style={{
-          width: isSquare ? "95%" : "100%",
+          width: "100%",
           maxWidth,
           marginTop: viewport === "mobile" ? 12 : undefined,
           marginBottom: viewport === "mobile" ? 12 : undefined,
