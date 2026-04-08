@@ -705,6 +705,8 @@ export function GridPreview({ config, viewport = "desktop", className }: {
               const cellPadY = cell.style?.paddingY ?? 0
               const cellPadTop = scaleForViewport(cell.style?.paddingTop ?? cellPadY, effectiveViewport)
               const cellPadBottom = scaleForViewport(cell.style?.paddingBottom ?? cellPadY, effectiveViewport)
+              // Mobile-only alignItems override; falls back to alignItems when unset
+              const mobileAlign = cell.style?.mobileAlignItems ?? cell.style?.alignItems
               return (
                 <div
                   key={cell.id}
@@ -721,7 +723,7 @@ export function GridPreview({ config, viewport = "desktop", className }: {
                     paddingRight: cellPadX,
                     overflow: "hidden",
                     display: "flex",
-                    alignItems: cell.style?.alignItems || gridStyle.alignItems || "flex-start",
+                    alignItems: mobileAlign || gridStyle.alignItems || "flex-start",
                   }}
                 >
                   <div
@@ -731,9 +733,14 @@ export function GridPreview({ config, viewport = "desktop", className }: {
                       width: "100%",
                       fontWeight: cell.style?.fontWeight,
                       ...( cell.style?.fontWeight ? { "--cell-font-weight": String(cell.style.fontWeight) } as React.CSSProperties : {} ),
-                      justifyContent: cell.style?.alignItems === "center" ? "center" : undefined,
-                      alignItems: cell.style?.alignItems === "center" ? "center" : undefined,
-                      textAlign: cell.style?.alignItems === "center" ? "center" : ((cell.style?.textAlignMobile ?? cell.style?.textAlign) as "left" | "center" | "right" | undefined),
+                      justifyContent:
+                        cell.style?.justifyContent === "between" ? "space-between" :
+                        cell.style?.justifyContent === "end" ? "flex-end" :
+                        cell.style?.justifyContent === "center" ? "center" :
+                        cell.style?.justifyContent === "start" ? "flex-start" :
+                        mobileAlign === "center" ? "center" : undefined,
+                      alignItems: mobileAlign === "center" ? "center" : undefined,
+                      textAlign: mobileAlign === "center" ? "center" : ((cell.style?.textAlignMobile ?? cell.style?.textAlign) as "left" | "center" | "right" | undefined),
                     }}
                   >
                     {cell.contents.map((content) => (
@@ -786,9 +793,14 @@ export function GridPreview({ config, viewport = "desktop", className }: {
                     width: "100%",
                     fontWeight: cell.style?.fontWeight,
                     ...( cell.style?.fontWeight ? { "--cell-font-weight": String(cell.style.fontWeight) } as React.CSSProperties : {} ),
-                    justifyContent: cell.style?.alignItems === "end" ? "flex-end"
-                      : cell.style?.alignItems === "center" ? "center"
-                      : "flex-start",
+                    justifyContent:
+                      cell.style?.justifyContent === "between" ? "space-between" :
+                      cell.style?.justifyContent === "end" ? "flex-end" :
+                      cell.style?.justifyContent === "center" ? "center" :
+                      cell.style?.justifyContent === "start" ? "flex-start" :
+                      cell.style?.alignItems === "end" ? "flex-end" :
+                      cell.style?.alignItems === "center" ? "center" :
+                      "flex-start",
                     alignItems: cell.style?.alignItems === "center" ? "center" : undefined,
                     textAlign: cell.style?.alignItems === "center" ? "center" : (cell.style?.textAlign as "left" | "center" | "right" | undefined),
                   }}

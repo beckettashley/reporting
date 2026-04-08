@@ -74,6 +74,7 @@ export interface CellStyle {
   textAlignMobile?: "left" | "center" | "right"  // overrides textAlign on mobile viewports
   alignItems?: "start" | "center" | "end"  // Vertical alignment of cell contents
   mobileAlignItems?: "start" | "center" | "end"  // overrides alignItems on mobile viewports only
+  justifyContent?: "start" | "center" | "end" | "between"  // Distribution of contents along the cell's flex column. "between" anchors first child to top, last to bottom — useful for aligning trailing captions across multi-column rows. Falls back to alignItems-derived behavior when unset.
   shadowEnabled?: boolean
   shadowColor?: string
   shadowBlur?: number
@@ -89,11 +90,11 @@ export interface RowStyle extends CellStyle {
   gap?: number  // Space between cells in the row
 }
 
-export interface GridStyle extends CellStyle {
+export interface GridStyle extends Omit<CellStyle, "justifyContent"> {
   // Grid-specific styling
   gap?: number        // Row gap (between rows); tablet=75%, mobile=60% auto-scaled
   columnGap?: number  // Column gap (between columns); tablet=75%, mobile=60% auto-scaled. Falls back to gap if unset.
-  justifyContent?: "start" | "center" | "end" | "space-between" | "space-around"  // Horizontal alignment
+  justifyContent?: "start" | "center" | "end" | "space-between" | "space-around"  // Horizontal alignment of cells in CSS Grid (distinct from CellStyle.justifyContent which controls flex column distribution inside a cell)
   alignItems?: "start" | "center" | "end"  // Vertical alignment for all cells
   gridMarginBottom?: number  // margin-bottom on the outer grid wrapper (px); useful for heading grids
   gridMaxWidth?: number      // max-width on the outer grid wrapper (px); centered with margin:auto — useful for heading grids
