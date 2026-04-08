@@ -789,7 +789,7 @@ export function GridPreview({ config, viewport = "desktop", className }: {
                   className={`flex flex-col${cell.style?.fontWeight ? " has-cell-font-weight" : ""}${cell.contents.some(c => c.type === "accordion") ? " has-accordion" : ""}`}
                   style={{
                     gap: cell.style?.contentGap ?? 16,
-                    height: cell.style?.alignItems ? "100%" : undefined,
+                    height: (cell.style?.alignItems || cell.style?.justifyContent) ? "100%" : undefined,
                     width: "100%",
                     fontWeight: cell.style?.fontWeight,
                     ...( cell.style?.fontWeight ? { "--cell-font-weight": String(cell.style.fontWeight) } as React.CSSProperties : {} ),
