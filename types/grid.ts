@@ -73,6 +73,7 @@ export interface CellStyle {
   textAlign?: "left" | "center" | "right"
   textAlignMobile?: "left" | "center" | "right"  // overrides textAlign on mobile viewports
   alignItems?: "start" | "center" | "end"  // Vertical alignment of cell contents
+  mobileAlignItems?: "start" | "center" | "end"  // overrides alignItems on mobile viewports only
   shadowEnabled?: boolean
   shadowColor?: string
   shadowBlur?: number
@@ -445,6 +446,10 @@ export interface SectionStyle {
   paddingYOverride?: number  // desktop px override; tablet=75%, mobile=60% auto-scaled
   paddingTopOverride?: number  // independent top padding override; desktop px; tablet=75%, mobile=60%
   paddingBottomOverride?: number  // independent bottom padding override; desktop px; tablet=75%, mobile=60%
+  paddingTopOverrideMobile?: number     // viewport-specific override; absolute mobile px, no scaling. Wins over scaled paddingTopOverride on mobile.
+  paddingBottomOverrideMobile?: number  // viewport-specific override; absolute mobile px, no scaling. Wins over scaled paddingBottomOverride on mobile.
+  paddingTopOverrideTablet?: number     // viewport-specific override; absolute tablet px, no scaling. Wins over scaled paddingTopOverride on tablet.
+  paddingBottomOverrideTablet?: number  // viewport-specific override; absolute tablet px, no scaling. Wins over scaled paddingBottomOverride on tablet.
   contentWidth?: "flood" | "narrow" | "contained"
   // "flood"    = edge-to-edge, section background AND content fill full width (banners, hero images)
   // "narrow"   = ~720px editorial/article width, centered, auto gutters (24/16/12px)

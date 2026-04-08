@@ -44,12 +44,31 @@ export function SectionRenderer({ sections, viewport, pageStyle }: SectionRender
         let sectionPadTop: number
         let sectionPadBottom: number
 
-        if (section.style.paddingTopOverride !== undefined || section.style.paddingBottomOverride !== undefined) {
+        // Viewport-specific overrides take precedence over scaled overrides on their respective viewport.
+        // Outer condition includes the viewport-specific fields so a section using only e.g. paddingTopOverrideMobile still enters this branch.
+        const topOverrideMobile = section.style.paddingTopOverrideMobile
+        const bottomOverrideMobile = section.style.paddingBottomOverrideMobile
+        const topOverrideTablet = section.style.paddingTopOverrideTablet
+        const bottomOverrideTablet = section.style.paddingBottomOverrideTablet
+        const hasAnyOverride =
+          section.style.paddingTopOverride !== undefined ||
+          section.style.paddingBottomOverride !== undefined ||
+          topOverrideMobile !== undefined ||
+          bottomOverrideMobile !== undefined ||
+          topOverrideTablet !== undefined ||
+          bottomOverrideTablet !== undefined
+
+        if (hasAnyOverride) {
           // Independent top/bottom overrides
           const topOverride = section.style.paddingTopOverride ?? section.style.paddingYOverride
           const bottomOverride = section.style.paddingBottomOverride ?? section.style.paddingYOverride
 
-          if (topOverride !== undefined) {
+          // Top resolution: viewport-specific > scaled override > preset fallback
+          if (viewport === "mobile" && topOverrideMobile !== undefined) {
+            sectionPadTop = topOverrideMobile
+          } else if (viewport === "tablet" && topOverrideTablet !== undefined) {
+            sectionPadTop = topOverrideTablet
+          } else if (topOverride !== undefined) {
             sectionPadTop = viewport === "mobile"
               ? Math.round(topOverride * 0.6)
               : viewport === "tablet"
@@ -60,7 +79,12 @@ export function SectionRenderer({ sections, viewport, pageStyle }: SectionRender
             sectionPadTop = sizes[viewport]
           }
 
-          if (bottomOverride !== undefined) {
+          // Bottom resolution: viewport-specific > scaled override > preset fallback
+          if (viewport === "mobile" && bottomOverrideMobile !== undefined) {
+            sectionPadBottom = bottomOverrideMobile
+          } else if (viewport === "tablet" && bottomOverrideTablet !== undefined) {
+            sectionPadBottom = bottomOverrideTablet
+          } else if (bottomOverride !== undefined) {
             sectionPadBottom = viewport === "mobile"
               ? Math.round(bottomOverride * 0.6)
               : viewport === "tablet"
