@@ -19,6 +19,10 @@ import { CountdownTimer } from "./elements/countdown"
 
 const PROSE_STYLES = "max-w-none [&_p]:m-0 [&_h1]:mb-2 [&_h2]:mb-2 [&_h3]:font-semibold [&_h3]:mb-1 [&_h4]:font-semibold [&_h4]:mb-1 [&_h5]:font-semibold [&_h6]:font-semibold [&_blockquote]:border-l-4 [&_blockquote]:border-gray-300 [&_blockquote]:pl-4 [&_blockquote]:italic [&_strong]:font-bold [&_em]:italic [&_hr]:border-t [&_hr]:border-current [&_hr]:my-3"
 
+// Canonical card drop-shadow — layered for depth (tight ambient + soft lift).
+// Used by the video case in captionBelow mode and by cells with shadowEnabled.
+const CARD_SHADOW = "0 1px 2px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.12)"
+
 // ─── Content Renderer ─────────────────────────────────────────────────────────
 
 function ContentRenderer({ content, cellStyle, viewport = "desktop" }: {
@@ -186,10 +190,23 @@ function ContentRenderer({ content, cellStyle, viewport = "desktop" }: {
         <div style={{
           width: "100%",
           maxWidth,
-          marginTop: viewport === "mobile" ? 12 : undefined,
-          marginBottom: viewport === "mobile" ? 12 : undefined,
-          borderRadius: 8,
-          overflow: "hidden",
+          // captionBelow mode: become a flex column card that fills the cell vertically.
+          // The video sits at top, the caption flex:1 fills the rest. Border + shadow wrap
+          // the entire card; no internal border appears between video and caption because
+          // they're inside the same overflow:hidden wrapper.
+          ...(captionBelow ? {
+            display: "flex",
+            flexDirection: "column",
+            height: "100%",
+            borderRadius: 8,
+            boxShadow: CARD_SHADOW,
+            overflow: "hidden",
+          } : {
+            borderRadius: 8,
+            overflow: "hidden",
+            marginTop: viewport === "mobile" ? 12 : undefined,
+            marginBottom: viewport === "mobile" ? 12 : undefined,
+          }),
         }}>
           <div style={{ aspectRatio, position: "relative" }} className="w-full bg-black">
             <video
@@ -220,9 +237,19 @@ function ContentRenderer({ content, cellStyle, viewport = "desktop" }: {
               </div>
             )}
           </div>
-          {/* Below caption */}
+          {/* Below caption — flex:1 expands the caption to fill all remaining cell height after the video,
+              with the text vertically and horizontally centered within that space */}
           {hasCaption && captionBelow && (
-            <div className="w-full" style={captionBarStyle}>
+            <div
+              className="w-full"
+              style={{
+                ...captionBarStyle,
+                flex: 1,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
               {captionInner}
             </div>
           )}
@@ -421,7 +448,7 @@ function ContentRenderer({ content, cellStyle, viewport = "desktop" }: {
       )
 
     case "divider":
-      return <hr className="my-2 border-t border-current opacity-20" />
+      return <hr className="border-t border-current opacity-20" />
 
     case "spacer":
       return <div style={{ height: content.spacerHeight || 16 }} />
@@ -643,11 +670,14 @@ export function GridPreview({ config, viewport = "desktop", className }: {
   // Compute grid positions for desktop/tablet (and mobile when mobileColumns:2)
   const visibleForGrid = (isMobile && !useMobileGrid) ? [] : cells.filter(c => !c.hideOnDesktop)
   const { positions, columnTemplate } = assignGridPositions(visibleForGrid)
-  // Column gap: explicit gridStyle.columnGap takes priority; legacy fallback to rows[0].gap then gridGap
-  // Use || instead of ?? to treat 0 as "not set" and fall through to gap
+  // Column gap: explicit gridStyle.columnGap (including 0) is honored via ??;
+  // when columnGap is undefined, fall through the legacy chain using || to keep
+  // the original 0-as-not-set behavior for legacyColGap and gridStyle.gap (otherwise
+  // grids with rows[0].style.gap:0 leftover scaffolding would lose their gridStyle.gap
+  // fallback, regressing layouts like Hero whose gridStyle.gap:48 is the intent).
   const legacyColGap = config.rows?.[0]?.style?.gap
   const columnGap = scaleForViewport(
-    gridStyle.columnGap || legacyColGap || gridStyle.gap || 48,
+    gridStyle.columnGap ?? (legacyColGap || gridStyle.gap || 48),
     effectiveViewport
   )
 
@@ -721,7 +751,10 @@ export function GridPreview({ config, viewport = "desktop", className }: {
                     paddingBottom: cellPadBottom,
                     paddingLeft: cellPadX,
                     paddingRight: cellPadX,
-                    overflow: "hidden",
+                    // Only clip when the cell has a rounded corner that would actually need clipping.
+                    // Otherwise children's box-shadows (e.g., video card shadows) get cut off.
+                    overflow: (cell.style?.borderRadius ?? 0) > 0 ? "hidden" : undefined,
+                    boxShadow: cell.style?.shadowEnabled ? CARD_SHADOW : undefined,
                     display: "flex",
                     alignItems: mobileAlign || gridStyle.alignItems || "flex-start",
                   }}
@@ -780,7 +813,10 @@ export function GridPreview({ config, viewport = "desktop", className }: {
                   paddingBottom: cellPadBottom,
                   paddingLeft: cellPadX,
                   paddingRight: cellPadX,
-                  overflow: "hidden",
+                  // Only clip when the cell has a rounded corner that would actually need clipping.
+                  // Otherwise children's box-shadows (e.g., video card shadows) get cut off.
+                  overflow: (cell.style?.borderRadius ?? 0) > 0 ? "hidden" : undefined,
+                  boxShadow: cell.style?.shadowEnabled ? CARD_SHADOW : undefined,
                   display: "flex",
                   alignItems: cell.style?.alignItems || gridStyle.alignItems || "flex-start",
                 }}
