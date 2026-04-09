@@ -756,6 +756,9 @@ export function GridPreview({ config, viewport = "desktop", className }: {
                     overflow: (cell.style?.borderRadius ?? 0) > 0 ? "hidden" : undefined,
                     boxShadow: cell.style?.shadowEnabled ? CARD_SHADOW : undefined,
                     display: "flex",
+                    // Allow this flex item to shrink below its content's intrinsic min-content;
+                    // without min-width:0, max-content children (e.g., LogoBanner marquee) widen the page.
+                    minWidth: 0,
                     alignItems: mobileAlign || gridStyle.alignItems || "flex-start",
                   }}
                 >
@@ -764,6 +767,7 @@ export function GridPreview({ config, viewport = "desktop", className }: {
                     style={{
                       gap: cell.style?.contentGap ?? 16,
                       width: "100%",
+                      minWidth: 0,
                       fontWeight: cell.style?.fontWeight,
                       ...( cell.style?.fontWeight ? { "--cell-font-weight": String(cell.style.fontWeight) } as React.CSSProperties : {} ),
                       justifyContent:
@@ -818,6 +822,9 @@ export function GridPreview({ config, viewport = "desktop", className }: {
                   overflow: (cell.style?.borderRadius ?? 0) > 0 ? "hidden" : undefined,
                   boxShadow: cell.style?.shadowEnabled ? CARD_SHADOW : undefined,
                   display: "flex",
+                  // Allow this grid item to shrink below its content's intrinsic min-content;
+                  // without min-width:0, max-content children (e.g., LogoBanner marquee) widen the page.
+                  minWidth: 0,
                   alignItems: cell.style?.alignItems || gridStyle.alignItems || "flex-start",
                 }}
               >
@@ -827,6 +834,7 @@ export function GridPreview({ config, viewport = "desktop", className }: {
                     gap: cell.style?.contentGap ?? 16,
                     height: (cell.style?.alignItems || cell.style?.justifyContent) ? "100%" : undefined,
                     width: "100%",
+                    minWidth: 0,
                     fontWeight: cell.style?.fontWeight,
                     ...( cell.style?.fontWeight ? { "--cell-font-weight": String(cell.style.fontWeight) } as React.CSSProperties : {} ),
                     justifyContent:
