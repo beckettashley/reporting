@@ -24,7 +24,7 @@ export function LogoBanner({ content, viewport }: { content: CellContent; viewpo
   const animName = `logoBannerScroll-${content.id.replace(/[^a-zA-Z0-9_-]/g, "")}`
 
   return (
-    <div style={{ width: "100%", position: "relative", overflow: "hidden" }}>
+    <div style={{ width: "100%", minWidth: 0, position: "relative", overflow: "hidden" }}>
       <style>{`
         @keyframes ${animName} {
           from { transform: translateX(0); }
