@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { ViewportSize } from "@/types/grid"
 
 export function CarouselRenderer({
   images,
@@ -10,6 +11,7 @@ export function CarouselRenderer({
   autoplayInterval,
   thumbnailSize,
   thumbnailGap,
+  viewport = "desktop",
 }: {
   images: Array<{ url: string; alt?: string; thumbnailUrl?: string }>
   borderRadius: number
@@ -18,6 +20,7 @@ export function CarouselRenderer({
   autoplayInterval: number
   thumbnailSize: number
   thumbnailGap: number
+  viewport?: ViewportSize
 }) {
   const [activeIndex, setActiveIndex] = useState(0)
   const [mounted, setMounted] = useState(false)
@@ -46,8 +49,12 @@ export function CarouselRenderer({
 
   const activeImage = images[activeIndex]
 
+  const effectiveThumbSize = viewport === "mobile" ? Math.round(thumbnailSize * 0.65) : viewport === "tablet" ? Math.round(thumbnailSize * 0.8) : thumbnailSize
+  const effectiveThumbGap = viewport === "mobile" ? Math.max(2, Math.round(thumbnailGap * 0.5)) : viewport === "tablet" ? Math.round(thumbnailGap * 0.75) : thumbnailGap
+  const containerGap = viewport === "mobile" ? 6 : viewport === "tablet" ? 10 : 12
+
   return (
-    <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: showThumbnails ? 16 : 0 }}>
+    <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: showThumbnails ? containerGap : 0 }}>
       {/* Main carousel image */}
       <div style={{ position: "relative", width: "100%", borderRadius, overflow: "hidden" }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -123,14 +130,14 @@ export function CarouselRenderer({
 
       {/* Thumbnails */}
       {showThumbnails && images.length > 1 && (
-        <div style={{ display: "flex", gap: thumbnailGap, justifyContent: "center", flexWrap: "wrap" }}>
+        <div style={{ display: "flex", gap: effectiveThumbGap, justifyContent: "center", flexWrap: "wrap" }}>
           {images.map((img, idx) => (
             <button
               key={idx}
               onClick={() => setActiveIndex(idx)}
               style={{
-                width: thumbnailSize,
-                height: thumbnailSize,
+                width: effectiveThumbSize,
+                height: effectiveThumbSize,
                 borderRadius: borderRadius / 2,
                 overflow: "hidden",
                 border: idx === activeIndex ? "3px solid #000" : "3px solid transparent",

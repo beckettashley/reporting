@@ -67,6 +67,7 @@ export interface CellStyle {
   borderRadius?: number
   borderStyle?: "solid" | "dashed" | "dotted" | "double"
   paddingX?: number   // horizontal cell inset; tablet=75%, mobile=60% auto-scaled
+  paddingXMobile?: number  // explicit mobile paddingX override, absolute px (no scaling)
   paddingY?: number   // vertical cell inset; tablet=75%, mobile=60% auto-scaled
   paddingTop?: number    // overrides paddingY top when set; tablet=75%, mobile=60%
   paddingBottom?: number // overrides paddingY bottom when set; tablet=75%, mobile=60%
@@ -205,6 +206,8 @@ export interface CellContent {
   starSize?: number         // px; default 20
   starLabelColor?: string   // label text color
   starLabelSize?: number    // label font-size px; default 14
+  starLabelSizeMobile?: number // label font-size px on mobile
+  starLabelFontWeight?: number // label font-weight; default normal
   // Article Details
   articleAuthor?: string
   articleAuthorImage?: string
@@ -276,6 +279,7 @@ export interface CellContent {
   iconGridLabelSize?: number      // default 14
   iconGridLabelWeight?: number    // default 600
   iconGridLabelColor?: string     // default "#1a1a1a"
+  iconGridInvert?: boolean        // when true, applies brightness(0) invert(1) filter to icons — makes dark icons white for dark backgrounds
   iconGridLayout?: "column" | "row"  // layout direction: column (default, icon above text) or row (icon and text side by side)
   // Countdown timer
   countdownDurationSeconds?: number  // total seconds to count down from; default 11169
@@ -475,6 +479,7 @@ export interface SectionStyle {
 export interface Section {
   id: string
   label?: string
+  anchorId?: string  // HTML id for in-page anchor links (e.g. "order" → #order)
   style: SectionStyle
   grids: GridConfig[]  // one or more, stacked vertically
 }

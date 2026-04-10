@@ -187,12 +187,14 @@ export function SectionRenderer({ sections, viewport, pageStyle }: SectionRender
         const sectionElement = (
           <div
             key={section.id}
+            id={section.anchorId || undefined}
             style={{
               position: "relative",
               ...(bgGradient ? { background: bgGradient } : { backgroundColor: section.style.backgroundColor || undefined }),
               paddingTop: sectionPadTop,
               paddingBottom: sectionPadBottom,
               ...(section.style.position === "sticky" ? { position: "sticky", top: stickyTop, zIndex: stickyZIndex } : {}),
+              ...(section.anchorId ? { scrollMarginTop: cumulativeStickyTop } : {}),
               ...bgImageStyle,
             }}
           >

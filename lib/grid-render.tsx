@@ -17,7 +17,7 @@ import { AccordionList } from "./elements/accordion"
 import { IconGrid } from "./elements/icon-grid"
 import { CountdownTimer } from "./elements/countdown"
 
-const PROSE_STYLES = "max-w-none [&_p]:m-0 [&_h1]:mb-2 [&_h2]:mb-2 [&_h3]:font-semibold [&_h3]:mb-1 [&_h4]:font-semibold [&_h4]:mb-1 [&_h5]:font-semibold [&_h6]:font-semibold [&_blockquote]:border-l-4 [&_blockquote]:border-gray-300 [&_blockquote]:pl-4 [&_blockquote]:italic [&_strong]:font-bold [&_em]:italic [&_hr]:border-t [&_hr]:border-current [&_hr]:my-3"
+const PROSE_STYLES = "max-w-none [&_p]:m-0 [&_h1]:mb-2 [&_h1]:!leading-[1.32] [&_h2]:mb-2 [&_h3]:font-semibold [&_h3]:mb-1 [&_h4]:font-semibold [&_h4]:mb-1 [&_h5]:font-semibold [&_h6]:font-semibold [&_blockquote]:border-l-4 [&_blockquote]:border-gray-300 [&_blockquote]:pl-4 [&_blockquote]:italic [&_strong]:font-bold [&_em]:italic [&_hr]:border-t [&_hr]:border-current [&_hr]:my-3"
 
 // Canonical card drop-shadow — layered for depth (tight ambient + soft lift).
 // Used by the video case in captionBelow mode and by cells with shadowEnabled.
@@ -136,6 +136,7 @@ function ContentRenderer({ content, cellStyle, viewport = "desktop" }: {
           autoplayInterval={content.carouselAutoplayInterval ?? 5000}
           thumbnailSize={content.carouselThumbnailSize ?? 60}
           thumbnailGap={content.carouselThumbnailGap ?? 8}
+          viewport={viewport}
         />
       )
     }
@@ -334,9 +335,8 @@ function ContentRenderer({ content, cellStyle, viewport = "desktop" }: {
                       color: content.ctaGuaranteesColor ?? "inherit",
                       lineHeight: 1.3,
                     }}
-                  >
-                    {guarantee.text}
-                  </span>
+                    dangerouslySetInnerHTML={{ __html: guarantee.text }}
+                  />
                 </div>
               ))}
             </div>
@@ -391,7 +391,7 @@ function ContentRenderer({ content, cellStyle, viewport = "desktop" }: {
             })}
           </div>
           {content.starLabel && (
-            <p style={{ color: content.starLabelColor ?? "inherit", fontSize: content.starLabelSize ?? 14 }}>
+            <p style={{ color: content.starLabelColor ?? "inherit", fontSize: (viewport === "mobile" && content.starLabelSizeMobile) ? content.starLabelSizeMobile : (content.starLabelSize ?? 14), fontWeight: content.starLabelFontWeight ?? undefined }}>
               {content.starLabel}
             </p>
           )}
@@ -457,7 +457,7 @@ function ContentRenderer({ content, cellStyle, viewport = "desktop" }: {
       return <ProductComparisonTable content={content} viewport={viewport} />
 
     case "banner":
-      return <BannerPreview config={content.bannerConfig ?? createDefaultBanner()} />
+      return <BannerPreview config={content.bannerConfig ?? createDefaultBanner()} viewport={viewport} />
 
     case "navbar":
       return <NavBar content={content} viewport={viewport} />
@@ -468,18 +468,20 @@ function ContentRenderer({ content, cellStyle, viewport = "desktop" }: {
       const linkColor = content.footerLinkColor || "inherit"
       const today = new Date().toLocaleDateString("en-US", { month: "2-digit", day: "2-digit", year: "numeric" })
       const disclaimer = content.footerDisclaimer?.replace(/\{\{date\}\}/g, today)
-      const textAlign = cellStyle?.textAlign ?? "left"
+      const textAlign = (viewport === "mobile" && cellStyle?.textAlignMobile)
+        ? cellStyle.textAlignMobile
+        : (cellStyle?.textAlign ?? "left")
       const justifyContent = textAlign === "center" ? "center" : textAlign === "right" ? "flex-end" : "flex-start"
       const footerGutter = viewport === "mobile" ? 8 : viewport === "tablet" ? 12 : 16
       return (
         <div className="w-full space-y-2" style={{ color: textColor, textAlign, paddingLeft: footerGutter, paddingRight: footerGutter }}>
           {disclaimer && (
             <div
-              className={PROSE_STYLES + " text-[11px] leading-relaxed"}
+              className={PROSE_STYLES + " text-[10px] leading-relaxed"}
               dangerouslySetInnerHTML={{ __html: disclaimer }}
             />
           )}
-          <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[11px]" style={{ justifyContent }}>
+          <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[13px]" style={{ justifyContent }}>
             {content.footerCopyright && (
               <span style={{ fontWeight: 500 }}>{content.footerCopyright}</span>
             )}
@@ -632,7 +634,7 @@ export function GridPreview({ config, viewport = "desktop", className }: {
   // Breakpoints aligned to device frame widths: mobile ≤500, tablet ≤820, desktop >820
   const effectiveViewport: ViewportSize =
     containerWidth > 0 && containerWidth <= 500 ? "mobile" :
-    containerWidth > 0 && containerWidth <= 600 ? "tablet" :
+    containerWidth > 0 && containerWidth <= 820 ? "tablet" :
     viewport
 
   const { cells, gridStyle, gridBadge } = config
@@ -731,7 +733,9 @@ export function GridPreview({ config, viewport = "desktop", className }: {
           {cells
             .filter(cell => !cell.hideOnMobile)
             .map((cell, naturalIdx) => {
-              const cellPadX = scaleForViewport(cell.style?.paddingX ?? 0, effectiveViewport)
+              const cellPadX = (effectiveViewport === "mobile" && cell.style?.paddingXMobile !== undefined)
+                ? cell.style.paddingXMobile
+                : scaleForViewport(cell.style?.paddingX ?? 0, effectiveViewport)
               const cellPadY = cell.style?.paddingY ?? 0
               const cellPadTop = scaleForViewport(cell.style?.paddingTop ?? cellPadY, effectiveViewport)
               const cellPadBottom = scaleForViewport(cell.style?.paddingBottom ?? cellPadY, effectiveViewport)
@@ -797,7 +801,9 @@ export function GridPreview({ config, viewport = "desktop", className }: {
           rowGap: gridGap,
         }}>
           {positions.map(({ cell, colStart, colSpan, rowStart, rowSpan }) => {
-            const cellPadX = scaleForViewport(cell.style?.paddingX ?? 0, effectiveViewport)
+            const cellPadX = (effectiveViewport === "mobile" && cell.style?.paddingXMobile !== undefined)
+              ? cell.style.paddingXMobile
+              : scaleForViewport(cell.style?.paddingX ?? 0, effectiveViewport)
             const cellPadY = cell.style?.paddingY ?? 0
             const cellPadTop = scaleForViewport(cell.style?.paddingTop ?? cellPadY, effectiveViewport)
             const cellPadBottom = scaleForViewport(cell.style?.paddingBottom ?? cellPadY, effectiveViewport)

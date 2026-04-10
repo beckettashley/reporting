@@ -21,8 +21,12 @@ export function StickyBottomCta({ content, viewport = "desktop" }: { content: Ce
     const checkSticky = () => {
       if (!originalRef.current) return
       const rect = originalRef.current.getBoundingClientRect()
-      // Pin when bottom of element reaches bottom of viewport
-      setIsSticky(rect.bottom <= window.innerHeight)
+      const scrolledPast = rect.bottom <= window.innerHeight
+      // Hide when the user has scrolled near the page bottom (footer visible).
+      // Reappears on scroll up when the footer is no longer in view.
+      const distFromBottom = document.documentElement.scrollHeight - window.innerHeight - window.scrollY
+      const nearPageBottom = distFromBottom < 120
+      setIsSticky(scrolledPast && !nearPageBottom)
     }
 
     window.addEventListener('scroll', checkSticky, { passive: true })
@@ -99,9 +103,8 @@ export function StickyBottomCta({ content, viewport = "desktop" }: { content: Ce
                   color: content.ctaGuaranteesColor ?? "inherit",
                   lineHeight: 1.3,
                 }}
-              >
-                {guarantee.text}
-              </span>
+                dangerouslySetInnerHTML={{ __html: guarantee.text }}
+              />
             </div>
           ))}
         </div>
@@ -138,14 +141,14 @@ export function StickyBottomCta({ content, viewport = "desktop" }: { content: Ce
             width: "100%",
             zIndex: 999999,
             backgroundColor: "#ffffff",
+            boxShadow: "0 -2px 10px rgba(0, 0, 0, 0.1)",
             paddingTop: "16px",
             paddingBottom: "16px",
             paddingLeft: "16px",
             paddingRight: "16px",
-            boxShadow: "0 -2px 10px rgba(0, 0, 0, 0.1)",
             opacity: isSticky ? 1 : 0,
             transform: isSticky ? "translateY(0)" : "translateY(100%)",
-            transition: "none",
+            transition: "opacity 0.25s ease, transform 0.25s ease",
             pointerEvents: isSticky ? "auto" : "none",
           }}
         >

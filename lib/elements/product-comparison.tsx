@@ -20,8 +20,8 @@ export function ProductComparisonTable({ content, viewport }: { content: CellCon
     return () => observer.disconnect()
   }, [])
 
-  const effectiveIsMobile = tableContainerWidth > 0 ? tableContainerWidth <= 400 : viewport === "mobile"
-  const effectiveIsTablet = tableContainerWidth > 0 ? tableContainerWidth <= 700 : viewport === "tablet"
+  const effectiveIsMobile = tableContainerWidth > 0 ? tableContainerWidth <= 500 : viewport === "mobile"
+  const effectiveIsTablet = tableContainerWidth > 0 ? tableContainerWidth <= 820 : viewport === "tablet"
 
   const products = content.productComparisonProducts || []
   const metrics  = content.productComparisonMetrics  || []

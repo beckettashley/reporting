@@ -16,11 +16,12 @@ export function AccordionList({ content }: { content: CellContent }) {
   return (
     <div style={{ width: "100%" }}>
       {items.map((item, i) => (
-        <div key={i}>
+        <div key={i} style={{
+          borderBottom: i === items.length - 1 ? `1px ${borderStyle} ${borderColor}` : undefined,
+        }}>
           <div
             style={{
               borderTop: `1px ${borderStyle} ${borderColor}`,
-              borderBottom: i === items.length - 1 ? `1px ${borderStyle} ${borderColor}` : undefined,
               padding: "16px 0",
               cursor: "pointer",
               display: "flex",

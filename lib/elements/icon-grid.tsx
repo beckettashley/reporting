@@ -8,6 +8,7 @@ export function IconGrid({ content, viewport }: { content: CellContent; viewport
   const cols = isMobile ? (content.iconGridColumnsMobile ?? 2) : (content.iconGridColumns ?? 4)
   const gap = content.iconGridGap ?? 24
   const layout = content.iconGridLayout ?? "column"
+  const iconFilter = content.iconGridInvert ? "brightness(0) invert(1)" : undefined
 
   if (layout === "row") {
     // Row layout: icon and label on same line, left-aligned, stacked vertically
@@ -26,7 +27,7 @@ export function IconGrid({ content, viewport }: { content: CellContent; viewport
             <img
               src={item.iconUrl}
               alt={item.label}
-              style={{ flexShrink: 0, width: item.iconSize ?? 48, height: item.iconSize ?? 48, objectFit: "contain", display: "block" }}
+              style={{ flexShrink: 0, width: item.iconSize ?? 48, height: item.iconSize ?? 48, objectFit: "contain", display: "block", filter: iconFilter }}
             />
             <span style={{
               fontSize: content.iconGridLabelSize ? `${content.iconGridLabelSize}px` : "var(--fs-small)",
@@ -60,7 +61,7 @@ export function IconGrid({ content, viewport }: { content: CellContent; viewport
           <img
             src={item.iconUrl}
             alt={item.label}
-            style={{ width: item.iconSize ?? 48, height: item.iconSize ?? 48, objectFit: "contain", display: "block" }}
+            style={{ width: item.iconSize ?? 48, height: item.iconSize ?? 48, objectFit: "contain", display: "block", filter: iconFilter }}
           />
           <span style={{
             fontSize: content.iconGridLabelSize ? `${content.iconGridLabelSize}px` : "var(--fs-small)",
