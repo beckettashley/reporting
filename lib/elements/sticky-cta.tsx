@@ -63,8 +63,11 @@ export function StickyBottomCta({ content, viewport = "desktop" }: { content: Ce
             ? `${content.ctaBorderWidth ?? 1}px ${content.ctaBorderStyle} ${content.ctaBorderColor ?? "transparent"}`
             : "none",
           boxShadow: ctaShadow,
+          transition: "background 0.15s ease",
         }}
         onClick={() => content.ctaUrl && window.open(content.ctaUrl, "_blank")}
+        onMouseEnter={(e) => { e.currentTarget.dataset.bg = e.currentTarget.style.background; e.currentTarget.style.background = `linear-gradient(rgba(0,0,0,0.15),rgba(0,0,0,0.15)),${e.currentTarget.dataset.bg}` }}
+        onMouseLeave={(e) => { if (e.currentTarget.dataset.bg) e.currentTarget.style.background = e.currentTarget.dataset.bg }}
       >
         {content.ctaText || "Get Started"}
       </Button>
