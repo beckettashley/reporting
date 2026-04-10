@@ -17,7 +17,7 @@ import { AccordionList } from "./elements/accordion"
 import { IconGrid } from "./elements/icon-grid"
 import { CountdownTimer } from "./elements/countdown"
 
-const PROSE_STYLES = "max-w-none [&_p]:m-0 [&_h1]:mb-2 [&_h1]:!leading-[1.32] [&_h2]:mb-2 [&_h3]:font-semibold [&_h3]:mb-1 [&_h4]:font-semibold [&_h4]:mb-1 [&_h5]:font-semibold [&_h6]:font-semibold [&_blockquote]:border-l-4 [&_blockquote]:border-gray-300 [&_blockquote]:pl-4 [&_blockquote]:italic [&_strong]:font-bold [&_em]:italic [&_hr]:border-t [&_hr]:border-current [&_hr]:my-3"
+const PROSE_STYLES = "max-w-none [&_p]:m-0 [&_h1]:mb-2 [&_h1]:!leading-[0.99] [&_h1]:text-[30px] [&_h2]:mb-2 [&_h3]:font-semibold [&_h3]:mb-1 [&_h4]:font-semibold [&_h4]:mb-1 [&_h5]:font-semibold [&_h6]:font-semibold [&_blockquote]:border-l-4 [&_blockquote]:border-gray-300 [&_blockquote]:pl-4 [&_blockquote]:italic [&_strong]:font-bold [&_em]:italic [&_hr]:border-t [&_hr]:border-current [&_hr]:my-3"
 
 // Canonical card drop-shadow — layered for depth (tight ambient + soft lift).
 // Used by the video case in captionBelow mode and by cells with shadowEnabled.
@@ -168,10 +168,10 @@ function ContentRenderer({ content, cellStyle, viewport = "desktop" }: {
       const captionBarStyle = {
         backgroundColor: content.captionBgColor || "#7C3AED",
         color: content.captionTextColor || "#FFFFFF",
-        paddingLeft: 16,
-        paddingRight: 16,
-        paddingTop: 20,
-        paddingBottom: 20,
+        paddingLeft: 12,
+        paddingRight: 12,
+        paddingTop: 10,
+        paddingBottom: 10,
       }
 
       const captionInner = (

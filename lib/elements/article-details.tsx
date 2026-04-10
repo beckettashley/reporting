@@ -33,10 +33,10 @@ export function ArticleDetailsRenderer({ avatar, authorName, date, variant }: {
       )}
       <div>
         {authorName && (
-          <p className="text-sm text-gray-800">By <strong>{authorName}</strong></p>
+          <p className="text-gray-800" style={{ fontSize: 12, lineHeight: 1.5 }}>By <strong>{authorName}</strong></p>
         )}
         {date && (
-          <p className="text-sm text-gray-500">Last Updated <span>{date}</span></p>
+          <p className="text-gray-500" style={{ fontSize: 12, lineHeight: 1.5 }}>Last Updated <span>{date}</span></p>
         )}
       </div>
     </div>

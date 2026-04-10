@@ -36,8 +36,8 @@ export function SectionRenderer({ sections, viewport, pageStyle }: SectionRender
         const cw = sectionHasBanner ? "flood" : (section.style.contentWidth ?? "contained")
         const isContained = cw === "contained"
         const isNarrow = cw === "narrow"
-        const gutter = viewport === "mobile" ? 8 : viewport === "tablet" ? 12 : 16
-        const narrowGutter = viewport === "mobile" ? 8 : viewport === "tablet" ? 12 : 16
+        const gutter = viewport === "mobile" ? 16 : viewport === "tablet" ? 12 : 16
+        const narrowGutter = viewport === "mobile" ? 16 : viewport === "tablet" ? 12 : 16
         const sectionMaxWidth = section.style.maxWidth ?? null
 
         // Support independent top/bottom padding

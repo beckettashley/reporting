@@ -13,7 +13,7 @@ export function CountdownTimer({ content }: { content: CellContent }) {
       {content.countdownLabel && (
         <strong style={{ color: content.countdownLabelColor ?? undefined, fontWeight: 900 }}>{content.countdownLabel} </strong>
       )}
-      <span style={{ color: content.countdownDigitColor ?? "#dc2626" }}>{display}</span>
+      <span style={{ color: content.countdownDigitColor ?? "#dc2626", fontWeight: 700 }}>{display}</span>
     </p>
   )
 }
