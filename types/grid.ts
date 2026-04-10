@@ -506,6 +506,47 @@ export const createDefaultSection = (): Section => {
 export interface PageStyle {
   fontDisplay?: string  // CSS font-family value, e.g. "'Libre Baskerville', serif"
   fontBody?: string     // CSS font-family value, e.g. "'DM Sans', sans-serif"
+  // Page-level typography tokens — cascade via CSS variables
+  titleFontFamily?: string
+  titleFontSize?: number      // px
+  titleFontWeight?: number
+  titleColor?: string
+  titleLineHeight?: number    // unitless ratio e.g. 1.3
+  h1FontFamily?: string
+  h1FontSize?: number
+  h1FontWeight?: number
+  h1Color?: string
+  h1LineHeight?: number
+  h2FontFamily?: string
+  h2FontSize?: number
+  h2FontWeight?: number
+  h2Color?: string
+  h2LineHeight?: number
+  h3FontFamily?: string
+  h3FontSize?: number
+  h3FontWeight?: number
+  h3Color?: string
+  h3LineHeight?: number
+  h4FontFamily?: string
+  h4FontSize?: number
+  h4FontWeight?: number
+  h4Color?: string
+  h4LineHeight?: number
+  h5FontFamily?: string
+  h5FontSize?: number
+  h5FontWeight?: number
+  h5Color?: string
+  h5LineHeight?: number
+  h6FontFamily?: string
+  h6FontSize?: number
+  h6FontWeight?: number
+  h6Color?: string
+  h6LineHeight?: number
+  bodyFontFamily?: string
+  bodyFontSize?: number
+  bodyFontWeight?: number
+  bodyColor?: string
+  bodyLineHeight?: number
 }
 
 export function rebuildRows(cells: GridCell[], existingRows?: GridRow[]): GridRow[] {

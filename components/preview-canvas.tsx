@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Section, ViewportSize } from "@/types/grid"
+import { Section, ViewportSize, PageStyle } from "@/types/grid"
 import { SectionRenderer } from "@/components/section-renderer"
 
 const getViewport = (width: number): ViewportSize => {
@@ -12,9 +12,10 @@ const getViewport = (width: number): ViewportSize => {
 
 interface PreviewCanvasProps {
   sections: Section[]
+  pageStyle?: PageStyle
 }
 
-export function PreviewCanvas({ sections }: PreviewCanvasProps) {
+export function PreviewCanvas({ sections, pageStyle }: PreviewCanvasProps) {
   const [viewport, setViewport] = useState<ViewportSize>("desktop")
 
   useEffect(() => {
@@ -27,7 +28,7 @@ export function PreviewCanvas({ sections }: PreviewCanvasProps) {
   return (
     <div className="preview-container">
       <div className="preview-wrapper">
-        <SectionRenderer sections={sections} viewport={viewport} />
+        <SectionRenderer sections={sections} viewport={viewport} pageStyle={pageStyle} />
       </div>
     </div>
   )

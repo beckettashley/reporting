@@ -2,7 +2,7 @@
 
 import React from "react"
 import { Section, ViewportSize, PageStyle } from "@/types/grid"
-import { GridPreview } from "@/lib/grid-render"
+import { GridPreview, GLOBAL_CARD_STYLES } from "@/lib/grid-render"
 
 const SECTION_PAD_Y: Record<string, { desktop: number; tablet: number; mobile: number }> = {
   none: { desktop: 0, tablet: 0, mobile: 0 },
@@ -22,13 +22,73 @@ export function SectionRenderer({ sections, viewport, pageStyle }: SectionRender
   const pageVars = {
     ...(pageStyle?.fontDisplay && { '--page-font-display': pageStyle.fontDisplay }),
     ...(pageStyle?.fontBody && { '--page-font-body': pageStyle.fontBody }),
+    // Typography tokens
+    ...(pageStyle?.titleFontFamily && { '--page-title-family': pageStyle.titleFontFamily }),
+    ...(pageStyle?.titleFontSize && { '--page-title-size': `${pageStyle.titleFontSize}px` }),
+    ...(pageStyle?.titleFontWeight && { '--page-title-weight': String(pageStyle.titleFontWeight) }),
+    ...(pageStyle?.titleColor && { '--page-title-color': pageStyle.titleColor }),
+    ...(pageStyle?.titleLineHeight && { '--page-title-line-height': String(pageStyle.titleLineHeight) }),
+    ...(pageStyle?.h1FontFamily && { '--page-h1-family': pageStyle.h1FontFamily }),
+    ...(pageStyle?.h1FontSize && { '--page-h1-size': `${pageStyle.h1FontSize}px` }),
+    ...(pageStyle?.h1FontWeight && { '--page-h1-weight': String(pageStyle.h1FontWeight) }),
+    ...(pageStyle?.h1Color && { '--page-h1-color': pageStyle.h1Color }),
+    ...(pageStyle?.h1LineHeight && { '--page-h1-line-height': String(pageStyle.h1LineHeight) }),
+    ...(pageStyle?.h2FontFamily && { '--page-h2-family': pageStyle.h2FontFamily }),
+    ...(pageStyle?.h2FontSize && { '--page-h2-size': `${pageStyle.h2FontSize}px` }),
+    ...(pageStyle?.h2FontWeight && { '--page-h2-weight': String(pageStyle.h2FontWeight) }),
+    ...(pageStyle?.h2Color && { '--page-h2-color': pageStyle.h2Color }),
+    ...(pageStyle?.h2LineHeight && { '--page-h2-line-height': String(pageStyle.h2LineHeight) }),
+    ...(pageStyle?.h3FontFamily && { '--page-h3-family': pageStyle.h3FontFamily }),
+    ...(pageStyle?.h3FontSize && { '--page-h3-size': `${pageStyle.h3FontSize}px` }),
+    ...(pageStyle?.h3FontWeight && { '--page-h3-weight': String(pageStyle.h3FontWeight) }),
+    ...(pageStyle?.h3Color && { '--page-h3-color': pageStyle.h3Color }),
+    ...(pageStyle?.h3LineHeight && { '--page-h3-line-height': String(pageStyle.h3LineHeight) }),
+    ...(pageStyle?.h4FontFamily && { '--page-h4-family': pageStyle.h4FontFamily }),
+    ...(pageStyle?.h4FontSize && { '--page-h4-size': `${pageStyle.h4FontSize}px` }),
+    ...(pageStyle?.h4FontWeight && { '--page-h4-weight': String(pageStyle.h4FontWeight) }),
+    ...(pageStyle?.h4Color && { '--page-h4-color': pageStyle.h4Color }),
+    ...(pageStyle?.h4LineHeight && { '--page-h4-line-height': String(pageStyle.h4LineHeight) }),
+    ...(pageStyle?.h5FontFamily && { '--page-h5-family': pageStyle.h5FontFamily }),
+    ...(pageStyle?.h5FontSize && { '--page-h5-size': `${pageStyle.h5FontSize}px` }),
+    ...(pageStyle?.h5FontWeight && { '--page-h5-weight': String(pageStyle.h5FontWeight) }),
+    ...(pageStyle?.h5Color && { '--page-h5-color': pageStyle.h5Color }),
+    ...(pageStyle?.h5LineHeight && { '--page-h5-line-height': String(pageStyle.h5LineHeight) }),
+    ...(pageStyle?.h6FontFamily && { '--page-h6-family': pageStyle.h6FontFamily }),
+    ...(pageStyle?.h6FontSize && { '--page-h6-size': `${pageStyle.h6FontSize}px` }),
+    ...(pageStyle?.h6FontWeight && { '--page-h6-weight': String(pageStyle.h6FontWeight) }),
+    ...(pageStyle?.h6Color && { '--page-h6-color': pageStyle.h6Color }),
+    ...(pageStyle?.h6LineHeight && { '--page-h6-line-height': String(pageStyle.h6LineHeight) }),
+    ...(pageStyle?.bodyFontFamily && { '--page-body-family': pageStyle.bodyFontFamily }),
+    ...(pageStyle?.bodyFontSize && { '--page-body-size': `${pageStyle.bodyFontSize}px` }),
+    ...(pageStyle?.bodyFontWeight && { '--page-body-weight': String(pageStyle.bodyFontWeight) }),
+    ...(pageStyle?.bodyColor && { '--page-body-color': pageStyle.bodyColor }),
+    ...(pageStyle?.bodyLineHeight && { '--page-body-line-height': String(pageStyle.bodyLineHeight) }),
   } as React.CSSProperties
+
+  // Build dynamic typography style rules — only for properties that are set
+  const typoRules: string[] = []
+  const levels = [
+    { tag: 'h1', prefix: 'h1' }, { tag: 'h2', prefix: 'h2' }, { tag: 'h3', prefix: 'h3' },
+    { tag: 'h4', prefix: 'h4' }, { tag: 'h5', prefix: 'h5' }, { tag: 'h6', prefix: 'h6' },
+    { tag: 'p', prefix: 'body' },
+  ] as const
+  for (const { tag, prefix } of levels) {
+    const props: string[] = []
+    if ((pageStyle as Record<string, unknown>)?.[`${prefix}FontFamily`]) props.push(`font-family: var(--page-${prefix}-family)`)
+    if ((pageStyle as Record<string, unknown>)?.[`${prefix}FontSize`]) props.push(`font-size: var(--page-${prefix}-size)`)
+    if ((pageStyle as Record<string, unknown>)?.[`${prefix}FontWeight`]) props.push(`font-weight: var(--page-${prefix}-weight)`)
+    if ((pageStyle as Record<string, unknown>)?.[`${prefix}Color`]) props.push(`color: var(--page-${prefix}-color)`)
+    if ((pageStyle as Record<string, unknown>)?.[`${prefix}LineHeight`]) props.push(`line-height: var(--page-${prefix}-line-height)`)
+    if (props.length) typoRules.push(`.page-typo ${tag} { ${props.join('; ')}; }`)
+  }
 
   // Track cumulative height of previous sticky sections for stacking
   let cumulativeStickyTop = 0
 
   return (
     <div style={pageVars}>
+      <style>{GLOBAL_CARD_STYLES}</style>
+      {typoRules.length > 0 && <style>{typoRules.join('\n')}</style>}
       {sections.map((section) => {
         const sectionHasBanner = section.grids.some(g =>
           g.cells.some(c => c.contents.some(ct => ct.type === "banner" || ct.type === "footer" || ct.type === "logoBanner"))

@@ -17,11 +17,15 @@ import { AccordionList } from "./elements/accordion"
 import { IconGrid } from "./elements/icon-grid"
 import { CountdownTimer } from "./elements/countdown"
 
-const PROSE_STYLES = "max-w-none [&_p]:m-0 [&_h1]:mb-2 [&_h1]:!leading-[0.99] [&_h1]:text-[30px] [&_h2]:mb-2 [&_h3]:font-semibold [&_h3]:mb-1 [&_h4]:font-semibold [&_h4]:mb-1 [&_h5]:font-semibold [&_h6]:font-semibold [&_blockquote]:border-l-4 [&_blockquote]:border-gray-300 [&_blockquote]:pl-4 [&_blockquote]:italic [&_strong]:font-bold [&_em]:italic [&_hr]:border-t [&_hr]:border-current [&_hr]:my-3"
+const PROSE_STYLES = "max-w-none [&_p]:m-0 [&_h1]:mb-2 [&_h1]:leading-[0.99] [&_h1]:text-[30px] [&_h2]:mb-2 [&_h3]:font-semibold [&_h3]:mb-1 [&_h4]:font-semibold [&_h4]:mb-1 [&_h5]:font-semibold [&_h6]:font-semibold [&_blockquote]:border-l-4 [&_blockquote]:border-gray-300 [&_blockquote]:pl-4 [&_blockquote]:italic [&_strong]:font-bold [&_em]:italic [&_hr]:border-t [&_hr]:border-current [&_hr]:my-3"
 
 // Canonical card drop-shadow — layered for depth (tight ambient + soft lift).
 // Used by the video case in captionBelow mode and by cells with shadowEnabled.
 const CARD_SHADOW = "0 1px 2px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.12)"
+
+// Shared card styles used by ingredient/mechanism cards (javvy-card-body pattern).
+// Injected once via GLOBAL_CARD_STYLES so it renders regardless of which card appears first.
+export const GLOBAL_CARD_STYLES = `.javvy-card-body{display:flex;gap:20px;align-items:flex-start;padding:24px}.javvy-card-img{flex-shrink:0;width:120px;height:120px;border-radius:50%;overflow:hidden}@media(max-width:640px){.javvy-card-body{flex-direction:column}.javvy-card-img{width:100px;height:100px;margin:0 auto}}`
 
 // ─── Content Renderer ─────────────────────────────────────────────────────────
 
@@ -35,7 +39,7 @@ function ContentRenderer({ content, cellStyle, viewport = "desktop" }: {
     case "textBox": {
       return (
         <div
-          className={PROSE_STYLES}
+          className={PROSE_STYLES + " page-typo"}
           style={{
             width: "100%",
             textAlign: cellStyle?.textAlign as "left" | "center" | "right" | undefined,
