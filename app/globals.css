@@ -193,8 +193,8 @@
 
 /* ─── Desktop-only: H1 narrower than other content ──────────────────────── */
 @container preview (min-width: 821px) {
-  .preview-wrapper h1,
-  .preview-wrapper .text-h1 {
+  .preview-wrapper h1:not(.page-typo h1),
+  .preview-wrapper .text-h1:not(.page-typo .text-h1) {
     padding-left: 5rem;
     padding-right: 5rem;
   }
