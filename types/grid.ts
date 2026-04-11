@@ -27,6 +27,7 @@ export type ContentType =
   | "benefitsGrid"
   | "testimonial"
   | "logoBanner"
+  | "offerCard"
 
 export interface TestimonialCarouselItem {
   id: string
@@ -281,6 +282,29 @@ export interface CellContent {
   iconGridLabelColor?: string     // default "#1a1a1a"
   iconGridInvert?: boolean        // when true, applies brightness(0) invert(1) filter to icons — makes dark icons white for dark backgrounds
   iconGridLayout?: "column" | "row"  // layout direction: column (default, icon above text) or row (icon and text side by side)
+  // Offer Card
+  offerCardBackgroundColor?: string    // default "#ffffff"
+  offerCardBorderColor?: string        // default "#e5e7eb"
+  offerCardBorderWidth?: number        // default 1
+  offerCardBorderRadius?: number       // default 12
+  offerCardPaddingX?: number           // default 24
+  offerCardPaddingY?: number           // default 24
+  offerCardShadow?: boolean            // default false
+  offerCardImageUrl?: string           // product image
+  offerCardImageSize?: number          // image column width %; default 25
+  offerCardTitle?: string              // bold title text
+  offerCardSubtitle?: string           // regular subtitle text
+  offerCardTag?: string                // pill/badge text e.g. "BEST SELLER"
+  offerCardTagColor?: string           // pill text color; default "#ffffff"
+  offerCardTagBackgroundColor?: string // pill bg color; default "#dc2626"
+  offerCardSellPrice?: string          // e.g. "$59"
+  offerCardComparePrice?: string       // e.g. "$149" (shown with strikethrough)
+  offerCardVariants?: {
+    sizes?: string[]                   // e.g. ["Queen", "King", "Standard"]
+    colors?: string[]                  // e.g. ["White", "Grey", "Navy"]
+    defaultSize?: string
+    defaultColor?: string
+  }
   // Countdown timer
   countdownDurationSeconds?: number  // total seconds to count down from; default 11169
   countdownLabel?: string            // e.g. "DEAL ENDING IN:"
