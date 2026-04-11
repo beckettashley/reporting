@@ -299,6 +299,10 @@ export interface CellContent {
   offerCardTagBackgroundColor?: string // pill bg color; default "#dc2626"
   offerCardSellPrice?: string          // e.g. "$59"
   offerCardComparePrice?: string       // e.g. "$149" (shown with strikethrough)
+  offerCardCtaText?: string            // CTA button text; default "Add to Order"
+  offerCardCtaUrl?: string             // CTA button URL
+  offerCardCtaBackgroundColor?: string // CTA bg color; default "#2a2552"
+  offerCardCtaTextColor?: string       // CTA text color; default "#ffffff"
   offerCardVariants?: {
     sizes?: string[]                   // e.g. ["Queen", "King", "Standard"]
     colors?: string[]                  // e.g. ["White", "Grey", "Navy"]

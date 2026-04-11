@@ -1,7 +1,7 @@
 "use client"
 
 import { useRef, useState, useEffect } from "react"
-import { GridConfig, GridCell, CellContent, ViewportSize } from "@/types/grid"
+import { GridConfig, GridCell, CellContent, CellStyle, ViewportSize } from "@/types/grid"
 import { createDefaultBanner } from "@/types/banner"
 import { BannerPreview } from "@/components/banner-preview"
 import { Button } from "@/components/ui/button"
@@ -16,7 +16,27 @@ import { TestimonialSection } from "./elements/testimonial"
 import { AccordionList } from "./elements/accordion"
 import { IconGrid } from "./elements/icon-grid"
 import { CountdownTimer } from "./elements/countdown"
-import { OfferCard } from "./elements/offer-card"
+import { OfferCardGroup } from "./elements/offer-card"
+
+/** Groups consecutive offerCard items so they share single-expand state */
+function renderCellContents(contents: CellContent[], cellStyle: CellStyle | undefined, viewport: ViewportSize) {
+  const result: React.ReactNode[] = []
+  let i = 0
+  while (i < contents.length) {
+    if (contents[i].type === "offerCard") {
+      const group: CellContent[] = []
+      while (i < contents.length && contents[i].type === "offerCard") {
+        group.push(contents[i])
+        i++
+      }
+      result.push(<OfferCardGroup key={`offer-group-${group[0].id}`} cards={group} />)
+    } else {
+      result.push(<ContentRenderer key={contents[i].id} content={contents[i]} cellStyle={cellStyle ?? {}} viewport={viewport} />)
+      i++
+    }
+  }
+  return result
+}
 
 const PROSE_STYLES = "max-w-none [&_p]:m-0 [&_h1]:mb-2 [&_h1]:leading-[0.99] [&_h1]:text-[30px] [&_h2]:mb-2 [&_h3]:font-semibold [&_h3]:mb-1 [&_h4]:font-semibold [&_h4]:mb-1 [&_h5]:font-semibold [&_h6]:font-semibold [&_blockquote]:border-l-4 [&_blockquote]:border-gray-300 [&_blockquote]:pl-4 [&_blockquote]:italic [&_strong]:font-bold [&_em]:italic [&_hr]:border-t [&_hr]:border-current [&_hr]:my-3"
 
@@ -530,7 +550,8 @@ function ContentRenderer({ content, cellStyle, viewport = "desktop" }: {
       return <LogoBanner content={content} viewport={viewport} />
 
     case "offerCard":
-      return <OfferCard content={content} />
+      // Rendered via OfferCardGroup — see groupContentItems()
+      return null
 
     default:
       return null
@@ -795,9 +816,7 @@ export function GridPreview({ config, viewport = "desktop", className }: {
                       textAlign: mobileAlign === "center" ? "center" : ((cell.style?.textAlignMobile ?? cell.style?.textAlign) as "left" | "center" | "right" | undefined),
                     }}
                   >
-                    {cell.contents.map((content) => (
-                      <ContentRenderer key={content.id} content={content} cellStyle={cell.style} viewport={effectiveViewport} />
-                    ))}
+                    {renderCellContents(cell.contents, cell.style, effectiveViewport)}
                   </div>
                 </div>
               )
