@@ -885,9 +885,7 @@ export function GridPreview({ config, viewport = "desktop", className }: {
                     textAlign: cell.style?.alignItems === "center" ? "center" : (cell.style?.textAlign as "left" | "center" | "right" | undefined),
                   }}
                 >
-                  {cell.contents.map((content) => (
-                    <ContentRenderer key={content.id} content={content} cellStyle={cell.style} viewport={effectiveViewport} />
-                  ))}
+                  {renderCellContents(cell.contents, cell.style, effectiveViewport)}
                 </div>
               </div>
             )
