@@ -108,12 +108,16 @@ export const COMPONENT_LIBRARY: ComponentDefinition[] = [
   {
     type: "bulletList",
     label: "Bullet List",
-    description: "Unordered list of items",
+    description: "List of items; each item optionally has an icon (absent = default disc bullet)",
     icon: <List className="h-5 w-5" />,
     category: "lists",
     defaultContent: {
       type: "bulletList",
-      bulletItems: ["First item", "Second item", "Third item"],
+      bulletListItems: [
+        { id: `bullet-${Date.now()}-1`, text: "First item" },
+        { id: `bullet-${Date.now()}-2`, text: "Second item" },
+        { id: `bullet-${Date.now()}-3`, text: "Third item" },
+      ],
     },
   },
   {
@@ -125,17 +129,6 @@ export const COMPONENT_LIBRARY: ComponentDefinition[] = [
     defaultContent: {
       type: "numberedList",
       bulletItems: ["Step one", "Step two", "Step three"],
-    },
-  },
-  {
-    type: "iconList",
-    label: "Icon List",
-    description: "List with custom icon per item",
-    icon: <LayoutList className="h-5 w-5" />,
-    category: "lists",
-    defaultContent: {
-      type: "iconList",
-      iconListItems: [],
     },
   },
   // Actions

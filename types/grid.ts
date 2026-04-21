@@ -8,7 +8,6 @@ export type ContentType =
   | "video"
   | "bulletList"
   | "numberedList"
-  | "iconList"
   | "ctaButton"
   | "stickyBottomCta"
   | "iconBlock"
@@ -49,10 +48,10 @@ export interface TestimonialMoreReviewsItem {
   starValue?: number
 }
 
-export interface IconListItem {
+export interface BulletListItem {
   id: string
   text: string
-  iconUrl: string
+  iconUrl?: string   // when set, renders as bullet icon; when absent, renders as default disc bullet
 }
 
 export interface IconBlockItem {
@@ -153,10 +152,15 @@ export interface CellContent {
   captionBgColor?: string    // Hex color for caption background
   captionTextColor?: string  // Hex color for caption text
   captionBelow?: boolean     // When true, caption renders below video instead of overlaying it
-  // Bullet/numbered list content
+  // Numbered list items (ordered list). bulletList no longer uses this — see bulletListItems below.
   bulletItems?: string[]
-  // Icon list content
-  iconListItems?: IconListItem[]
+  // Bullet list — each item has text; iconUrl is optional (absent = default disc bullet)
+  bulletListItems?: BulletListItem[]
+  bulletListGap?: number         // px gap between items; default 8
+  bulletListLabelSize?: number   // px; default 14
+  bulletListLabelWeight?: number // 100-900; default 500
+  bulletListIconSize?: number    // px; default 20
+  bulletListLabelColor?: string  // hex or CSS var; default var(--color-text-primary)
   // CTA button content
   ctaText?: string
   ctaUrl?: string
@@ -406,8 +410,8 @@ export const createDefaultContent = (type: ContentType = "textBox"): CellContent
   id: `content-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
   type,
   text: type === "textBox" ? "" : undefined,
-  bulletItems: type === "bulletList" || type === "numberedList" ? [] : undefined,
-  iconListItems: type === "iconList" ? [] : undefined,
+  bulletItems: type === "numberedList" ? [] : undefined,
+  bulletListItems: type === "bulletList" ? [] : undefined,
   ctaText: type === "ctaButton" || type === "stickyBottomCta" ? "" : undefined,
   ctaUrl: type === "stickyBottomCta" ? "#" : undefined,
   ctaBackgroundColor: type === "stickyBottomCta" ? "#000000" : undefined,

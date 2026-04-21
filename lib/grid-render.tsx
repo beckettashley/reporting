@@ -427,14 +427,36 @@ function ContentRenderer({ content, cellStyle, viewport = "desktop" }: {
       )
     }
 
-    case "bulletList":
+    case "bulletList": {
+      const listGap = content.bulletListGap ?? 8
+      const listLabelSize = content.bulletListLabelSize ?? 14
+      const listLabelWeight = content.bulletListLabelWeight ?? 500
+      const listIconSize = content.bulletListIconSize ?? 20
+      const listLabelColor = content.bulletListLabelColor ?? "var(--color-text-primary)"
       return (
-        <ul className="space-y-2 list-disc list-inside">
-          {content.bulletItems?.map((item: string, idx: number) => (
-            <li key={idx} className="text-sm break-words">{item}</li>
+        <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: listGap, width: "100%" }}>
+          {content.bulletListItems?.map((item, idx) => (
+            <li key={item.id || idx} style={{ display: "flex", flexDirection: "row", alignItems: "center", gap: 8, textAlign: "left", width: "100%" }}>
+              {item.iconUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={item.iconUrl}
+                  alt=""
+                  style={{ flexShrink: 0, width: listIconSize, height: listIconSize, objectFit: "contain", display: "block" }}
+                />
+              ) : (
+                <span style={{ flexShrink: 0, width: listIconSize, height: listIconSize, display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+                  <span style={{ width: 6, height: 6, borderRadius: "50%", backgroundColor: "currentColor" }} />
+                </span>
+              )}
+              <span style={{ fontSize: `${listLabelSize}px`, fontWeight: listLabelWeight, color: listLabelColor, lineHeight: 1.3, wordBreak: "break-word" }}>
+                {item.text}
+              </span>
+            </li>
           ))}
         </ul>
       )
+    }
 
     case "numberedList":
       return (
@@ -443,21 +465,6 @@ function ContentRenderer({ content, cellStyle, viewport = "desktop" }: {
             <li key={idx} className="text-sm break-words">{item}</li>
           ))}
         </ol>
-      )
-
-    case "iconList":
-      return (
-        <ul className="space-y-2">
-          {content.iconListItems?.map((item, idx) => (
-            <li key={item.id || idx} className="flex items-center gap-2 text-sm">
-              {item.iconUrl && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={item.iconUrl} alt="" className="w-5 h-5 shrink-0 object-contain" />
-              )}
-              <span className="break-words">{item.text}</span>
-            </li>
-          ))}
-        </ul>
       )
 
     case "iconBlock":

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { GridCell, CellContent, IconListItem, IconBlockItem, createDefaultContent } from "@/types/grid"
+import { GridCell, CellContent, BulletListItem, IconBlockItem, createDefaultContent } from "@/types/grid"
 import { createDefaultBanner } from "@/types/banner"
 import { BannerEditor } from "./banner-editor"
 import { Label } from "@/components/ui/label"
@@ -696,19 +696,121 @@ function ContentFields({ content, onUpdate }: { content: CellContent; onUpdate: 
         </div>
       )
 
-    case "bulletList":
+    case "bulletList": {
+      const items = content.bulletListItems || []
+      const sharedIconUrl = items[0]?.iconUrl || ""
+      const updateItem = (i: number, updates: Partial<BulletListItem>) => {
+        const next = items.map((item, idx) => idx === i ? { ...item, ...updates } : item)
+        onUpdate({ bulletListItems: next })
+      }
+      const removeItem = (i: number) => {
+        onUpdate({ bulletListItems: items.filter((_, idx) => idx !== i) })
+      }
+      const addItem = () => {
+        const newItem: BulletListItem = {
+          id: `bullet-item-${Date.now()}`,
+          text: "",
+          iconUrl: sharedIconUrl || undefined,
+        }
+        onUpdate({ bulletListItems: [...items, newItem] })
+      }
+      const setSharedIcon = (url: string) => {
+        const next = items.map((item) => ({ ...item, iconUrl: url || undefined }))
+        onUpdate({ bulletListItems: next.length ? next : [{ id: `bullet-item-${Date.now()}`, text: "", iconUrl: url || undefined }] })
+      }
+      return (
+        <div className="space-y-3">
+          <Label className="text-xs text-muted-foreground">Bullet Items</Label>
+          <p className="text-xs text-muted-foreground">
+            Leave the icon URL empty for default disc bullets. Set a shared icon URL to render the same icon before every item.
+          </p>
+          {/* Shared icon URL */}
+          <div className="space-y-2">
+            <Label className="text-xs text-muted-foreground">Shared Icon URL (optional)</Label>
+            <div className="flex items-center gap-2">
+              {sharedIconUrl && (
+                <img
+                  src={sharedIconUrl}
+                  alt="icon"
+                  className="w-8 h-8 rounded object-contain border border-border shrink-0"
+                />
+              )}
+              <Input
+                value={sharedIconUrl}
+                onChange={(e) => setSharedIcon(e.target.value)}
+                placeholder="https://... or leave blank for disc bullets"
+                className="flex-1"
+              />
+            </div>
+            <div className="relative">
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full gap-2"
+                onClick={() => document.getElementById("bullet-list-upload")?.click()}
+              >
+                <Upload className="h-3.5 w-3.5" />
+                Upload Icon Image
+              </Button>
+              <input
+                id="bullet-list-upload"
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0]
+                  if (!file) return
+                  setSharedIcon(URL.createObjectURL(file))
+                }}
+              />
+            </div>
+          </div>
+          {/* Items */}
+          <div className="space-y-2">
+            {items.map((item, i) => (
+              <div key={item.id} className="flex items-center gap-2">
+                {item.iconUrl ? (
+                  <img
+                    src={item.iconUrl}
+                    alt={`icon-${i}`}
+                    className="w-5 h-5 rounded object-contain border border-border shrink-0"
+                  />
+                ) : (
+                  <span className="w-5 text-xs text-muted-foreground shrink-0 text-center">•</span>
+                )}
+                <Input
+                  value={item.text}
+                  onChange={(e) => updateItem(i, { text: e.target.value })}
+                  placeholder="Bullet text"
+                  className="flex-1"
+                />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-9 w-9 shrink-0 text-muted-foreground hover:text-destructive"
+                  onClick={() => removeItem(i)}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+            ))}
+            <Button variant="outline" size="sm" className="w-full" onClick={addItem}>
+              <Plus className="h-4 w-4 mr-2" />
+              Add Item
+            </Button>
+          </div>
+        </div>
+      )
+    }
+
     case "numberedList":
       return (
         <div className="space-y-2">
-          <Label className="text-xs text-muted-foreground">
-            {content.type === "bulletList" ? "Bullet Items" : "Numbered Items"}
-          </Label>
+          <Label className="text-xs text-muted-foreground">Numbered Items</Label>
           <div className="space-y-2">
             {(content.bulletItems || []).map((item, i) => (
               <div key={i} className="flex items-center gap-2">
-                <span className="w-5 text-xs text-muted-foreground shrink-0">
-                  {content.type === "bulletList" ? "•" : `${i + 1}.`}
-                </span>
+                <span className="w-5 text-xs text-muted-foreground shrink-0">{i + 1}.</span>
                 <Input
                   value={item}
                   onChange={(e) => {
@@ -747,113 +849,6 @@ function ContentFields({ content, onUpdate }: { content: CellContent; onUpdate: 
           </div>
         </div>
       )
-
-    case "iconList": {
-      const items = content.iconListItems || []
-      const updateItem = (i: number, updates: Partial<IconListItem>) => {
-        const next = items.map((item, idx) => idx === i ? { ...item, ...updates } : item)
-        onUpdate({ iconListItems: next })
-      }
-      const removeItem = (i: number) => {
-        onUpdate({ iconListItems: items.filter((_, idx) => idx !== i) })
-      }
-      const addItem = () => {
-        const newItem: IconListItem = {
-          id: `icon-item-${Date.now()}`,
-          text: "",
-          iconUrl: items[0]?.iconUrl || "",
-        }
-        onUpdate({ iconListItems: [...items, newItem] })
-      }
-      return (
-        <div className="space-y-3">
-          <Label className="text-xs text-muted-foreground">Icon List Items</Label>
-          <p className="text-xs text-muted-foreground">
-            All items share the same icon image. Upload or paste a URL below.
-          </p>
-          {/* Shared icon URL for all items */}
-          <div className="space-y-2">
-            <Label className="text-xs text-muted-foreground">Icon Image URL</Label>
-            <div className="flex items-center gap-2">
-              {items[0]?.iconUrl && (
-                <img
-                  src={items[0].iconUrl}
-                  alt="icon"
-                  className="w-8 h-8 rounded object-contain border border-border shrink-0"
-                />
-              )}
-              <Input
-                value={items[0]?.iconUrl || ""}
-                onChange={(e) => {
-                  // Update iconUrl on all items at once
-                  const next = items.map((item) => ({ ...item, iconUrl: e.target.value }))
-                  onUpdate({ iconListItems: next.length ? next : [{ id: `icon-item-${Date.now()}`, text: "", iconUrl: e.target.value }] })
-                }}
-                placeholder="https://... or upload"
-                className="flex-1"
-              />
-            </div>
-            <div className="relative">
-              <Button
-                variant="outline"
-                size="sm"
-                className="w-full gap-2"
-                onClick={() => document.getElementById("icon-list-upload")?.click()}
-              >
-                <Upload className="h-3.5 w-3.5" />
-                Upload Icon Image
-              </Button>
-              <input
-                id="icon-list-upload"
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={(e) => {
-                  const file = e.target.files?.[0]
-                  if (!file) return
-                  const url = URL.createObjectURL(file)
-                  const next = items.map((item) => ({ ...item, iconUrl: url }))
-                  onUpdate({ iconListItems: next.length ? next : [{ id: `icon-item-${Date.now()}`, text: "", iconUrl: url }] })
-                }}
-              />
-            </div>
-          </div>
-          {/* Items */}
-          <div className="space-y-2">
-            {items.map((item, i) => (
-              <div key={item.id} className="flex items-center gap-2">
-                {item.iconUrl && (
-                  <img
-                    src={item.iconUrl}
-                    alt={`icon-${i}`}
-                    className="w-5 h-5 rounded object-contain border border-border shrink-0"
-                  />
-                )}
-                {!item.iconUrl && <span className="w-5 text-xs text-muted-foreground shrink-0">{i + 1}.</span>}
-                <Input
-                  value={item.text}
-                  onChange={(e) => updateItem(i, { text: e.target.value })}
-                  placeholder="List item text"
-                  className="flex-1"
-                />
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-9 w-9 shrink-0 text-muted-foreground hover:text-destructive"
-                  onClick={() => removeItem(i)}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-            ))}
-            <Button variant="outline" size="sm" className="w-full" onClick={addItem}>
-              <Plus className="h-4 w-4 mr-2" />
-              Add Item
-            </Button>
-          </div>
-        </div>
-      )
-    }
 
     case "stickyBottomCta":
     case "ctaButton":
