@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Sales Page Template — Theme Token Reference</title>
+<style>
+  @page { size: letter portrait; margin: 0.4in; }
+  * { box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; color: #1a1a1a; margin: 0; padding: 0; font-size: 9pt; line-height: 1.35; }
+  .page { page-break-after: always; padding: 0.1in 0; }
+  .page:last-child { page-break-after: auto; }
+  h1 { font-size: 18pt; margin: 0 0 4pt; color: #111; }
+  h2 { font-size: 12pt; margin: 10pt 0 4pt; color: #111; border-bottom: 1px solid #ddd; padding-bottom: 3pt; }
+  h3 { font-size: 10pt; margin: 8pt 0 3pt; color: #444; }
+  p { margin: 3pt 0; }
+  .subtitle { color: #666; font-size: 9.5pt; margin-bottom: 8pt; }
+  code, .mono { font-family: "SF Mono", Consolas, monospace; font-size: 8pt; }
+  table { border-collapse: collapse; width: 100%; font-size: 7.5pt; margin: 4pt 0; table-layout: fixed; }
+  th, td { border: 1px solid #d0d0d0; padding: 3pt 6pt; text-align: left; vertical-align: top; word-wrap: break-word; overflow-wrap: anywhere; }
+  th { background: #f2f2f2; font-weight: 600; font-size: 8pt; }
+  td.var { font-family: "SF Mono", Consolas, monospace; font-size: 7.5pt; background: #fafafa; }
+  td.val { font-family: "SF Mono", Consolas, monospace; font-size: 7.5pt; font-weight: 600; }
+  td.use { font-size: 7.5pt; color: #444; }
+  td.ex { font-size: 7.5pt; color: #333; font-style: italic; }
+  .swatch-cell { display: inline-block; width: 14pt; height: 14pt; border: 1px solid #e5e7eb; border-radius: 2pt; vertical-align: middle; margin-right: 4pt; }
+  .intro { background: #f9f9f9; border-left: 3px solid #3d348b; padding: 7pt 10pt; margin: 6pt 0; font-size: 8.5pt; }
+  .footer { font-size: 7.5pt; color: #888; margin-top: 10pt; }
+  .note { font-size: 7.5pt; color: #555; font-style: italic; margin: 3pt 0; padding: 5pt 8pt; background: #fafaf3; border-left: 2px solid #d4d0a8; }
+</style>
+</head>
+<body>
+
+<!-- PAGE 1: COVER + BRAND + ACCENT + SEMANTIC -->
+<div class="page">
+  <h1>Sales Page Template — Theme Token Reference</h1>
+  <p class="subtitle">Reference doc. Each row: one variable, one value, where it's used, and a specific example from the template.</p>
+
+  <div class="intro">
+    <b>Preview:</b> component-demo-three.vercel.app/preview?id=66 <br>
+    <b>Scope:</b> theme tokens only — the values that change per brand (colors, typography). Structural decisions the template carries across every brand (spacing, radii, shadows, border widths, motion) live with the template, not the theme. <br>
+    <b>Companion files:</b> <code>theme-tokens.md</code>, <code>theme.json</code>, <code>theme.css</code>.
+  </div>
+
+  <h2>Colors — brand</h2>
+  <table>
+    <colgroup><col style="width:30%"><col style="width:18%"><col style="width:24%"><col style="width:28%"></colgroup>
+    <thead><tr><th>Variable</th><th>Value</th><th>Used for</th><th>Example</th></tr></thead>
+    <tbody>
+      <tr><td class="var">color.brand.primary</td><td class="val"><span class="swatch-cell" style="background:#3d348b"></span>#3d348b</td><td class="use">Brand purple — primary surface accents</td><td class="ex">"Happiness Guarantee" section background</td></tr>
+      <tr><td class="var">color.brand.primary-dark</td><td class="val"><span class="swatch-cell" style="background:#2a2552"></span>#2a2552</td><td class="use">Action color — CTA backgrounds, emphasized text</td><td class="ex">"CLAIM YOUR DISCOUNT" button fill</td></tr>
+      <tr><td class="var">color.brand.primary-subtle</td><td class="val"><span class="swatch-cell" style="background:#e8e4f7"></span>#e8e4f7</td><td class="use">Pale lavender — soft brand surface</td><td class="ex">"Step 1 / 2 / 3" card backgrounds</td></tr>
+    </tbody>
+  </table>
+  <p class="note">Three brand tokens. Prototype's six near-identical purples were consolidated: <code>primary</code> and <code>primary-mid</code> (#41388a, ΔE 5.7) were duplicates; <code>primary-dark</code> is the single action color. Two rare one-off shades from the prototype (#270061 at Footer, #351979 at Final CTA accent) remain in the preset as inline values — they are not canonical brand tokens.</p>
+
+  <h2>Colors — accent</h2>
+  <table>
+    <colgroup><col style="width:30%"><col style="width:22%"><col style="width:22%"><col style="width:26%"></colgroup>
+    <tbody>
+      <tr><td class="var">color.accent.warning</td><td class="val"><span class="swatch-cell" style="background:#ffd61f"></span>#ffd61f</td><td class="use">High-contrast attention yellow</td><td class="ex">Sticky bottom CTA bar background</td></tr>
+      <tr><td class="var">color.accent.warning-subtle</td><td class="val"><span class="swatch-cell" style="background:#fef9c3"></span>#fef9c3</td><td class="use">Soft warning surface</td><td class="ex">"Sell-Out Risk" banner background</td></tr>
+      <tr><td class="var">color.accent.tint-1</td><td class="val"><span class="swatch-cell" style="background:#faf8f6"></span>#faf8f6</td><td class="use">Fill for <code>gradient.background-1</code></td><td class="ex">Hero background</td></tr>
+      <tr><td class="var">color.accent.tint-2</td><td class="val"><span class="swatch-cell" style="background:#fcf3df"></span>#fcf3df</td><td class="use">Fill for <code>gradient.background-2</code></td><td class="ex">"How It Works" background</td></tr>
+      <tr><td class="var">color.accent.tint-3</td><td class="val"><span class="swatch-cell" style="background:#e1f3ff"></span>#e1f3ff</td><td class="use">Fill for <code>gradient.background-3</code></td><td class="ex">"Benefits" background</td></tr>
+      <tr><td class="var">color.accent.tint-4</td><td class="val">rgba(20,245,255,0.125)</td><td class="use">First fill for <code>gradient.background-4</code> + <code>background-5</code></td><td class="ex">"Final CTA" low stop</td></tr>
+      <tr><td class="var">color.accent.tint-5</td><td class="val">rgba(153,143,255,0.125)</td><td class="use">Second fill for <code>gradient.background-4</code> + <code>background-5</code></td><td class="ex">"Final CTA" high stop</td></tr>
+    </tbody>
+  </table>
+  <p class="note">Tints are <b>brand-supplied</b> fill colors for the gradient shapes. Each tint is a slot — brands supply whatever color fits their palette. Names are intentionally generic (<code>tint-1</code>, <code>tint-2</code>, …) — the template makes no assumption about warm/cool/neutral. A brand whose palette is all cool, all warm, or all neutral fills each slot accordingly. The values above are what Javvy happens to use.</p>
+
+  <h2>Colors — semantic</h2>
+  <table>
+    <colgroup><col style="width:30%"><col style="width:18%"><col style="width:24%"><col style="width:28%"></colgroup>
+    <tbody>
+      <tr><td class="var">color.semantic.danger</td><td class="val"><span class="swatch-cell" style="background:#dc2626"></span>#dc2626</td><td class="use">Negative indicator — worse values, warnings</td><td class="ex">Competitor comparison "worse" cell values, countdown timer digits</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Colors — text</h2>
+  <table>
+    <colgroup><col style="width:30%"><col style="width:22%"><col style="width:22%"><col style="width:26%"></colgroup>
+    <tbody>
+      <tr><td class="var">color.text.primary</td><td class="val"><span class="swatch-cell" style="background:#1a1a1a"></span>#1a1a1a</td><td class="use">All body text and headlines</td><td class="ex">Hero H1, benefit body, ingredient bullets, FAQ subtitle</td></tr>
+      <tr><td class="var">color.text.inverse</td><td class="val"><span class="swatch-cell" style="background:#ffffff;border:1px solid #ccc"></span>#ffffff</td><td class="use">Text on dark surfaces</td><td class="ex">"Happiness Guarantee" heading and subtitle</td></tr>
+    </tbody>
+  </table>
+  <p class="note">Two text tokens. Prototype had seven; this version drops the entire muted / secondary / tertiary ladder. Body text is one color, period — all paragraph, bullet, subtitle, and fine-print copy uses <code>text.primary</code> #1a1a1a. Inverse is either white or it isn't. Also dropped: <code>text.link</code> (aliased <code>color.brand.primary</code>) and <code>text.inverse-muted</code> (translucent white that read as muted grey on dark surfaces).</p>
+
+  <h2>Colors — surface</h2>
+  <table>
+    <colgroup><col style="width:30%"><col style="width:22%"><col style="width:22%"><col style="width:26%"></colgroup>
+    <tbody>
+      <tr><td class="var">color.surface.default</td><td class="val"><span class="swatch-cell" style="background:#ffffff;border:1px solid #ccc"></span>#ffffff</td><td class="use">Page background, card interiors</td><td class="ex">Benefit card backgrounds</td></tr>
+      <tr><td class="var">color.surface.subtle</td><td class="val"><span class="swatch-cell" style="background:#f0f0f0"></span>#f0f0f0</td><td class="use">Secondary card surface</td><td class="ex">Table row alt background</td></tr>
+      <tr><td class="var">color.surface.inverse</td><td class="val"><span class="swatch-cell" style="background:#000"></span>#000000</td><td class="use">Dark band surface</td><td class="ex">"AS SEEN ON" marquee strip</td></tr>
+      <tr><td class="var">color.surface.scrim</td><td class="val">rgba(255,255,255,0.9)</td><td class="use">Translucent controls over imagery</td><td class="ex">Carousel prev / next bg</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Colors — border</h2>
+  <table>
+    <colgroup><col style="width:30%"><col style="width:22%"><col style="width:22%"><col style="width:26%"></colgroup>
+    <tbody>
+      <tr><td class="var">color.border.default</td><td class="val"><span class="swatch-cell" style="background:#cccccc"></span>#cccccc</td><td class="use">Default dividers and card borders</td><td class="ex">Accordion row separators</td></tr>
+      <tr><td class="var">color.border.subtle</td><td class="val"><span class="swatch-cell" style="background:#e5e7eb"></span>#e5e7eb</td><td class="use">Quiet row dividers</td><td class="ex">Comparison table rows</td></tr>
+      <tr><td class="var">color.border.contrast</td><td class="val"><span class="swatch-cell" style="background:#000"></span>#000000</td><td class="use">Active selection indicator</td><td class="ex">Selected carousel thumbnail outline</td></tr>
+      <tr><td class="var">color.border.muted-inverse</td><td class="val">rgba(255,255,255,0.3)</td><td class="use">Subtle divider on dark surface</td><td class="ex">Footer section divider</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- PAGE 2: GRADIENTS + TYPOGRAPHY FAMILIES + WEIGHTS + TRACKING -->
+<div class="page">
+  <h1>Gradients · Typography families · weights · tracking</h1>
+
+  <h2>Gradients</h2>
+  <p>Gradient <b>shapes</b> are theme-defined. Fill colors are tokenized — each gradient references one or more <code>color.accent.tint-*</code> slots, and the brand supplies whatever tint values fit their palette (all neutral, all warm, all cool — the template doesn't care). White and transparent stops are brand-invariant and stay as literals.</p>
+  <table>
+    <colgroup><col style="width:22%"><col style="width:42%"><col style="width:16%"><col style="width:20%"></colgroup>
+    <thead><tr><th>Variable</th><th>Value</th><th>Used for</th><th>Example</th></tr></thead>
+    <tbody>
+      <tr><td class="var">gradient.background-1</td><td class="val">radial-gradient(50% 50%, #fff 0%, {color.accent.tint-1} 50%, #fff 100%)</td><td class="use">Radial wash (single center stop)</td><td class="ex">Hero background</td></tr>
+      <tr><td class="var">gradient.background-2</td><td class="val">radial-gradient(50% 50%, #fff 0%, {color.accent.tint-2} 30%, {color.accent.tint-2} 70%, #fff 100%)</td><td class="use">Radial with plateau (30%–70% hold)</td><td class="ex">"How It Works" background</td></tr>
+      <tr><td class="var">gradient.background-3</td><td class="val">radial-gradient(50% 50%, #fff 0%, {color.accent.tint-3} 50%, #fff 100%)</td><td class="use">Radial wash (same shape as background-1)</td><td class="ex">"Benefits" background</td></tr>
+      <tr><td class="var">gradient.background-4</td><td class="val">linear-gradient({color.accent.tint-4} 0%, {color.accent.tint-5} 100%)</td><td class="use">Two-color linear (full-bleed)</td><td class="ex">Subtle section accent</td></tr>
+      <tr><td class="var">gradient.background-5</td><td class="val">linear-gradient(transparent 0%, {color.accent.tint-5} 15%, {color.accent.tint-4} 85%, transparent 100%)</td><td class="use">Two-color linear with transparent ends (fade in/out)</td><td class="ex">"Final CTA" background</td></tr>
+      <tr><td class="var">gradient.mask-edge</td><td class="val">linear-gradient(to right, transparent 0%, #fff 25%, #fff 75%, transparent 100%)</td><td class="use">Horizontal edge-fade mask (white, no tint slot)</td><td class="ex">"AS SEEN ON" marquee edges</td></tr>
+    </tbody>
+  </table>
+  <p class="note">Token refs (<code>{color.accent.tint-2}</code>, etc.) are the canonical form. The preset currently has the resolved Javvy values inlined as hex — a transitional state until the token resolver ships. Swapping brands = swapping the five <code>color.accent.tint-*</code> values; gradient shapes stay constant.</p>
+
+  <h2>Typography — families</h2>
+  <table>
+    <colgroup><col style="width:22%"><col style="width:22%"><col style="width:26%"><col style="width:30%"></colgroup>
+    <thead><tr><th>Variable</th><th>Value</th><th>Used for</th><th>Example</th></tr></thead>
+    <tbody>
+      <tr><td class="var">font.sans</td><td class="val">Geist</td><td class="use">Default UI</td><td class="ex">CTA labels, table cells, timer digits, footer</td></tr>
+      <tr><td class="var">font.body</td><td class="val">DM Sans</td><td class="use">Long-form prose</td><td class="ex">Benefit card paragraphs, ingredient bullets</td></tr>
+      <tr><td class="var">font.display</td><td class="val">Libre Baskerville</td><td class="use">Display headlines</td><td class="ex">Hero H1, section H1s</td></tr>
+      <tr><td class="var">font.condensed</td><td class="val">Barlow</td><td class="use">Urgency display</td><td class="ex">"UP TO 58% OFF / FOR A LIMITED TIME ONLY!"</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Typography — weights</h2>
+  <table>
+    <colgroup><col style="width:22%"><col style="width:14%"><col style="width:26%"><col style="width:38%"></colgroup>
+    <thead><tr><th>Variable</th><th>Value</th><th>Used for</th><th>Example</th></tr></thead>
+    <tbody>
+      <tr><td class="var">weight.extralight</td><td class="val">200</td><td class="use">Very-light supporting copy</td><td class="ex">"This limited-time deal…" paragraph</td></tr>
+      <tr><td class="var">weight.light</td><td class="val">300</td><td class="use">Light supporting copy</td><td class="ex">"30-Day Money-Back Guarantee" line</td></tr>
+      <tr><td class="var">weight.regular</td><td class="val">400</td><td class="use">Default body, quiet labels</td><td class="ex">Timer unit labels</td></tr>
+      <tr><td class="var">weight.medium</td><td class="val">500</td><td class="use">Body prose</td><td class="ex">Benefit card body, reviews count</td></tr>
+      <tr><td class="var">weight.semibold</td><td class="val">600</td><td class="use">Badge labels, eyebrow</td><td class="ex">"NO SUGAR ADDED" feature badge</td></tr>
+      <tr><td class="var">weight.bold</td><td class="val">700</td><td class="use">CTA buttons, FAQ triggers</td><td class="ex">"CLAIM YOUR DISCOUNT" button label</td></tr>
+      <tr><td class="var">weight.extrabold</td><td class="val">800</td><td class="use">H1s, emphasized figures</td><td class="ex">Hero H1, "4.8" review score</td></tr>
+      <tr><td class="var">weight.black</td><td class="val">900</td><td class="use">Urgency headline, numerics</td><td class="ex">Countdown timer digits, "SPRING SPECIAL"</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Typography — letter-spacing</h2>
+  <table>
+    <colgroup><col style="width:22%"><col style="width:14%"><col style="width:26%"><col style="width:38%"></colgroup>
+    <thead><tr><th>Variable</th><th>Value</th><th>Used for</th><th>Example</th></tr></thead>
+    <tbody>
+      <tr><td class="var">tracking.tight-lg</td><td class="val">-0.66px</td><td class="use">Display and H1 headlines</td><td class="ex">Hero H1, "UP TO 58% OFF" urgency (−0.7 absorbed)</td></tr>
+      <tr><td class="var">tracking.tight-sm</td><td class="val">-0.18px</td><td class="use">Card headlines (H2 / H3 / H4)</td><td class="ex">Benefit, Mechanism, Callout titles (−0.36, −0.088 absorbed)</td></tr>
+      <tr><td class="var">tracking.normal</td><td class="val">0</td><td class="use">Body copy</td><td class="ex">Default paragraphs</td></tr>
+      <tr><td class="var">tracking.wide-md</td><td class="val">0.52px</td><td class="use">CTAs and small eyebrows</td><td class="ex">"CLAIM YOUR DISCOUNT" CTA, FAQ triggers (0.36, 0.4, 0.42, 0.6, 0.88, 0.96 absorbed)</td></tr>
+      <tr><td class="var">tracking.widest</td><td class="val">1.8px</td><td class="use">Widest eyebrow</td><td class="ex">"AS SEEN ON", "FREE GIFTS WITH YOUR ORDER" (1.3 absorbed)</td></tr>
+    </tbody>
+  </table>
+  <p class="note">Five primitive tracking steps. Absorbed values (the 6 intermediate prototype values shown per-row) stay pixel-accurate inside their <code>type.*</code> scale tokens below — consumers that need exact fidelity read from the type token rather than the primitive.</p>
+</div>
+
+<!-- PAGE 3: TYPE SCALE COMPACT SUMMARY -->
+<div class="page">
+  <h1>Typography — type scale (compact summary)</h1>
+  <p class="note">Scan-friendly view. Each token bundles five sub-properties. See expanded tables on following pages for one-variable-per-row addressability.</p>
+  <table>
+    <colgroup><col style="width:22%"><col style="width:36%"><col style="width:18%"><col style="width:24%"></colgroup>
+    <thead><tr><th>Variable</th><th>Size / LH / Weight / Family / Tracking</th><th>Used for</th><th>Example</th></tr></thead>
+    <tbody>
+      <tr><td class="var">type.display-xl</td><td class="val">28 / 32.34 / 900 / Barlow / -0.7px</td><td class="use">Urgency display</td><td class="ex">"UP TO 58% OFF…"</td></tr>
+      <tr><td class="var">type.display-lg</td><td class="val">26.4 / 30.5 / 800 / Libre Baskerville / -0.66px</td><td class="use">Page and section H1s</td><td class="ex">Hero H1</td></tr>
+      <tr><td class="var">type.display-md</td><td class="val">24 / 28.8 / 900 / DM Sans / -0.36px</td><td class="use">Callout H2</td><td class="ex">"Reaching #11…"</td></tr>
+      <tr><td class="var">type.display-sm</td><td class="val">17.6 / 22.88 / 800 / DM Sans / -0.088px</td><td class="use">Mechanism H4s</td><td class="ex">Mechanism card titles</td></tr>
+      <tr><td class="var">type.headline</td><td class="val">18 / 22.5 / 600 / DM Sans / -0.18px</td><td class="use">Benefit card titles (H3)</td><td class="ex">Benefit card titles</td></tr>
+      <tr><td class="var">type.body-lg</td><td class="val">18 / 28.8 / 500 / DM Sans / 0</td><td class="use">Hero description, intros</td><td class="ex">Hero paragraph</td></tr>
+      <tr><td class="var">type.body</td><td class="val">16 / 20.8 / 500 / Geist / 0</td><td class="use">Default body</td><td class="ex">Step bodies, feature bullets</td></tr>
+      <tr><td class="var">type.body-sm</td><td class="val">15 / 24 / 500 / DM Sans / 0</td><td class="use">Prose body</td><td class="ex">Benefit body, ingredient bullets</td></tr>
+      <tr><td class="var">type.body-xs</td><td class="val">13 / 16.9 / 400 / Geist / 0</td><td class="use">Smaller body</td><td class="ex">Guarantee sub-copy</td></tr>
+      <tr><td class="var">type.caption</td><td class="val">12 / 18 / 500 / DM Sans / 0</td><td class="use">Caption</td><td class="ex">Mechanism body, table cell values</td></tr>
+      <tr><td class="var">type.caption-xs</td><td class="val">11 / 15.4 / 500 / DM Sans / 0</td><td class="use">Fine print</td><td class="ex">Legal footnotes</td></tr>
+      <tr><td class="var">type.eyebrow-lg</td><td class="val">18 / 21.6 / 700 / DM Sans / 1.8px · upper</td><td class="use">Large eyebrow</td><td class="ex">"AS SEEN ON"</td></tr>
+      <tr><td class="var">type.eyebrow</td><td class="val">13 / 19.5 / 700 / Geist / 0.52px · upper</td><td class="use">Accordion trigger</td><td class="ex">FAQ questions</td></tr>
+      <tr><td class="var">type.eyebrow-sm</td><td class="val">12 / 18 / 600 / Geist / 0.96px · upper</td><td class="use">Table column labels</td><td class="ex">Comparison column headers</td></tr>
+      <tr><td class="var">type.badge</td><td class="val">14 / 18.2 / 600 / Geist / 0</td><td class="use">Feature badges</td><td class="ex">"No Added Sugar", "Clean Label", "Waistline-Friendly"</td></tr>
+      <tr><td class="var">type.cta-lg</td><td class="val">20 / 28.57 / 700 / Geist / 0.4px</td><td class="use">Large CTA</td><td class="ex">"GET 58% OFF" button</td></tr>
+      <tr><td class="var">type.cta</td><td class="val">18 / 25.7 / 700 / Geist / 0.36px</td><td class="use">Default CTA</td><td class="ex">"CLAIM YOUR DISCOUNT" button</td></tr>
+      <tr><td class="var">type.step-label</td><td class="val">12 / 18 / 700 / Geist / 0</td><td class="use">Step pill label</td><td class="ex">"Step 1" / "Step 2" / "Step 3"</td></tr>
+      <tr><td class="var">type.timer-digit</td><td class="val">20 / 20 / 900 / Geist / 0</td><td class="use">Countdown numeric</td><td class="ex">Timer "03" digits</td></tr>
+      <tr><td class="var">type.timer-unit</td><td class="val">10 / 15 / 400 / Geist / 0.6px</td><td class="use">Countdown label</td><td class="ex">"HRS" / "MIN" / "SEC"</td></tr>
+      <tr><td class="var">type.score-xl</td><td class="val">56 / 56 / 800 / Geist / 0</td><td class="use">Large numeric</td><td class="ex">"4.8" review score</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- PAGE 4: TYPE SCALE EXPANDED 1 -->
+<div class="page">
+  <h1>Typography — type scale (expanded, 1/3)</h1>
+  <p class="note">Use this form when addressing a single sub-property by name (e.g. <code>type.display-lg.size</code>).</p>
+
+  <h3>type.display-xl — urgency display</h3>
+  <table><colgroup><col style="width:40%"><col style="width:60%"></colgroup>
+    <tbody>
+      <tr><td class="var">type.display-xl.size</td><td class="val">28px</td></tr>
+      <tr><td class="var">type.display-xl.line-height</td><td class="val">32.34px</td></tr>
+      <tr><td class="var">type.display-xl.weight</td><td class="val">900</td></tr>
+      <tr><td class="var">type.display-xl.family</td><td class="val">Barlow</td></tr>
+      <tr><td class="var">type.display-xl.tracking</td><td class="val">-0.7px</td></tr>
+    </tbody>
+  </table>
+
+  <h3>type.display-lg — page and section H1s</h3>
+  <table><colgroup><col style="width:40%"><col style="width:60%"></colgroup>
+    <tbody>
+      <tr><td class="var">type.display-lg.size</td><td class="val">26.4px</td></tr>
+      <tr><td class="var">type.display-lg.line-height</td><td class="val">30.5px</td></tr>
+      <tr><td class="var">type.display-lg.weight</td><td class="val">800</td></tr>
+      <tr><td class="var">type.display-lg.family</td><td class="val">Libre Baskerville</td></tr>
+      <tr><td class="var">type.display-lg.tracking</td><td class="val">-0.66px</td></tr>
+    </tbody>
+  </table>
+
+  <h3>type.display-md — callout H2</h3>
+  <table><colgroup><col style="width:40%"><col style="width:60%"></colgroup>
+    <tbody>
+      <tr><td class="var">type.display-md.size</td><td class="val">24px</td></tr>
+      <tr><td class="var">type.display-md.line-height</td><td class="val">28.8px</td></tr>
+      <tr><td class="var">type.display-md.weight</td><td class="val">900</td></tr>
+      <tr><td class="var">type.display-md.family</td><td class="val">DM Sans</td></tr>
+      <tr><td class="var">type.display-md.tracking</td><td class="val">-0.36px</td></tr>
+    </tbody>
+  </table>
+
+  <h3>type.display-sm — mechanism H4s</h3>
+  <table><colgroup><col style="width:40%"><col style="width:60%"></colgroup>
+    <tbody>
+      <tr><td class="var">type.display-sm.size</td><td class="val">17.6px</td></tr>
+      <tr><td class="var">type.display-sm.line-height</td><td class="val">22.88px</td></tr>
+      <tr><td class="var">type.display-sm.weight</td><td class="val">800</td></tr>
+      <tr><td class="var">type.display-sm.family</td><td class="val">DM Sans</td></tr>
+      <tr><td class="var">type.display-sm.tracking</td><td class="val">-0.088px</td></tr>
+    </tbody>
+  </table>
+
+  <h3>type.headline — benefit card titles (H3)</h3>
+  <table><colgroup><col style="width:40%"><col style="width:60%"></colgroup>
+    <tbody>
+      <tr><td class="var">type.headline.size</td><td class="val">18px</td></tr>
+      <tr><td class="var">type.headline.line-height</td><td class="val">22.5px</td></tr>
+      <tr><td class="var">type.headline.weight</td><td class="val">600</td></tr>
+      <tr><td class="var">type.headline.family</td><td class="val">DM Sans</td></tr>
+      <tr><td class="var">type.headline.tracking</td><td class="val">-0.18px</td></tr>
+    </tbody>
+  </table>
+
+  <h3>type.body-lg — hero description, intros</h3>
+  <table><colgroup><col style="width:40%"><col style="width:60%"></colgroup>
+    <tbody>
+      <tr><td class="var">type.body-lg.size</td><td class="val">18px</td></tr>
+      <tr><td class="var">type.body-lg.line-height</td><td class="val">28.8px</td></tr>
+      <tr><td class="var">type.body-lg.weight</td><td class="val">500</td></tr>
+      <tr><td class="var">type.body-lg.family</td><td class="val">DM Sans</td></tr>
+      <tr><td class="var">type.body-lg.tracking</td><td class="val">0</td></tr>
+    </tbody>
+  </table>
+
+  <h3>type.body — default body</h3>
+  <table><colgroup><col style="width:40%"><col style="width:60%"></colgroup>
+    <tbody>
+      <tr><td class="var">type.body.size</td><td class="val">16px</td></tr>
+      <tr><td class="var">type.body.line-height</td><td class="val">20.8px</td></tr>
+      <tr><td class="var">type.body.weight</td><td class="val">500</td></tr>
+      <tr><td class="var">type.body.family</td><td class="val">Geist</td></tr>
+      <tr><td class="var">type.body.tracking</td><td class="val">0</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- PAGE 5: TYPE SCALE EXPANDED 2 -->
+<div class="page">
+  <h1>Typography — type scale (expanded, 2/3)</h1>
+
+  <h3>type.body-sm — prose body</h3>
+  <table><colgroup><col style="width:40%"><col style="width:60%"></colgroup>
+    <tbody>
+      <tr><td class="var">type.body-sm.size</td><td class="val">15px</td></tr>
+      <tr><td class="var">type.body-sm.line-height</td><td class="val">24px</td></tr>
+      <tr><td class="var">type.body-sm.weight</td><td class="val">500</td></tr>
+      <tr><td class="var">type.body-sm.family</td><td class="val">DM Sans</td></tr>
+      <tr><td class="var">type.body-sm.tracking</td><td class="val">0</td></tr>
+    </tbody>
+  </table>
+
+  <h3>type.body-xs — smaller body</h3>
+  <table><colgroup><col style="width:40%"><col style="width:60%"></colgroup>
+    <tbody>
+      <tr><td class="var">type.body-xs.size</td><td class="val">13px</td></tr>
+      <tr><td class="var">type.body-xs.line-height</td><td class="val">16.9px</td></tr>
+      <tr><td class="var">type.body-xs.weight</td><td class="val">400</td></tr>
+      <tr><td class="var">type.body-xs.family</td><td class="val">Geist</td></tr>
+      <tr><td class="var">type.body-xs.tracking</td><td class="val">0</td></tr>
+    </tbody>
+  </table>
+
+  <h3>type.caption — caption</h3>
+  <table><colgroup><col style="width:40%"><col style="width:60%"></colgroup>
+    <tbody>
+      <tr><td class="var">type.caption.size</td><td class="val">12px</td></tr>
+      <tr><td class="var">type.caption.line-height</td><td class="val">18px</td></tr>
+      <tr><td class="var">type.caption.weight</td><td class="val">500</td></tr>
+      <tr><td class="var">type.caption.family</td><td class="val">DM Sans</td></tr>
+      <tr><td class="var">type.caption.tracking</td><td class="val">0</td></tr>
+    </tbody>
+  </table>
+
+  <h3>type.caption-xs — fine print</h3>
+  <table><colgroup><col style="width:40%"><col style="width:60%"></colgroup>
+    <tbody>
+      <tr><td class="var">type.caption-xs.size</td><td class="val">11px</td></tr>
+      <tr><td class="var">type.caption-xs.line-height</td><td class="val">15.4px</td></tr>
+      <tr><td class="var">type.caption-xs.weight</td><td class="val">500</td></tr>
+      <tr><td class="var">type.caption-xs.family</td><td class="val">DM Sans</td></tr>
+      <tr><td class="var">type.caption-xs.tracking</td><td class="val">0</td></tr>
+    </tbody>
+  </table>
+
+  <h3>type.eyebrow-lg — large eyebrow</h3>
+  <table><colgroup><col style="width:40%"><col style="width:60%"></colgroup>
+    <tbody>
+      <tr><td class="var">type.eyebrow-lg.size</td><td class="val">18px</td></tr>
+      <tr><td class="var">type.eyebrow-lg.line-height</td><td class="val">21.6px</td></tr>
+      <tr><td class="var">type.eyebrow-lg.weight</td><td class="val">700</td></tr>
+      <tr><td class="var">type.eyebrow-lg.family</td><td class="val">DM Sans</td></tr>
+      <tr><td class="var">type.eyebrow-lg.tracking</td><td class="val">1.8px</td></tr>
+      <tr><td class="var">type.eyebrow-lg.text-transform</td><td class="val">uppercase</td></tr>
+    </tbody>
+  </table>
+
+  <h3>type.eyebrow — accordion trigger</h3>
+  <table><colgroup><col style="width:40%"><col style="width:60%"></colgroup>
+    <tbody>
+      <tr><td class="var">type.eyebrow.size</td><td class="val">13px</td></tr>
+      <tr><td class="var">type.eyebrow.line-height</td><td class="val">19.5px</td></tr>
+      <tr><td class="var">type.eyebrow.weight</td><td class="val">700</td></tr>
+      <tr><td class="var">type.eyebrow.family</td><td class="val">Geist</td></tr>
+      <tr><td class="var">type.eyebrow.tracking</td><td class="val">0.52px</td></tr>
+      <tr><td class="var">type.eyebrow.text-transform</td><td class="val">uppercase</td></tr>
+    </tbody>
+  </table>
+
+  <h3>type.eyebrow-sm — table column labels</h3>
+  <table><colgroup><col style="width:40%"><col style="width:60%"></colgroup>
+    <tbody>
+      <tr><td class="var">type.eyebrow-sm.size</td><td class="val">12px</td></tr>
+      <tr><td class="var">type.eyebrow-sm.line-height</td><td class="val">18px</td></tr>
+      <tr><td class="var">type.eyebrow-sm.weight</td><td class="val">600</td></tr>
+      <tr><td class="var">type.eyebrow-sm.family</td><td class="val">Geist</td></tr>
+      <tr><td class="var">type.eyebrow-sm.tracking</td><td class="val">0.96px</td></tr>
+      <tr><td class="var">type.eyebrow-sm.text-transform</td><td class="val">uppercase</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- PAGE 6: TYPE SCALE EXPANDED 3 -->
+<div class="page">
+  <h1>Typography — type scale (expanded, 3/3)</h1>
+
+  <h3>type.badge — feature badges</h3>
+  <table><colgroup><col style="width:40%"><col style="width:60%"></colgroup>
+    <tbody>
+      <tr><td class="var">type.badge.size</td><td class="val">14px</td></tr>
+      <tr><td class="var">type.badge.line-height</td><td class="val">18.2px</td></tr>
+      <tr><td class="var">type.badge.weight</td><td class="val">600</td></tr>
+      <tr><td class="var">type.badge.family</td><td class="val">Geist</td></tr>
+      <tr><td class="var">type.badge.tracking</td><td class="val">0</td></tr>
+    </tbody>
+  </table>
+
+  <h3>type.cta-lg — large CTA</h3>
+  <table><colgroup><col style="width:40%"><col style="width:60%"></colgroup>
+    <tbody>
+      <tr><td class="var">type.cta-lg.size</td><td class="val">20px</td></tr>
+      <tr><td class="var">type.cta-lg.line-height</td><td class="val">28.57px</td></tr>
+      <tr><td class="var">type.cta-lg.weight</td><td class="val">700</td></tr>
+      <tr><td class="var">type.cta-lg.family</td><td class="val">Geist</td></tr>
+      <tr><td class="var">type.cta-lg.tracking</td><td class="val">0.4px</td></tr>
+    </tbody>
+  </table>
+
+  <h3>type.cta — default CTA</h3>
+  <table><colgroup><col style="width:40%"><col style="width:60%"></colgroup>
+    <tbody>
+      <tr><td class="var">type.cta.size</td><td class="val">18px</td></tr>
+      <tr><td class="var">type.cta.line-height</td><td class="val">25.7px</td></tr>
+      <tr><td class="var">type.cta.weight</td><td class="val">700</td></tr>
+      <tr><td class="var">type.cta.family</td><td class="val">Geist</td></tr>
+      <tr><td class="var">type.cta.tracking</td><td class="val">0.36px</td></tr>
+    </tbody>
+  </table>
+
+  <h3>type.step-label — step pill label</h3>
+  <table><colgroup><col style="width:40%"><col style="width:60%"></colgroup>
+    <tbody>
+      <tr><td class="var">type.step-label.size</td><td class="val">12px</td></tr>
+      <tr><td class="var">type.step-label.line-height</td><td class="val">18px</td></tr>
+      <tr><td class="var">type.step-label.weight</td><td class="val">700</td></tr>
+      <tr><td class="var">type.step-label.family</td><td class="val">Geist</td></tr>
+      <tr><td class="var">type.step-label.tracking</td><td class="val">0</td></tr>
+    </tbody>
+  </table>
+
+  <h3>type.timer-digit — countdown numeric</h3>
+  <table><colgroup><col style="width:40%"><col style="width:60%"></colgroup>
+    <tbody>
+      <tr><td class="var">type.timer-digit.size</td><td class="val">20px</td></tr>
+      <tr><td class="var">type.timer-digit.line-height</td><td class="val">20px</td></tr>
+      <tr><td class="var">type.timer-digit.weight</td><td class="val">900</td></tr>
+      <tr><td class="var">type.timer-digit.family</td><td class="val">Geist</td></tr>
+      <tr><td class="var">type.timer-digit.tracking</td><td class="val">0</td></tr>
+    </tbody>
+  </table>
+
+  <h3>type.timer-unit — countdown label</h3>
+  <table><colgroup><col style="width:40%"><col style="width:60%"></colgroup>
+    <tbody>
+      <tr><td class="var">type.timer-unit.size</td><td class="val">10px</td></tr>
+      <tr><td class="var">type.timer-unit.line-height</td><td class="val">15px</td></tr>
+      <tr><td class="var">type.timer-unit.weight</td><td class="val">400</td></tr>
+      <tr><td class="var">type.timer-unit.family</td><td class="val">Geist</td></tr>
+      <tr><td class="var">type.timer-unit.tracking</td><td class="val">0.6px</td></tr>
+    </tbody>
+  </table>
+
+  <h3>type.score-xl — large numeric</h3>
+  <table><colgroup><col style="width:40%"><col style="width:60%"></colgroup>
+    <tbody>
+      <tr><td class="var">type.score-xl.size</td><td class="val">56px</td></tr>
+      <tr><td class="var">type.score-xl.line-height</td><td class="val">56px</td></tr>
+      <tr><td class="var">type.score-xl.weight</td><td class="val">800</td></tr>
+      <tr><td class="var">type.score-xl.family</td><td class="val">Geist</td></tr>
+      <tr><td class="var">type.score-xl.tracking</td><td class="val">0</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- PAGE 7: SCOPE NOTE -->
+<div class="page">
+  <h1>Not part of the theme</h1>
+  <p class="subtitle">Template-level decisions that do not vary per brand.</p>
+
+  <p>Spacing, radii, shadows, border widths, and motion are <b>template-level</b> decisions — the Sales Page Template carries the same values across every brand. They live with the template, not with the theme. When a new brand plugs into this template, they supply only the values in the sections above; the template's structural rhythm stays constant.</p>
+
+  <p>The template's structural values remain in the preset as raw units (px, ms, etc.). They are not tokenized as brand-facing variables.</p>
+
+  <p class="note">If a future template needs to expose any of these as brand-adjustable (e.g. brand-specific corner radius or shadow language), that token can be promoted into the theme then — but only when a brand genuinely requires it.</p>
+
+  <p class="footer">Source: component-demo-three.vercel.app/preview?id=66 · extracted at mobile 390×844 · 2026-04-20. Companion files: <code>theme-tokens.md</code>, <code>theme.json</code>, <code>theme.css</code>.</p>
+</div>
+
+</body>
+</html>
