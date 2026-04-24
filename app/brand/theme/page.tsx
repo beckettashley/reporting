@@ -365,11 +365,28 @@ export default function ThemePage() {
   const [background, setBackground] = useState("#ffffff");
 
   // Section 2: Gradient Tints
-  const [tint1, setTint1] = useState("#faf8f6");
-  const [tint2, setTint2] = useState("#fcf3df");
-  const [tint3, setTint3] = useState("#e1f3ff");
-  const [tint4, setTint4] = useState("#e8f5ff");
-  const [tint5, setTint5] = useState("#f0eeff");
+  // Section 2: Alternate Backgrounds
+  interface AltBackground {
+    type: "solid" | "gradient";
+    color: string;
+    opacity: number; // 0-100
+    color2?: string; // for gradient second stop
+    opacity2?: number;
+  }
+  const [altBackgrounds, setAltBackgrounds] = useState<AltBackground[]>([
+    { type: "solid", color: "#faf8f6", opacity: 100 },
+    { type: "solid", color: "#fcf3df", opacity: 100 },
+  ]);
+  const updateAltBg = (index: number, updates: Partial<AltBackground>) => {
+    setAltBackgrounds((prev) => prev.map((bg, i) => i === index ? { ...bg, ...updates } : bg));
+  };
+  const addAltBg = () => {
+    setAltBackgrounds((prev) => [...prev, { type: "solid", color: "#f0f0f0", opacity: 80 }]);
+  };
+  const removeAltBg = (index: number) => {
+    if (altBackgrounds.length <= 2) return;
+    setAltBackgrounds((prev) => prev.filter((_, i) => i !== index));
+  };
 
   // Section 3: Typography
   const [displayFont, setDisplayFont] = useState("Libre Baskerville");
@@ -443,22 +460,65 @@ export default function ThemePage() {
               </CardContent>
             </Card>
 
-            {/* ------ Section 2: Gradient Tints ------ */}
+            {/* ------ Section 2: Alternate Backgrounds ------ */}
             <Card>
               <CardHeader className="pb-4">
-                <CardTitle className="text-base">Gradient Tints</CardTitle>
-                <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
-                  <Info className="w-3 h-3 flex-shrink-0" />
-                  Fill colors for section background gradients. The template
-                  controls gradient shapes.
+                <CardTitle className="text-base">Alternate Backgrounds</CardTitle>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Section backgrounds that alternate with the base background. Minimum 2 required — sections distribute automatically.
                 </p>
               </CardHeader>
-              <CardContent className="grid grid-cols-2 gap-4">
-                <ColorField label="Tint 1" value={tint1} onChange={setTint1} />
-                <ColorField label="Tint 2" value={tint2} onChange={setTint2} />
-                <ColorField label="Tint 3" value={tint3} onChange={setTint3} />
-                <ColorField label="Tint 4" value={tint4} onChange={setTint4} />
-                <ColorField label="Tint 5" value={tint5} onChange={setTint5} />
+              <CardContent className="flex flex-col gap-4">
+                {altBackgrounds.map((bg, i) => (
+                  <div key={i} className="rounded-lg border p-3 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">Alternate {i + 1}</span>
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => updateAltBg(i, { type: bg.type === "solid" ? "gradient" : "solid" })}
+                          className="text-xs px-2 py-1 rounded border hover:bg-muted transition-colors"
+                        >
+                          {bg.type === "solid" ? "Solid" : "Gradient"}
+                        </button>
+                        {altBackgrounds.length > 2 && (
+                          <button type="button" onClick={() => removeAltBg(i)} className="text-xs text-muted-foreground hover:text-destructive transition-colors">Remove</button>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <label className="w-8 h-8 rounded border border-border flex-shrink-0 cursor-pointer block relative overflow-hidden" style={{ backgroundColor: bg.color }}>
+                        <input type="color" value={bg.color} onChange={(e) => updateAltBg(i, { color: e.target.value })} className="absolute inset-0 opacity-0 cursor-pointer" />
+                      </label>
+                      <Input value={bg.color} onChange={(e) => updateAltBg(i, { color: e.target.value })} className="font-mono text-sm h-8 w-24" />
+                      <div className="flex items-center gap-1.5 flex-1">
+                        <span className="text-xs text-muted-foreground w-6 text-right">{bg.opacity}%</span>
+                        <input type="range" min={0} max={100} value={bg.opacity} onChange={(e) => updateAltBg(i, { opacity: Number(e.target.value) })} className="flex-1 h-1.5 accent-foreground" />
+                      </div>
+                    </div>
+                    {bg.type === "gradient" && (
+                      <div className="flex items-center gap-3">
+                        <label className="w-8 h-8 rounded border border-border flex-shrink-0 cursor-pointer block relative overflow-hidden" style={{ backgroundColor: bg.color2 || "#ffffff" }}>
+                          <input type="color" value={bg.color2 || "#ffffff"} onChange={(e) => updateAltBg(i, { color2: e.target.value })} className="absolute inset-0 opacity-0 cursor-pointer" />
+                        </label>
+                        <Input value={bg.color2 || "#ffffff"} onChange={(e) => updateAltBg(i, { color2: e.target.value })} className="font-mono text-sm h-8 w-24" />
+                        <div className="flex items-center gap-1.5 flex-1">
+                          <span className="text-xs text-muted-foreground w-6 text-right">{bg.opacity2 ?? 100}%</span>
+                          <input type="range" min={0} max={100} value={bg.opacity2 ?? 100} onChange={(e) => updateAltBg(i, { opacity2: Number(e.target.value) })} className="flex-1 h-1.5 accent-foreground" />
+                        </div>
+                      </div>
+                    )}
+                    {/* Preview strip */}
+                    <div className="h-6 rounded" style={{
+                      background: bg.type === "solid"
+                        ? `rgba(${hexToRgb(bg.color).r}, ${hexToRgb(bg.color).g}, ${hexToRgb(bg.color).b}, ${bg.opacity / 100})`
+                        : `linear-gradient(90deg, rgba(${hexToRgb(bg.color).r}, ${hexToRgb(bg.color).g}, ${hexToRgb(bg.color).b}, ${bg.opacity / 100}), rgba(${hexToRgb(bg.color2 || "#ffffff").r}, ${hexToRgb(bg.color2 || "#ffffff").g}, ${hexToRgb(bg.color2 || "#ffffff").b}, ${(bg.opacity2 ?? 100) / 100}))`
+                    }} />
+                  </div>
+                ))}
+                <Button variant="outline" size="sm" onClick={addAltBg} className="w-full">
+                  + Add alternate background
+                </Button>
               </CardContent>
             </Card>
 
@@ -652,13 +712,17 @@ export default function ThemePage() {
                     </button>
                   </div>
 
-                  {/* Tint gradient preview strip */}
+                  {/* Alternate backgrounds preview strip */}
                   <div className="flex h-6">
-                    {[tint1, tint2, tint3, tint4, tint5].map((t, i) => (
+                    {altBackgrounds.map((bg, i) => (
                       <div
                         key={i}
                         className="flex-1"
-                        style={{ backgroundColor: t }}
+                        style={{
+                          background: bg.type === "solid"
+                            ? `rgba(${hexToRgb(bg.color).r}, ${hexToRgb(bg.color).g}, ${hexToRgb(bg.color).b}, ${bg.opacity / 100})`
+                            : `linear-gradient(90deg, rgba(${hexToRgb(bg.color).r}, ${hexToRgb(bg.color).g}, ${hexToRgb(bg.color).b}, ${bg.opacity / 100}), rgba(${hexToRgb(bg.color2 || "#ffffff").r}, ${hexToRgb(bg.color2 || "#ffffff").g}, ${hexToRgb(bg.color2 || "#ffffff").b}, ${(bg.opacity2 ?? 100) / 100}))`
+                        }}
                       />
                     ))}
                   </div>
@@ -678,42 +742,6 @@ export default function ThemePage() {
               </CardContent>
             </Card>
 
-            {/* ------ Section 5: Derived Colors ------ */}
-            <Card>
-              <CardHeader className="pb-4">
-                <CardTitle className="text-base">Derived Colors</CardTitle>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Auto-computed from your 4 brand colors. Advanced overrides
-                  coming later.
-                </p>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 gap-3">
-                  {derivedColors.map((dc) => (
-                    <div
-                      key={dc.name}
-                      className="flex items-center gap-2"
-                    >
-                      <div
-                        className="w-8 h-8 rounded border border-border flex-shrink-0"
-                        style={{
-                          backgroundColor: dc.isRgba ? undefined : dc.value,
-                          background: dc.isRgba ? dc.value : undefined,
-                        }}
-                      />
-                      <div className="flex flex-col min-w-0">
-                        <span className="text-xs font-medium truncate">
-                          {dc.name}
-                        </span>
-                        <span className="text-[10px] text-muted-foreground font-mono truncate">
-                          {dc.value}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
           </div>
         </div>
       </div>
