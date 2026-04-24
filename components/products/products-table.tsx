@@ -880,7 +880,7 @@ export function ProductsTable({
                 <TableHead className="h-9 text-xs bg-muted/50 cursor-pointer select-none px-2" onClick={() => handleSort("status")}>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <div className="flex items-center gap-1 w-full h-full">Shopify Status <img src="/icons/information.png" alt="info" className="w-3.5 h-3.5 flex-shrink-0 opacity-50" />{getSortIcon("status")}</div>
+                      <div className="flex items-center gap-1 w-full h-full">Shopify Status <Info className="w-3.5 h-3.5 flex-shrink-0 text-muted-foreground/40" />{getSortIcon("status")}</div>
                     </TooltipTrigger>
                     <TooltipContent side="top" className="text-xs max-w-[220px]">{"The product's publishing status in Shopify."}</TooltipContent>
                   </Tooltip>
@@ -888,7 +888,7 @@ export function ProductsTable({
                 <TableHead className="h-9 text-xs bg-muted/50 cursor-pointer select-none px-2" onClick={() => handleSort("quantity")}>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <div className="flex items-center gap-1 w-full h-full">Available <img src="/icons/information.png" alt="info" className="w-3.5 h-3.5 flex-shrink-0 opacity-50" />{getSortIcon("quantity")}</div>
+                      <div className="flex items-center gap-1 w-full h-full">Available <Info className="w-3.5 h-3.5 flex-shrink-0 text-muted-foreground/40" />{getSortIcon("quantity")}</div>
                     </TooltipTrigger>
                     <TooltipContent side="top" className="text-xs max-w-[240px]">Total inventory units available across all locations in Shopify.</TooltipContent>
                   </Tooltip>
@@ -896,7 +896,7 @@ export function ProductsTable({
                 <TableHead className="h-9 text-xs bg-muted/50 cursor-pointer select-none px-2" onClick={() => handleSort("sellPrice")}>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <div className="flex items-center gap-1 w-full h-full">Sell Price <img src="/icons/information.png" alt="info" className="w-3.5 h-3.5 flex-shrink-0 opacity-50" />{getSortIcon("sellPrice")}</div>
+                      <div className="flex items-center gap-1 w-full h-full">Sell Price <Info className="w-3.5 h-3.5 flex-shrink-0 text-muted-foreground/40" />{getSortIcon("sellPrice")}</div>
                     </TooltipTrigger>
                     <TooltipContent side="top" className="text-xs max-w-[200px]">{"The product's current listed price in Shopify."}</TooltipContent>
                   </Tooltip>
@@ -905,7 +905,7 @@ export function ProductsTable({
                   <div className="absolute inset-0 pointer-events-none" style={{ backgroundColor: "rgba(253, 224, 71, 0.35)", opacity: minPriceHighlightOpacity, transition: "opacity 0.4s ease" }} />
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <div className="flex items-center gap-1 w-full h-full" onMouseEnter={() => notifyMinPriceHovered()}>Min Price <img src="/icons/information.png" alt="info" className="w-3.5 h-3.5 flex-shrink-0 opacity-50" />{getSortIcon("minPrice")}</div>
+                      <div className="flex items-center gap-1 w-full h-full" onMouseEnter={() => notifyMinPriceHovered()}>Min Price <Info className="w-3.5 h-3.5 flex-shrink-0 text-muted-foreground/40" />{getSortIcon("minPrice")}</div>
                     </TooltipTrigger>
                     <TooltipContent side="top" className="text-xs max-w-[260px]">Set the Minimum Sell Price for each variant. When building your offers, we&apos;ll bundle products and adjust pricing to increase order value — your minimum price is the floor we won&apos;t go below.</TooltipContent>
                   </Tooltip>
@@ -913,7 +913,7 @@ export function ProductsTable({
                 <TableHead className="h-9 text-xs bg-muted/50 cursor-pointer select-none text-center px-2" onClick={() => handleSort("variants")}>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <div className="flex items-center justify-center gap-1 w-full h-full">Variants <img src="/icons/information.png" alt="info" className="w-3.5 h-3.5 flex-shrink-0 opacity-50" />{getSortIcon("variants")}</div>
+                      <div className="flex items-center justify-center gap-1 w-full h-full">Variants <Info className="w-3.5 h-3.5 flex-shrink-0 text-muted-foreground/40" />{getSortIcon("variants")}</div>
                     </TooltipTrigger>
                     <TooltipContent side="top" className="text-xs max-w-[200px]">Number of variants for this product.</TooltipContent>
                   </Tooltip>
@@ -922,7 +922,7 @@ export function ProductsTable({
                   <TableHead className="h-9 text-xs bg-muted/50 cursor-pointer select-none text-center px-2" onClick={() => handleSort("experiment")}>
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <div className="flex items-center justify-center gap-1 w-full h-full">Experiment <img src="/icons/information.png" alt="info" className="w-3.5 h-3.5 flex-shrink-0 opacity-50" />{getSortIcon("experiment")}</div>
+                        <div className="flex items-center justify-center gap-1 w-full h-full">Experiment <Info className="w-3.5 h-3.5 flex-shrink-0 text-muted-foreground/40" />{getSortIcon("experiment")}</div>
                       </TooltipTrigger>
                       <TooltipContent side="top" className="text-xs max-w-[200px]">Product live in an active experiment.</TooltipContent>
                     </Tooltip>
@@ -976,7 +976,7 @@ export function ProductsTable({
                         style={{ backgroundColor: isExpanded ? "#F1EFE8" : undefined }}
                         onClick={() => toggleExpansion(product.id)}
                       >
-                        <TableCell className="py-2 px-2 relative">
+                        <TableCell className="py-2 px-2 relative text-center">
                           <div className="absolute inset-0 pointer-events-none" style={{ backgroundColor: "rgba(253, 224, 71, 0.35)", opacity: columnHighlightOpacity, transition: "opacity 0.4s ease" }} />
                           <Checkbox
                             className="border-foreground/50"
