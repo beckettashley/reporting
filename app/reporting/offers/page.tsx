@@ -771,7 +771,6 @@ function OfferDetail({ offer }: { offer: AggregatedOffer }) {
                           <tr className="border-b">
                             <td colSpan={3} className="p-0">
                               <div className="px-6 py-4 border-l-2 border-l-amber-400">
-                                <p className="text-sm font-semibold text-foreground mb-2">{renderInsightText(ins.headline, offerLabel)}</p>
                                 <p className="text-sm text-foreground leading-relaxed">{renderInsightText(ins.body, offerLabel)}</p>
                               </div>
                             </td>
