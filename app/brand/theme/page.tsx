@@ -200,6 +200,10 @@ function FontSelect({
   description,
   value,
   onChange,
+  color,
+  onColorChange,
+  weight,
+  onWeightChange,
   customFont,
   onCustomFontUpload,
 }: {
@@ -207,6 +211,10 @@ function FontSelect({
   description: string;
   value: string;
   onChange: (v: string) => void;
+  color: string;
+  onColorChange: (v: string) => void;
+  weight: string;
+  onWeightChange: (v: string) => void;
   customFont?: string | null;
   onCustomFontUpload?: (name: string) => void;
 }) {
@@ -243,13 +251,20 @@ function FontSelect({
     <div className="flex flex-col gap-1.5" ref={dropdownRef}>
       <Label className="text-sm font-medium">{label}</Label>
       <p className="text-xs text-muted-foreground">{description}</p>
-      <div className="relative">
-        <button
-          type="button"
-          onClick={() => { setOpen(!open); setSearch(""); }}
-          className="w-full flex items-center justify-between px-3 py-2 rounded-md border text-sm transition-colors bg-background hover:bg-muted text-left h-9"
-          style={{ fontFamily: value === "Custom" ? undefined : value }}
+      <div className="flex items-center gap-2">
+        <label
+          className="w-8 h-8 rounded border border-border flex-shrink-0 cursor-pointer block relative overflow-hidden"
+          style={{ backgroundColor: color }}
         >
+          <input type="color" value={color} onChange={(e) => onColorChange(e.target.value)} className="absolute inset-0 opacity-0 cursor-pointer" />
+        </label>
+        <div className="relative flex-1">
+          <button
+            type="button"
+            onClick={() => { setOpen(!open); setSearch(""); }}
+            className="w-full flex items-center justify-between px-3 py-2 rounded-md border text-sm transition-colors bg-background hover:bg-muted text-left h-9"
+            style={{ fontFamily: value === "Custom" ? undefined : value }}
+          >
           <span className="truncate">{displayValue}</span>
           <svg className="w-4 h-4 text-muted-foreground shrink-0 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={open ? "M18 15l-6-6-6 6" : "M6 9l6 6 6-6"} /></svg>
         </button>
@@ -294,6 +309,21 @@ function FontSelect({
             </div>
           </div>
         )}
+        </div>
+        <select
+          value={weight}
+          onChange={(e) => onWeightChange(e.target.value)}
+          className="w-24 h-9 rounded-md border bg-background text-sm px-2 cursor-pointer"
+        >
+          <option value="200">Extra Light</option>
+          <option value="300">Light</option>
+          <option value="400">Regular</option>
+          <option value="500">Medium</option>
+          <option value="600">Semi Bold</option>
+          <option value="700">Bold</option>
+          <option value="800">Extra Bold</option>
+          <option value="900">Black</option>
+        </select>
       </div>
     </div>
   );
@@ -376,11 +406,19 @@ export default function ThemePage() {
   const [dangerOverride, setDangerOverride] = useState("#dc2626");
 
 
-  // Section 3: Typography (family only — text color determined by surface)
+  // Section 3: Typography (family + weight + color per role)
   const [displayFont, setDisplayFont] = useState("Libre Baskerville");
+  const [displayWeight, setDisplayWeight] = useState("800");
+  const [displayColor, setDisplayColor] = useState("#3d348b");
   const [bodyFont, setBodyFont] = useState("DM Sans");
+  const [bodyWeight, setBodyWeight] = useState("500");
+  const [bodyColor, setBodyColor] = useState("#1a1a1a");
   const [uiFont, setUiFont] = useState("Geist");
+  const [uiWeight, setUiWeight] = useState("700");
+  const [uiColor, setUiColor] = useState("#1a1a1a");
   const [condensedFont, setCondensedFont] = useState("Barlow");
+  const [condensedWeight, setCondensedWeight] = useState("900");
+  const [condensedColor, setCondensedColor] = useState("#1a1a1a");
   const [baseFontSize, setBaseFontSize] = useState(16);
   const [customFonts, setCustomFonts] = useState<Record<string, string | null>>({
     display: null, body: null, ui: null, condensed: null,
@@ -456,6 +494,10 @@ export default function ThemePage() {
                   description="Hero headlines, section display text"
                   value={displayFont}
                   onChange={setDisplayFont}
+                  color={displayColor}
+                  onColorChange={setDisplayColor}
+                  weight={displayWeight}
+                  onWeightChange={setDisplayWeight}
                   customFont={customFonts.display}
                   onCustomFontUpload={(name) => setCustomFonts((p) => ({ ...p, display: name }))}
                 />
@@ -464,6 +506,10 @@ export default function ThemePage() {
                   description="Paragraphs, descriptions"
                   value={bodyFont}
                   onChange={setBodyFont}
+                  color={bodyColor}
+                  onColorChange={setBodyColor}
+                  weight={bodyWeight}
+                  onWeightChange={setBodyWeight}
                   customFont={customFonts.body}
                   onCustomFontUpload={(name) => setCustomFonts((p) => ({ ...p, body: name }))}
                 />
@@ -472,6 +518,10 @@ export default function ThemePage() {
                   description="Buttons, tables, badges, nav"
                   value={uiFont}
                   onChange={setUiFont}
+                  color={uiColor}
+                  onColorChange={setUiColor}
+                  weight={uiWeight}
+                  onWeightChange={setUiWeight}
                   customFont={customFonts.ui}
                   onCustomFontUpload={(name) => setCustomFonts((p) => ({ ...p, ui: name }))}
                 />
@@ -480,6 +530,10 @@ export default function ThemePage() {
                   description="Urgency banners"
                   value={condensedFont}
                   onChange={setCondensedFont}
+                  color={condensedColor}
+                  onColorChange={setCondensedColor}
+                  weight={condensedWeight}
+                  onWeightChange={setCondensedWeight}
                   customFont={customFonts.condensed}
                   onCustomFontUpload={(name) => setCustomFonts((p) => ({ ...p, condensed: name }))}
                 />
@@ -567,10 +621,11 @@ export default function ThemePage() {
                     style={{ borderColor: borderDefaultOverride }}
                   >
                     <div
-                      className="text-sm font-semibold"
+                      className="text-sm"
                       style={{
-                        color: text,
+                        color: uiColor,
                         fontFamily: uiFont,
+                        fontWeight: uiWeight,
                       }}
                     >
                       {logo ? (
@@ -586,7 +641,7 @@ export default function ThemePage() {
                     <div
                       className="flex gap-3 text-xs"
                       style={{
-                        color: text,
+                        color: uiColor,
                         fontFamily: uiFont,
                       }}
                     >
@@ -599,10 +654,11 @@ export default function ThemePage() {
                   {/* Hero section */}
                   <div className="px-6 py-8">
                     <h2
-                      className="text-xl font-bold mb-2"
+                      className="text-xl mb-2"
                       style={{
-                        color: text,
+                        color: displayColor,
                         fontFamily: displayFont,
+                        fontWeight: displayWeight,
                         fontSize: `${baseFontSize * 1.5}px`,
                       }}
                     >
@@ -611,10 +667,10 @@ export default function ThemePage() {
                     <p
                       className="mb-4 leading-relaxed"
                       style={{
-                        color: text,
+                        color: bodyColor,
                         fontFamily: bodyFont,
+                        fontWeight: bodyWeight,
                         fontSize: `${baseFontSize}px`,
-                        opacity: 0.8,
                       }}
                     >
                       This is body text rendered in your chosen Body Font. It
