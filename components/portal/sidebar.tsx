@@ -37,59 +37,59 @@ interface NavItem {
 const NAV_ITEMS: NavItem[] = [
   {
     label: "Dashboard",
-    href: "/portal",
+    href: "/",
     icon: <LayoutDashboard className="w-4 h-4" />,
   },
   {
     label: "To Do",
-    href: "/portal/todo",
+    href: "/todo",
     icon: <CheckSquare className="w-4 h-4" />,
     badge: "dynamic",
   },
   {
     label: "Brand",
-    href: "/portal/brand",
+    href: "/brand",
     icon: <Palette className="w-4 h-4" />,
     children: [
-      { label: "Assets", href: "/portal/brand" },
-      { label: "Theme", href: "/portal/brand/theme" },
+      { label: "Assets", href: "/brand" },
+      { label: "Theme", href: "/brand/theme" },
     ],
   },
   {
     label: "Experiments",
-    href: "/portal/experiments",
+    href: "/experiments",
     icon: <FlaskConical className="w-4 h-4" />,
   },
   {
     label: "Products",
-    href: "/portal/products",
+    href: "/products",
     icon: <Package className="w-4 h-4" />,
   },
   {
     label: "Reporting",
-    href: "/portal/reporting",
+    href: "/reporting",
     icon: <BarChart3 className="w-4 h-4" />,
     children: [
-      { label: "Orders", href: "/portal/reporting" },
-      { label: "Insights", href: "/portal/reporting/insights" },
-      { label: "Offers", href: "/portal/reporting/offers" },
+      { label: "Orders", href: "/reporting" },
+      { label: "Insights", href: "/reporting/insights" },
+      { label: "Offers", href: "/reporting/offers" },
     ],
   },
   {
     label: "Settings",
-    href: "/portal/settings",
+    href: "/settings",
     icon: <Settings className="w-4 h-4" />,
     children: [
-      { label: "General", href: "/portal/settings" },
-      { label: "Payment", href: "/portal/settings/payment" },
-      { label: "Stores", href: "/portal/settings/stores" },
-      { label: "Subdomain", href: "/portal/settings/subdomain" },
-      { label: "Pixels", href: "/portal/settings/pixels" },
+      { label: "General", href: "/settings" },
+      { label: "Payment", href: "/settings/payment" },
+      { label: "Stores", href: "/settings/stores" },
+      { label: "Subdomain", href: "/settings/subdomain" },
+      { label: "Pixels", href: "/settings/pixels" },
     ],
   },
   {
     label: "Team",
-    href: "/portal/team",
+    href: "/team",
     icon: <Users className="w-4 h-4" />,
   },
 ]
@@ -98,7 +98,7 @@ const REFERENCE_ITEMS = [
   { label: "Offers (Old)", href: "/reporting-v2/offers-old", icon: <Tag className="w-4 h-4" /> },
   { label: "Insights (Old)", href: "/reporting-v2/insights-v1", icon: <BookOpen className="w-4 h-4" /> },
   { label: "Experiments (Old)", href: "/reporting-v2", icon: <Lightbulb className="w-4 h-4" /> },
-  { label: "Summary (Old)", href: "/portal/reporting/summary", icon: <LayoutDashboard className="w-4 h-4" /> },
+  { label: "Summary (Old)", href: "/reporting/summary", icon: <LayoutDashboard className="w-4 h-4" /> },
   { label: "Ads (Old)", href: "/", icon: <Megaphone className="w-4 h-4" /> },
   { label: "Products (Old)", href: "/", icon: <Package className="w-4 h-4" /> },
 ]
@@ -131,7 +131,7 @@ export default function PortalSidebar() {
   }
 
   const isActive = (href: string) => {
-    if (href === "/portal") return pathname === "/portal"
+    if (href === "/") return pathname === "/"
     return pathname.startsWith(href)
   }
 
