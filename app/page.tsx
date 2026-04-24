@@ -97,7 +97,7 @@ export default function PortalDashboard() {
             <Link href="/reporting">All Orders</Link>
           </Button>
         </div>
-        <Orders compact />
+        <Orders compact maxRows={10} />
       </div>
     </div>
   );

@@ -608,7 +608,7 @@ function generateOrdersByDay(start: Date, end: Date): DayData[] {
   return data
 }
 
-export function Orders({ dateRange, compact }: { dateRange?: DateRange; compact?: boolean }) {
+export function Orders({ dateRange, compact, maxRows }: { dateRange?: DateRange; compact?: boolean; maxRows?: number }) {
   const [selected, setSelected] = useState<Order | null>(null)
   const [search, setSearch] = useState("")
   const [groupBy, setGroupBy] = useState<OrderGroupBy>("none")
@@ -753,7 +753,8 @@ export function Orders({ dateRange, compact }: { dateRange?: DateRange; compact?
 
   const totalPages = Math.max(1, Math.ceil(sorted.length / pageSize))
   const safePage = Math.min(page, totalPages - 1)
-  const paged = sorted.slice(safePage * pageSize, safePage * pageSize + pageSize)
+  const effectivePageSize = maxRows ?? pageSize
+  const paged = maxRows ? sorted.slice(0, maxRows) : sorted.slice(safePage * pageSize, safePage * pageSize + pageSize)
 
   // Build grouped view from the paged slice. Insert group headers when the
   // group key changes between consecutive rows (including the first row if
@@ -910,7 +911,7 @@ export function Orders({ dateRange, compact }: { dateRange?: DateRange; compact?
       })()}
 
       {/* Search + Group by + Filter */}
-      <div className="flex items-center gap-2">
+      {!compact && <div className="flex items-center gap-2">
         <div className="relative flex-1">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
@@ -987,10 +988,10 @@ export function Orders({ dateRange, compact }: { dateRange?: DateRange; compact?
             </div>
           )}
         </div>
-      </div>
+      </div>}
 
       {/* Active filter pills */}
-      {activeFilters.length > 0 && (
+      {!compact && activeFilters.length > 0 && (
         <div className="flex items-center gap-2 flex-wrap">
           {activeFilters.map((f) => (
             <button
@@ -1118,11 +1119,11 @@ export function Orders({ dateRange, compact }: { dateRange?: DateRange; compact?
                 ))
               )}
             </tbody>
-            {groupBy === "none" && (
+            {groupBy === "none" && !compact && (
               <tfoot>
                 <tr className="bg-muted/50 font-semibold text-sm">
-                  <td className="px-4 py-3" />
                   <td className="px-4 py-3">Total</td>
+                  <td className="px-4 py-3" />
                   <td className="px-4 py-3" />
                   <td className="px-4 py-3" />
                   <td className="px-4 py-3" />
@@ -1137,7 +1138,7 @@ export function Orders({ dateRange, compact }: { dateRange?: DateRange; compact?
         </div>
 
         {/* Pagination */}
-        <div className="flex items-center justify-between px-4 py-3 border-t">
+        {!compact && <div className="flex items-center justify-between px-4 py-3 border-t">
           <span className="text-sm text-muted-foreground">
             Page {safePage + 1} of {totalPages} ({tableFiltered.length} orders)
           </span>
@@ -1163,7 +1164,7 @@ export function Orders({ dateRange, compact }: { dateRange?: DateRange; compact?
               <ChevronRight className="h-4 w-4" />
             </Button>
           </div>
-        </div>
+        </div>}
       </Card>
     </div>
   )
