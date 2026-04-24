@@ -7,7 +7,9 @@ function Card({ className, ...props }: React.ComponentProps<'div'>) {
     <div
       data-slot="card"
       className={cn(
-        'bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm',
+        // Default gap is 0 — add gap-* explicitly on the Card where inter-child spacing is needed.
+        // Previously gap-6 was the default, which silently added 24px between siblings (e.g. tables and pagination rows).
+        'bg-card text-card-foreground flex flex-col gap-0 rounded-xl border py-6 shadow-sm',
         className,
       )}
       {...props}

@@ -67,17 +67,17 @@ Once you have the data, systematically check:
 **Map the full nesting chain** before changing anything:
 
 ```
-Section wrapper
+Page / Layout wrapper
   style: { ... }
     ↓
-  Inner content container
+  Content container
     style: { maxWidth: ???, padding: ??? }
       ↓
-    GridPreview
-      style: { paddingX: ??? }
+    Component
+      style: { padding: ??? }
         ↓
-      Grid cells
-        style: { padding: ??? }
+      Inner elements
+        style: { ... }
 ```
 
 ### 3. Identify the Real Constraint
@@ -114,12 +114,11 @@ Now that you understand the constraint:
 Check for cascade effects:
 
 ```
-✓ Section renderer (regular sections)
+✓ Layout containers (pages, sections)
 ✓ Navbar (if exists)
+✓ Sidebar (if exists)
 ✓ Footer (if exists)
-✓ Sticky CTA (if exists)
-✓ Mobile menu (if exists)
-✓ Any custom maxWidth sections
+✓ Any custom maxWidth containers
 ```
 
 ---
@@ -146,9 +145,7 @@ Assistant: "Found it - the constraint is maxWidth: 1092px, not padding. On a 192
 
 To make content feel wider, I'll increase maxWidth from 1092px to 1600px. This gives you 508px more usable width.
 
-Making changes to:
-- section-renderer.tsx (contained sections)
-- lib/grid-render.tsx (navbar, footer, sticky CTA)
+Making changes to the relevant layout components.
 
 [Makes changes]
 
@@ -172,24 +169,12 @@ When user says ambiguous things, **clarify immediately**:
 
 ## File Checklist
 
-When making layout width changes, search these files:
+When making layout width changes, search for these patterns in the codebase:
 
 ```bash
-# Section container widths
-components/section-renderer.tsx
-  - gutter (line ~39)
-  - narrowGutter (line ~40)
-  - maxWidthPadding (line ~83)
-  - innerContentStyle maxWidth (line ~87)
-
-# Component-specific containers
-lib/grid-render.tsx
-  - NavBar gutter (line ~137)
-  - NavBar maxWidth (line ~151)
-  - Mobile menu maxWidth (line ~259)
-  - Footer gutter (line ~1056)
-  - Sticky CTA padding (line ~103-107)
-  - Sticky CTA maxWidth (line ~112)
+# Search for container constraints
+grep -rn "maxWidth\|max-width\|max-w-" components/ app/
+grep -rn "padding\|gutter" components/ app/
 ```
 
 ---

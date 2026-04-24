@@ -110,10 +110,10 @@ types/
 ### When to Use Spec-Kit vs. Standard Workflow
 
 **Use formal spec-kit workflow** for:
-- New content types (adding to or extending ContentType in types/grid.ts)
-- Data model changes (GridConfig, CellStyle, ContentType, BannerConfig extensions)
-- Features touching >3 files or requiring new TypeScript types
-- Major UI additions (new editor panels, preview modes)
+- New dashboard views or reporting pages
+- Data model changes or new TypeScript types
+- Features touching >3 files
+- Major UI additions (new pages, complex interactive components)
 
 **Recommend to user:**
 1. `/speckit-specify` — Create formal spec with quality validation
@@ -126,7 +126,6 @@ types/
 - Bug fixes (rendering issues, type errors, interaction bugs)
 - Style tweaks (color, spacing, borders)
 - Single-file changes (component refactors, utility additions)
-- Preset additions (SAMPLE_CONFIGS in page.tsx)
 
 ### Before writing any code (standard workflow)
 1. Confirm what you're building — restate the requirement in one sentence
