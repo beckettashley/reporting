@@ -754,7 +754,7 @@ function OfferDetail({ offer }: { offer: AggregatedOffer }) {
                           className={cn("border-b cursor-pointer transition-colors", isInsExpanded ? "bg-muted/50 border-l-2 border-l-amber-400" : "hover:bg-muted/30 border-l-2 border-l-transparent")}
                           onClick={() => setExpandedInsight(isInsExpanded ? null : i)}
                         >
-                          <td className="px-4 py-3"><p className="text-sm text-foreground truncate">{renderInsightText(ins.headline, offerLabel)}</p></td>
+                          <td className="px-4 py-3"><p className={cn("text-sm text-foreground truncate", isInsExpanded && "font-semibold")}>{renderInsightText(ins.headline, offerLabel)}</p></td>
                           <td className="px-4 py-3">
                             <span className="text-sm text-foreground">
                               {new Date(ins.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
