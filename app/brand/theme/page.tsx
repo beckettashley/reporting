@@ -370,10 +370,19 @@ function ImageUploadField({
 // ---------------------------------------------------------------------------
 
 export default function ThemePage() {
-  // Section 1: Brand Colors
+  // Section 1: Brand Colors — all editable, initialized from defaults
   const [brandPrimary, setBrandPrimary] = useState("#3d348b");
   const [accent, setAccent] = useState("#ffd61f");
   const [background, setBackground] = useState("#ffffff");
+  const [brandPrimaryDarkOverride, setBrandPrimaryDarkOverride] = useState(() => darkenHex("#3d348b", 20));
+  const [brandPrimarySubtleOverride, setBrandPrimarySubtleOverride] = useState(() => hexWithOpacity("#3d348b", 0.1, "#ffffff"));
+  const [accentSubtleOverride, setAccentSubtleOverride] = useState(() => hexWithOpacity("#ffd61f", 0.15, "#ffffff"));
+  const [surfaceSubtleOverride, setSurfaceSubtleOverride] = useState(() => darkenHex("#ffffff", 3));
+  const [surfaceInverseOverride, setSurfaceInverseOverride] = useState("#000000");
+  const [textInverseOverride, setTextInverseOverride] = useState("#ffffff");
+  const [borderDefaultOverride, setBorderDefaultOverride] = useState(() => hexWithOpacity("#1a1a1a", 0.2, "#ffffff"));
+  const [borderSubtleOverride, setBorderSubtleOverride] = useState(() => hexWithOpacity("#1a1a1a", 0.1, "#ffffff"));
+  const [dangerOverride, setDangerOverride] = useState("#dc2626");
 
   // Section 2: Alternate Backgrounds
   interface GradientStop { position: number; color: string; opacity: number }
@@ -459,7 +468,7 @@ export default function ThemePage() {
     [brandPrimary, accent, bodyColor, background]
   );
 
-  const brandPrimaryDark = derivedColors[0].value;
+  const brandPrimaryDark = brandPrimaryDarkOverride;
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -485,36 +494,19 @@ export default function ThemePage() {
                 <CardTitle className="text-base">Brand Colors</CardTitle>
               </CardHeader>
               <CardContent className="grid grid-cols-2 gap-4">
-                <ColorField
-                  label="Brand Primary"
-                  value={brandPrimary}
-                  onChange={setBrandPrimary}
-                />
-                <ColorField
-                  label="Accent"
-                  value={accent}
-                  onChange={setAccent}
-                />
-                <ColorField
-                  label="Background"
-                  value={background}
-                  onChange={setBackground}
-                />
+                <ColorField label="Brand Primary" value={brandPrimary} onChange={setBrandPrimary} />
+                <ColorField label="Brand Primary Dark" value={brandPrimaryDarkOverride} onChange={setBrandPrimaryDarkOverride} />
+                <ColorField label="Brand Primary Subtle" value={brandPrimarySubtleOverride} onChange={setBrandPrimarySubtleOverride} />
+                <ColorField label="Accent" value={accent} onChange={setAccent} />
+                <ColorField label="Accent Subtle" value={accentSubtleOverride} onChange={setAccentSubtleOverride} />
+                <ColorField label="Background" value={background} onChange={setBackground} />
+                <ColorField label="Surface Subtle" value={surfaceSubtleOverride} onChange={setSurfaceSubtleOverride} />
+                <ColorField label="Surface Inverse" value={surfaceInverseOverride} onChange={setSurfaceInverseOverride} />
+                <ColorField label="Text Inverse" value={textInverseOverride} onChange={setTextInverseOverride} />
+                <ColorField label="Border Default" value={borderDefaultOverride} onChange={setBorderDefaultOverride} />
+                <ColorField label="Border Subtle" value={borderSubtleOverride} onChange={setBorderSubtleOverride} />
+                <ColorField label="Danger" value={dangerOverride} onChange={setDangerOverride} />
               </CardContent>
-              {/* Auto-generated palette */}
-              <div className="px-6 pb-4 pt-2 border-t">
-                <p className="text-[10px] text-muted-foreground uppercase tracking-wide font-medium mb-2">Auto-generated from your brand colors</p>
-                <div className="flex flex-wrap gap-1.5">
-                  {derivedColors.map((dc) => (
-                    <div key={dc.name} className="group relative">
-                      <div className="w-7 h-7 rounded border border-border" style={{ backgroundColor: dc.isRgba ? undefined : dc.value, background: dc.isRgba ? dc.value : undefined }} />
-                      <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-1 px-2 py-1 rounded border bg-background shadow-sm text-[10px] text-foreground whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity" style={{ zIndex: 99999 }}>
-                        {dc.name}: {dc.value}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
             </Card>
 
             {/* ------ Section 2: Alternate Backgrounds ------ */}
@@ -722,7 +714,7 @@ export default function ThemePage() {
                   {/* Navbar mockup */}
                   <div
                     className="flex items-center justify-between px-4 py-3 border-b"
-                    style={{ borderColor: derivedColors[7].value }}
+                    style={{ borderColor: borderDefaultOverride }}
                   >
                     <div
                       className="text-sm font-semibold"
