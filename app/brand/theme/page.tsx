@@ -109,7 +109,7 @@ interface DerivedColor {
 function computeDerivedColors(
   brandPrimary: string,
   accent: string,
-  textPrimary: string,
+  bodyColor: string,
   background: string
 ): DerivedColor[] {
   const bgLum = luminance(background);
@@ -128,7 +128,7 @@ function computeDerivedColors(
     ? darkenHex(background, 3)
     : lightenHex(background, 5);
 
-  const borderSource = isLightBg ? textPrimary : "#ffffff";
+  const borderSource = isLightBg ? bodyColor : "#ffffff";
   const borderDefault = hexWithOpacity(borderSource, 0.2, background);
   const borderSubtle = hexWithOpacity(borderSource, 0.1, background);
 
@@ -200,6 +200,8 @@ function FontSelect({
   description,
   value,
   onChange,
+  color,
+  onColorChange,
   customFont,
   onCustomFontUpload,
 }: {
@@ -207,6 +209,8 @@ function FontSelect({
   description: string;
   value: string;
   onChange: (v: string) => void;
+  color: string;
+  onColorChange: (v: string) => void;
   customFont?: string | null;
   onCustomFontUpload?: (name: string) => void;
 }) {
@@ -243,13 +247,20 @@ function FontSelect({
     <div className="flex flex-col gap-1.5" ref={dropdownRef}>
       <Label className="text-sm font-medium">{label}</Label>
       <p className="text-xs text-muted-foreground">{description}</p>
-      <div className="relative">
-        <button
-          type="button"
-          onClick={() => { setOpen(!open); setSearch(""); }}
-          className="w-full flex items-center justify-between px-3 py-2 rounded-md border text-sm transition-colors bg-background hover:bg-muted text-left h-9"
-          style={{ fontFamily: value === "Custom" ? undefined : value }}
+      <div className="flex items-center gap-2">
+        <label
+          className="w-8 h-8 rounded border border-border flex-shrink-0 cursor-pointer block relative overflow-hidden"
+          style={{ backgroundColor: color }}
         >
+          <input type="color" value={color} onChange={(e) => onColorChange(e.target.value)} className="absolute inset-0 opacity-0 cursor-pointer" />
+        </label>
+        <div className="relative flex-1">
+          <button
+            type="button"
+            onClick={() => { setOpen(!open); setSearch(""); }}
+            className="w-full flex items-center justify-between px-3 py-2 rounded-md border text-sm transition-colors bg-background hover:bg-muted text-left h-9"
+            style={{ fontFamily: value === "Custom" ? undefined : value, color }}
+          >
           <span className="truncate">{displayValue}</span>
           <svg className="w-4 h-4 text-muted-foreground shrink-0 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={open ? "M18 15l-6-6-6 6" : "M6 9l6 6 6-6"} /></svg>
         </button>
@@ -294,6 +305,7 @@ function FontSelect({
             </div>
           </div>
         )}
+        </div>
       </div>
     </div>
   );
@@ -361,7 +373,6 @@ export default function ThemePage() {
   // Section 1: Brand Colors
   const [brandPrimary, setBrandPrimary] = useState("#3d348b");
   const [accent, setAccent] = useState("#ffd61f");
-  const [textPrimary, setTextPrimary] = useState("#1a1a1a");
   const [background, setBackground] = useState("#ffffff");
 
   // Section 2: Gradient Tints
@@ -388,11 +399,15 @@ export default function ThemePage() {
     setAltBackgrounds((prev) => prev.filter((_, i) => i !== index));
   };
 
-  // Section 3: Typography
+  // Section 3: Typography (family + color per role)
   const [displayFont, setDisplayFont] = useState("Libre Baskerville");
+  const [displayColor, setDisplayColor] = useState("#3d348b");
   const [bodyFont, setBodyFont] = useState("DM Sans");
+  const [bodyColor, setBodyColor] = useState("#1a1a1a");
   const [uiFont, setUiFont] = useState("Geist");
+  const [uiColor, setUiColor] = useState("#1a1a1a");
   const [condensedFont, setCondensedFont] = useState("Barlow");
+  const [condensedColor, setCondensedColor] = useState("#1a1a1a");
   const [baseFontSize, setBaseFontSize] = useState(16);
   const [customFonts, setCustomFonts] = useState<Record<string, string | null>>({
     display: null, body: null, ui: null, condensed: null,
@@ -407,8 +422,8 @@ export default function ThemePage() {
 
   // Derived colors (computed reactively)
   const derivedColors = useMemo(
-    () => computeDerivedColors(brandPrimary, accent, textPrimary, background),
-    [brandPrimary, accent, textPrimary, background]
+    () => computeDerivedColors(brandPrimary, accent, bodyColor, background),
+    [brandPrimary, accent, bodyColor, background]
   );
 
   const brandPrimaryDark = derivedColors[0].value;
@@ -446,11 +461,6 @@ export default function ThemePage() {
                   label="Accent"
                   value={accent}
                   onChange={setAccent}
-                />
-                <ColorField
-                  label="Text Primary"
-                  value={textPrimary}
-                  onChange={setTextPrimary}
                 />
                 <ColorField
                   label="Background"
@@ -534,6 +544,8 @@ export default function ThemePage() {
                   description="Hero headlines, section display text"
                   value={displayFont}
                   onChange={setDisplayFont}
+                  color={displayColor}
+                  onColorChange={setDisplayColor}
                   customFont={customFonts.display}
                   onCustomFontUpload={(name) => setCustomFonts((p) => ({ ...p, display: name }))}
                 />
@@ -542,6 +554,8 @@ export default function ThemePage() {
                   description="Paragraphs, descriptions"
                   value={bodyFont}
                   onChange={setBodyFont}
+                  color={bodyColor}
+                  onColorChange={setBodyColor}
                   customFont={customFonts.body}
                   onCustomFontUpload={(name) => setCustomFonts((p) => ({ ...p, body: name }))}
                 />
@@ -550,6 +564,8 @@ export default function ThemePage() {
                   description="Buttons, tables, badges, nav"
                   value={uiFont}
                   onChange={setUiFont}
+                  color={uiColor}
+                  onColorChange={setUiColor}
                   customFont={customFonts.ui}
                   onCustomFontUpload={(name) => setCustomFonts((p) => ({ ...p, ui: name }))}
                 />
@@ -558,6 +574,8 @@ export default function ThemePage() {
                   description="Urgency banners"
                   value={condensedFont}
                   onChange={setCondensedFont}
+                  color={condensedColor}
+                  onColorChange={setCondensedColor}
                   customFont={customFonts.condensed}
                   onCustomFontUpload={(name) => setCustomFonts((p) => ({ ...p, condensed: name }))}
                 />
@@ -647,7 +665,7 @@ export default function ThemePage() {
                     <div
                       className="text-sm font-semibold"
                       style={{
-                        color: textPrimary,
+                        color: uiColor,
                         fontFamily: uiFont,
                       }}
                     >
@@ -664,7 +682,7 @@ export default function ThemePage() {
                     <div
                       className="flex gap-3 text-xs"
                       style={{
-                        color: textPrimary,
+                        color: uiColor,
                         fontFamily: uiFont,
                       }}
                     >
@@ -679,7 +697,7 @@ export default function ThemePage() {
                     <h2
                       className="text-xl font-bold mb-2"
                       style={{
-                        color: textPrimary,
+                        color: displayColor,
                         fontFamily: displayFont,
                         fontSize: `${baseFontSize * 1.5}px`,
                       }}
@@ -689,7 +707,7 @@ export default function ThemePage() {
                     <p
                       className="mb-4 leading-relaxed"
                       style={{
-                        color: textPrimary,
+                        color: bodyColor,
                         fontFamily: bodyFont,
                         fontSize: `${baseFontSize}px`,
                         opacity: 0.8,
@@ -732,7 +750,7 @@ export default function ThemePage() {
                     className="px-4 py-2 text-center text-xs font-bold uppercase tracking-wider"
                     style={{
                       backgroundColor: accent,
-                      color: textPrimary,
+                      color: condensedColor,
                       fontFamily: condensedFont,
                     }}
                   >
