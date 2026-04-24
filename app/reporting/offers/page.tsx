@@ -1047,8 +1047,8 @@ export default function OffersPage() {
         </div>
       )}
 
-      <Card className="py-0 gap-0 overflow-hidden">
-        <div className="overflow-x-auto">
+      <Card className="py-0 gap-0">
+        <div className="overflow-x-auto rounded-xl">
           <table className="w-full text-sm" style={{ tableLayout: "fixed", width: "100%", minWidth: "max-content" }}>
             <colgroup>
               <col style={{ width: 280 }} />

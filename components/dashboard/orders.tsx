@@ -1012,8 +1012,8 @@ export function Orders({ dateRange, compact, maxRows }: { dateRange?: DateRange;
       )}
 
       {/* Table */}
-      <Card className="py-0 overflow-hidden">
-        <div className="overflow-x-auto">
+      <Card className="py-0">
+        <div className="overflow-x-auto rounded-xl">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b bg-muted">
