@@ -6,8 +6,6 @@ import { cn } from "@/lib/utils"
 import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { V2Header } from "@/components/dashboard/v2-header"
-import { V2Sidebar } from "@/components/dashboard/v2-sidebar"
 
 // ─── Types ─────────────────────────────────────────────────────────────────
 
@@ -382,173 +380,165 @@ export default function InsightsPage() {
   }, [filtered, groupBy])
 
   return (
-    <div className="flex h-screen bg-background overflow-hidden">
-      <V2Sidebar activeKey="insights-v2" />
-      <div className="flex-1 flex flex-col min-w-0">
-        <V2Header />
-        <main className="flex-1 overflow-y-auto overflow-x-hidden">
-          <div className="px-6 py-6 space-y-4">
-            <h2 className="text-lg font-semibold">Insights</h2>
+    <div className="p-6 space-y-4">
+      <h2 className="text-lg font-semibold">Insights</h2>
 
-            {/* Controls */}
-            <div className="flex items-center gap-2">
-              <div className="relative flex-1">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input placeholder="Search insights, ads, campaigns..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-11 h-11 text-sm" />
-              </div>
-              <GroupBySelect value={groupBy} onChange={setGroupBy} />
-              <div className="relative shrink-0" ref={filterRef}>
-                <Button variant={showFilters ? "default" : "outline"} onClick={() => setShowFilters(!showFilters)} className="h-11 gap-2">
-                  <SlidersHorizontal className="h-4 w-4" />
-                  Filters
-                  {activeFilters.length > 0 && (
-                    <span className="bg-amber-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">{activeFilters.length}</span>
-                  )}
-                </Button>
-                {showFilters && (
-                  <div className="absolute right-0 top-full mt-2 w-[22rem] bg-background border rounded-xl shadow-xl p-4 space-y-4" style={{ zIndex: 9999 }}>
-                    <div className="flex items-center justify-between">
-                      <p className="text-sm font-semibold">Filters</p>
-                      {activeFilters.length > 0 && (
-                        <button onClick={clearAllFilters} className="text-xs text-muted-foreground hover:text-foreground transition-colors">Clear all</button>
-                      )}
-                    </div>
-                    <FilterRow label="Product" options={PRODUCT_OPTIONS} selected={productFilters} onChange={setProductFilters} />
-                    <div className="border-t border-border/50" />
-                    <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Attribution</p>
-                    <FilterRow label="Campaign" options={CAMPAIGN_OPTIONS} selected={campaignFilters} onChange={setCampaignFilters} />
-                    <FilterRow label="Ad Set" options={ADSET_OPTIONS} selected={adSetFilters} onChange={setAdSetFilters} />
-                    <FilterRow label="Ad" options={AD_OPTIONS} selected={adFilters} onChange={setAdFilters} />
-                    <FilterRow label="Destination Link" options={DESTINATION_OPTIONS} selected={destinationFilters} onChange={setDestinationFilters} />
-                  </div>
+      {/* Controls */}
+      <div className="flex items-center gap-2">
+        <div className="relative flex-1">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input placeholder="Search insights, ads, campaigns..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-11 h-11 text-sm" />
+        </div>
+        <GroupBySelect value={groupBy} onChange={setGroupBy} />
+        <div className="relative shrink-0" ref={filterRef}>
+          <Button variant={showFilters ? "default" : "outline"} onClick={() => setShowFilters(!showFilters)} className="h-11 gap-2">
+            <SlidersHorizontal className="h-4 w-4" />
+            Filters
+            {activeFilters.length > 0 && (
+              <span className="bg-amber-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">{activeFilters.length}</span>
+            )}
+          </Button>
+          {showFilters && (
+            <div className="absolute right-0 top-full mt-2 w-[22rem] bg-background border rounded-xl shadow-xl p-4 space-y-4" style={{ zIndex: 9999 }}>
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-semibold">Filters</p>
+                {activeFilters.length > 0 && (
+                  <button onClick={clearAllFilters} className="text-xs text-muted-foreground hover:text-foreground transition-colors">Clear all</button>
                 )}
               </div>
+              <FilterRow label="Product" options={PRODUCT_OPTIONS} selected={productFilters} onChange={setProductFilters} />
+              <div className="border-t border-border/50" />
+              <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Attribution</p>
+              <FilterRow label="Campaign" options={CAMPAIGN_OPTIONS} selected={campaignFilters} onChange={setCampaignFilters} />
+              <FilterRow label="Ad Set" options={ADSET_OPTIONS} selected={adSetFilters} onChange={setAdSetFilters} />
+              <FilterRow label="Ad" options={AD_OPTIONS} selected={adFilters} onChange={setAdFilters} />
+              <FilterRow label="Destination Link" options={DESTINATION_OPTIONS} selected={destinationFilters} onChange={setDestinationFilters} />
             </div>
+          )}
+        </div>
+      </div>
 
-            {/* Active filter pills */}
-            {activeFilters.length > 0 && (
-              <div className="flex items-center gap-2 flex-wrap">
-                {activeFilters.map((f) => (
-                  <button key={f.key} onClick={f.clear} className="inline-flex items-center gap-1.5 text-sm px-3 py-1 rounded-full bg-muted hover:bg-muted/80 transition-colors">
-                    {f.label}
-                    <X className="h-3 w-3 text-muted-foreground" />
-                  </button>
-                ))}
-                <button onClick={clearAllFilters} className="text-sm text-muted-foreground hover:text-foreground transition-colors ml-1">Clear all</button>
-              </div>
-            )}
+      {/* Active filter pills */}
+      {activeFilters.length > 0 && (
+        <div className="flex items-center gap-2 flex-wrap">
+          {activeFilters.map((f) => (
+            <button key={f.key} onClick={f.clear} className="inline-flex items-center gap-1.5 text-sm px-3 py-1 rounded-full bg-muted hover:bg-muted/80 transition-colors">
+              {f.label}
+              <X className="h-3 w-3 text-muted-foreground" />
+            </button>
+          ))}
+          <button onClick={clearAllFilters} className="text-sm text-muted-foreground hover:text-foreground transition-colors ml-1">Clear all</button>
+        </div>
+      )}
 
-            {/* Table */}
-            <Card className="py-0 gap-0 overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm" style={{ tableLayout: "fixed", width: "100%", minWidth: "max-content" }}>
-                  <colgroup>
-                    <col style={{ width: 456 }} />
-                    <col style={{ width: 140 }} />
-                    <col />
-                    <col style={{ width: 140 }} />
-                    <col style={{ width: 40 }} />
-                  </colgroup>
-                  <thead>
-                    <tr className="bg-muted border-b">
-                      <SortHeader label="Ad" sortKey="adName" currentSort={sortKey} currentDir={sortDir} onSort={handleSort} />
-                      <SortHeader label="Product" sortKey="product" currentSort={sortKey} currentDir={sortDir} onSort={handleSort} />
-                      <SortHeader label="Insight" sortKey="insight" currentSort={sortKey} currentDir={sortDir} onSort={handleSort} />
-                      <SortHeader label="Date" sortKey="date" currentSort={sortKey} currentDir={sortDir} onSort={handleSort} />
-                      <th className="px-2 py-3" />
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filtered.length === 0 ? (
-                      <tr><td colSpan={5} className="px-4 py-12 text-center text-muted-foreground">No insights match your search.</td></tr>
-                    ) : (
-                      grouped.map((group) => (
-                        <React.Fragment key={group.key}>
-                          {group.label && (
-                            <tr className="bg-muted/40">
-                              <td colSpan={5} className="px-4 py-2">
-                                <span className="text-sm font-semibold text-foreground">{group.label}</span>
-                                <span className="text-xs text-muted-foreground ml-2">{group.items.length}</span>
+      {/* Table */}
+      <Card className="py-0 gap-0 overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm" style={{ tableLayout: "fixed", width: "100%", minWidth: "max-content" }}>
+            <colgroup>
+              <col style={{ width: 456 }} />
+              <col style={{ width: 140 }} />
+              <col />
+              <col style={{ width: 140 }} />
+              <col style={{ width: 40 }} />
+            </colgroup>
+            <thead>
+              <tr className="bg-muted border-b">
+                <SortHeader label="Ad" sortKey="adName" currentSort={sortKey} currentDir={sortDir} onSort={handleSort} />
+                <SortHeader label="Product" sortKey="product" currentSort={sortKey} currentDir={sortDir} onSort={handleSort} />
+                <SortHeader label="Insight" sortKey="insight" currentSort={sortKey} currentDir={sortDir} onSort={handleSort} />
+                <SortHeader label="Date" sortKey="date" currentSort={sortKey} currentDir={sortDir} onSort={handleSort} />
+                <th className="px-2 py-3" />
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.length === 0 ? (
+                <tr><td colSpan={5} className="px-4 py-12 text-center text-muted-foreground">No insights match your search.</td></tr>
+              ) : (
+                grouped.map((group) => (
+                  <React.Fragment key={group.key}>
+                    {group.label && (
+                      <tr className="bg-muted/40">
+                        <td colSpan={5} className="px-4 py-2">
+                          <span className="text-sm font-semibold text-foreground">{group.label}</span>
+                          <span className="text-xs text-muted-foreground ml-2">{group.items.length}</span>
+                        </td>
+                      </tr>
+                    )}
+                    {group.items.map((ins) => {
+                      const isExpanded = expandedId === ins.id
+                      return (
+                        <React.Fragment key={ins.id}>
+                          <tr
+                            className={cn(
+                              "border-b cursor-pointer transition-colors",
+                              isExpanded ? "bg-muted/50 border-l-2 border-l-amber-400" : "hover:bg-muted/30 border-l-2 border-l-transparent"
+                            )}
+                            onClick={() => setExpandedId(isExpanded ? null : ins.id)}
+                          >
+                            <td className="px-4 py-3">
+                              <div className="flex items-center gap-3">
+                                <button
+                                  type="button"
+                                  onClick={(e) => { e.stopPropagation(); setPreviewInsight(ins) }}
+                                  className="w-9 h-9 rounded-lg border bg-muted flex items-center justify-center text-[8px] font-bold text-muted-foreground shrink-0 hover:ring-2 hover:ring-amber-400 transition-all cursor-pointer relative"
+                                  title="Preview ad"
+                                >
+                                  {ins.adType === "video" && <Play className="h-3 w-3 text-muted-foreground/70 absolute" />}
+                                  {ins.adType === "image" && "IMG"}
+                                </button>
+                                <div className="min-w-0">
+                                  <a href={ins.adUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}
+                                    className="text-sm font-semibold text-blue-600 hover:underline dark:text-blue-400 truncate block">
+                                    {ins.adName}
+                                  </a>
+                                  <p className="text-xs text-muted-foreground truncate">{ins.campaign} · {ins.adSet}</p>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="px-4 py-3">
+                              <span className={cn(
+                                "inline-flex items-center text-[10px] font-medium px-2 py-0.5 rounded-full",
+                                ins.product === "Acme Sleep Drops" ? "bg-violet-100 text-violet-700" :
+                                ins.product === "Acme Focus Caps" ? "bg-sky-100 text-sky-700" :
+                                ins.product === "Acme Calm Tea" ? "bg-emerald-100 text-emerald-700" :
+                                "bg-muted text-muted-foreground"
+                              )}>
+                                {ins.product}
+                              </span>
+                            </td>
+                            <td className="px-4 py-3">
+                              <p className="text-sm text-foreground truncate">{ins.insight}</p>
+                            </td>
+                            <td className="px-4 py-3">
+                              <span className="text-sm text-foreground">
+                                {new Date(ins.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                              </span>
+                              <p className="text-xs text-muted-foreground mt-0.5">
+                                {new Date(ins.date).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true })} PDT
+                              </p>
+                            </td>
+                            <td className="px-2 py-3 text-center">
+                              <ChevronRight className={cn("h-4 w-4 text-muted-foreground transition-transform", isExpanded && "rotate-90")} />
+                            </td>
+                          </tr>
+                          {isExpanded && (
+                            <tr className="border-b">
+                              <td colSpan={5} className="p-0">
+                                <InsightObservation ins={ins} />
                               </td>
                             </tr>
                           )}
-                          {group.items.map((ins) => {
-                            const isExpanded = expandedId === ins.id
-                            return (
-                              <React.Fragment key={ins.id}>
-                                <tr
-                                  className={cn(
-                                    "border-b cursor-pointer transition-colors",
-                                    isExpanded ? "bg-muted/50 border-l-2 border-l-amber-400" : "hover:bg-muted/30 border-l-2 border-l-transparent"
-                                  )}
-                                  onClick={() => setExpandedId(isExpanded ? null : ins.id)}
-                                >
-                                  <td className="px-4 py-3">
-                                    <div className="flex items-center gap-3">
-                                      <button
-                                        type="button"
-                                        onClick={(e) => { e.stopPropagation(); setPreviewInsight(ins) }}
-                                        className="w-9 h-9 rounded-lg border bg-muted flex items-center justify-center text-[8px] font-bold text-muted-foreground shrink-0 hover:ring-2 hover:ring-amber-400 transition-all cursor-pointer relative"
-                                        title="Preview ad"
-                                      >
-                                        {ins.adType === "video" && <Play className="h-3 w-3 text-muted-foreground/70 absolute" />}
-                                        {ins.adType === "image" && "IMG"}
-                                      </button>
-                                      <div className="min-w-0">
-                                        <a href={ins.adUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}
-                                          className="text-sm font-semibold text-blue-600 hover:underline dark:text-blue-400 truncate block">
-                                          {ins.adName}
-                                        </a>
-                                        <p className="text-xs text-muted-foreground truncate">{ins.campaign} · {ins.adSet}</p>
-                                      </div>
-                                    </div>
-                                  </td>
-                                  <td className="px-4 py-3">
-                                    <span className={cn(
-                                      "inline-flex items-center text-[10px] font-medium px-2 py-0.5 rounded-full",
-                                      ins.product === "Acme Sleep Drops" ? "bg-violet-100 text-violet-700" :
-                                      ins.product === "Acme Focus Caps" ? "bg-sky-100 text-sky-700" :
-                                      ins.product === "Acme Calm Tea" ? "bg-emerald-100 text-emerald-700" :
-                                      "bg-muted text-muted-foreground"
-                                    )}>
-                                      {ins.product}
-                                    </span>
-                                  </td>
-                                  <td className="px-4 py-3">
-                                    <p className="text-sm text-foreground truncate">{ins.insight}</p>
-                                  </td>
-                                  <td className="px-4 py-3">
-                                    <span className="text-sm text-foreground">
-                                      {new Date(ins.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
-                                    </span>
-                                    <p className="text-xs text-muted-foreground mt-0.5">
-                                      {new Date(ins.date).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true })} PDT
-                                    </p>
-                                  </td>
-                                  <td className="px-2 py-3 text-center">
-                                    <ChevronRight className={cn("h-4 w-4 text-muted-foreground transition-transform", isExpanded && "rotate-90")} />
-                                  </td>
-                                </tr>
-                                {isExpanded && (
-                                  <tr className="border-b">
-                                    <td colSpan={5} className="p-0">
-                                      <InsightObservation ins={ins} />
-                                    </td>
-                                  </tr>
-                                )}
-                              </React.Fragment>
-                            )
-                          })}
                         </React.Fragment>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </Card>
-          </div>
-        </main>
-      </div>
+                      )
+                    })}
+                  </React.Fragment>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </Card>
 
       {previewInsight && <AdPreviewModal ins={previewInsight} onClose={() => setPreviewInsight(null)} />}
     </div>
