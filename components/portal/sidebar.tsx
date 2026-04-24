@@ -73,8 +73,8 @@ const NAV_ITEMS: NavItem[] = [
       { label: "Insights (Old)", href: "/reporting-v2/insights-v1" },
       { label: "Experiments (Old)", href: "/reporting-v2" },
       { label: "Summary (Old)", href: "/reporting/summary" },
-      { label: "Ads (Old)", href: "/" },
-      { label: "Products (Old)", href: "/" },
+      { label: "Ads (Old)", href: "#" },
+      { label: "Products (Old)", href: "#" },
     ],
   },
   {
