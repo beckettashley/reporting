@@ -483,7 +483,7 @@ function SortHeader({ label, sortKey: sk, currentSort, currentDir, onSort, align
         {tooltip && (
           <span className="relative group">
             <Info className="h-3 w-3 text-muted-foreground/40" />
-            <span className="absolute left-1/2 -translate-x-1/2 bottom-full mb-1.5 px-3 py-2 rounded-lg border bg-background shadow-md text-xs text-foreground font-normal w-56 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity whitespace-normal" style={{ zIndex: 99999 }}>{tooltip}</span>
+            <span className="absolute left-1/2 -translate-x-1/2 top-full mt-1.5 px-3 py-2 rounded-lg border bg-background shadow-md text-xs text-foreground font-normal w-56 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity whitespace-normal" style={{ zIndex: 99999 }}>{tooltip}</span>
           </span>
         )}
         {active && (currentDir === "asc" ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />)}
@@ -813,7 +813,7 @@ function OfferDetail({ offer }: { offer: AggregatedOffer }) {
                 <p className="text-sm font-semibold text-foreground">Compare Offer Configurations</p>
                 <div className="relative group">
                   <Info className="h-3.5 w-3.5 text-muted-foreground/50 cursor-help" />
-                  <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-1.5 px-3 py-2 rounded-lg border bg-background shadow-md text-xs text-foreground w-64 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity" style={{ zIndex: 99999 }}>
+                  <div className="absolute left-1/2 -translate-x-1/2 top-full mt-1.5 px-3 py-2 rounded-lg border bg-background shadow-md text-xs text-foreground w-64 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity" style={{ zIndex: 99999 }}>
                     Compare how this offer performed across different page configurations it was presented on.
                   </div>
                 </div>
@@ -831,7 +831,7 @@ function OfferDetail({ offer }: { offer: AggregatedOffer }) {
                           Distribution
                           <span className="relative group">
                             <Info className="h-3 w-3 text-muted-foreground/40" />
-                            <span className="absolute left-1/2 -translate-x-1/2 bottom-full mb-1.5 px-3 py-2 rounded-lg border bg-background shadow-md text-xs text-foreground font-normal w-56 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity whitespace-normal" style={{ zIndex: 99999 }}>Share of total orders on this page captured by each offer.</span>
+                            <span className="absolute left-1/2 -translate-x-1/2 top-full mt-1.5 px-3 py-2 rounded-lg border bg-background shadow-md text-xs text-foreground font-normal w-56 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity whitespace-normal" style={{ zIndex: 99999 }}>Share of total orders on this page captured by each offer.</span>
                           </span>
                         </span>
                       </th>
