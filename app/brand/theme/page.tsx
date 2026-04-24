@@ -1,17 +1,10 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { ImageIcon, Type, Palette, Info } from "lucide-react";
 
 // ---------------------------------------------------------------------------
@@ -207,28 +200,101 @@ function FontSelect({
   description,
   value,
   onChange,
+  customFont,
+  onCustomFontUpload,
 }: {
   label: string;
   description: string;
   value: string;
   onChange: (v: string) => void;
+  customFont?: string | null;
+  onCustomFontUpload?: (name: string) => void;
 }) {
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  const dropdownRef = React.useRef<HTMLDivElement>(null);
+
+  const allFonts = customFont ? ["Custom", ...FONT_OPTIONS] : FONT_OPTIONS;
+  const filtered = search
+    ? allFonts.filter((f) => f.toLowerCase().includes(search.toLowerCase()))
+    : allFonts;
+
+  React.useEffect(() => {
+    if (!open) return;
+    function handleClick(e: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) setOpen(false);
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [open]);
+
+  const handleCustomUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const name = file.name.replace(/\.[^.]+$/, "");
+    onCustomFontUpload?.(name);
+    onChange("Custom");
+    setOpen(false);
+  };
+
+  const displayValue = value === "Custom" && customFont ? `Custom (${customFont})` : value;
+
   return (
-    <div className="flex flex-col gap-1.5">
+    <div className="flex flex-col gap-1.5" ref={dropdownRef}>
       <Label className="text-sm font-medium">{label}</Label>
       <p className="text-xs text-muted-foreground">{description}</p>
-      <Select value={value} onValueChange={onChange}>
-        <SelectTrigger className="h-9">
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          {FONT_OPTIONS.map((font) => (
-            <SelectItem key={font} value={font}>
-              {font}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+      <div className="relative">
+        <button
+          type="button"
+          onClick={() => { setOpen(!open); setSearch(""); }}
+          className="w-full flex items-center justify-between px-3 py-2 rounded-md border text-sm transition-colors bg-background hover:bg-muted text-left h-9"
+          style={{ fontFamily: value === "Custom" ? undefined : value }}
+        >
+          <span className="truncate">{displayValue}</span>
+          <svg className="w-4 h-4 text-muted-foreground shrink-0 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={open ? "M18 15l-6-6-6 6" : "M6 9l6 6 6-6"} /></svg>
+        </button>
+        {open && (
+          <div className="absolute left-0 right-0 top-full mt-1 bg-background border rounded-lg shadow-lg overflow-hidden" style={{ zIndex: 99999 }}>
+            <div className="px-2 pt-2 pb-1">
+              <input
+                type="text"
+                placeholder="Search fonts..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full text-sm px-2.5 py-1.5 rounded-md border bg-background outline-none focus:ring-1 focus:ring-ring"
+                autoFocus
+              />
+            </div>
+            <div className="max-h-64 overflow-y-auto py-1">
+              {filtered.map((font) => (
+                <button
+                  key={font}
+                  type="button"
+                  onClick={() => { onChange(font); setOpen(false); }}
+                  className={`w-full text-left px-3 py-2 text-sm transition-colors hover:bg-muted ${value === font ? "bg-muted font-medium" : ""}`}
+                  style={{ fontFamily: font === "Custom" ? undefined : font }}
+                >
+                  {font === "Custom" && customFont ? `Custom (${customFont})` : font}
+                </button>
+              ))}
+              {filtered.length === 0 && (
+                <p className="px-3 py-2 text-sm text-muted-foreground">No fonts match</p>
+              )}
+            </div>
+            <div className="border-t px-3 py-2">
+              <label className="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer hover:text-foreground transition-colors">
+                <input
+                  type="file"
+                  accept=".woff,.woff2,.ttf,.otf"
+                  onChange={handleCustomUpload}
+                  className="hidden"
+                />
+                Upload custom font...
+              </label>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -311,6 +377,9 @@ export default function ThemePage() {
   const [uiFont, setUiFont] = useState("Geist");
   const [condensedFont, setCondensedFont] = useState("Barlow");
   const [baseFontSize, setBaseFontSize] = useState(16);
+  const [customFonts, setCustomFonts] = useState<Record<string, string | null>>({
+    display: null, body: null, ui: null, condensed: null,
+  });
 
   // Section 4: Images
   const [logo, setLogo] = useState<string | null>(null);
@@ -405,24 +474,32 @@ export default function ThemePage() {
                   description="Hero headlines, section display text"
                   value={displayFont}
                   onChange={setDisplayFont}
+                  customFont={customFonts.display}
+                  onCustomFontUpload={(name) => setCustomFonts((p) => ({ ...p, display: name }))}
                 />
                 <FontSelect
                   label="Body Font"
                   description="Paragraphs, descriptions"
                   value={bodyFont}
                   onChange={setBodyFont}
+                  customFont={customFonts.body}
+                  onCustomFontUpload={(name) => setCustomFonts((p) => ({ ...p, body: name }))}
                 />
                 <FontSelect
                   label="UI Font"
                   description="Buttons, tables, badges, nav"
                   value={uiFont}
                   onChange={setUiFont}
+                  customFont={customFonts.ui}
+                  onCustomFontUpload={(name) => setCustomFonts((p) => ({ ...p, ui: name }))}
                 />
                 <FontSelect
                   label="Condensed Font"
                   description="Urgency banners"
                   value={condensedFont}
                   onChange={setCondensedFont}
+                  customFont={customFonts.condensed}
+                  onCustomFontUpload={(name) => setCustomFonts((p) => ({ ...p, condensed: name }))}
                 />
                 <div className="flex flex-col gap-1.5">
                   <Label className="text-sm font-medium">Base Font Size</Label>
