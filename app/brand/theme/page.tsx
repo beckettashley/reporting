@@ -375,28 +375,61 @@ export default function ThemePage() {
   const [accent, setAccent] = useState("#ffd61f");
   const [background, setBackground] = useState("#ffffff");
 
-  // Section 2: Gradient Tints
   // Section 2: Alternate Backgrounds
+  interface GradientStop { position: number; color: string; opacity: number }
   interface AltBackground {
     type: "solid" | "gradient";
     color: string;
-    opacity: number; // 0-100
-    color2?: string; // for gradient second stop
-    opacity2?: number;
+    opacity: number;
+    gradientAngle: number;
+    stops: GradientStop[];
   }
+  const makeDefault = (color: string): AltBackground => ({
+    type: "solid", color, opacity: 100, gradientAngle: 180,
+    stops: [{ position: 0, color: "#ffffff", opacity: 100 }, { position: 100, color, opacity: 60 }],
+  });
   const [altBackgrounds, setAltBackgrounds] = useState<AltBackground[]>([
-    { type: "solid", color: "#faf8f6", opacity: 100 },
-    { type: "solid", color: "#fcf3df", opacity: 100 },
+    makeDefault("#faf8f6"),
+    makeDefault("#fcf3df"),
   ]);
   const updateAltBg = (index: number, updates: Partial<AltBackground>) => {
     setAltBackgrounds((prev) => prev.map((bg, i) => i === index ? { ...bg, ...updates } : bg));
   };
-  const addAltBg = () => {
-    setAltBackgrounds((prev) => [...prev, { type: "solid", color: "#f0f0f0", opacity: 80 }]);
+  const updateStop = (bgIndex: number, stopIndex: number, updates: Partial<GradientStop>) => {
+    setAltBackgrounds((prev) => prev.map((bg, i) => {
+      if (i !== bgIndex) return bg;
+      const stops = bg.stops.map((s, si) => si === stopIndex ? { ...s, ...updates } : s);
+      return { ...bg, stops };
+    }));
   };
+  const addStop = (bgIndex: number) => {
+    setAltBackgrounds((prev) => prev.map((bg, i) => {
+      if (i !== bgIndex) return bg;
+      const last = bg.stops[bg.stops.length - 1];
+      return { ...bg, stops: [...bg.stops, { position: Math.min((last?.position ?? 50) + 25, 100), color: "#cccccc", opacity: 80 }] };
+    }));
+  };
+  const removeStop = (bgIndex: number, stopIndex: number) => {
+    setAltBackgrounds((prev) => prev.map((bg, i) => {
+      if (i !== bgIndex || bg.stops.length <= 2) return bg;
+      return { ...bg, stops: bg.stops.filter((_, si) => si !== stopIndex) };
+    }));
+  };
+  const addAltBg = () => setAltBackgrounds((prev) => [...prev, makeDefault("#f0f0f0")]);
   const removeAltBg = (index: number) => {
     if (altBackgrounds.length <= 2) return;
     setAltBackgrounds((prev) => prev.filter((_, i) => i !== index));
+  };
+  const getAltBgCSS = (bg: AltBackground): string => {
+    if (bg.type === "solid") {
+      const { r, g, b } = hexToRgb(bg.color);
+      return `rgba(${r}, ${g}, ${b}, ${bg.opacity / 100})`;
+    }
+    const stopsCSS = [...bg.stops].sort((a, b) => a.position - b.position).map((s) => {
+      const { r, g, b } = hexToRgb(s.color);
+      return `rgba(${r}, ${g}, ${b}, ${s.opacity / 100}) ${s.position}%`;
+    }).join(", ");
+    return `linear-gradient(${bg.gradientAngle}deg, ${stopsCSS})`;
   };
 
   // Section 3: Typography (family + color per role)
@@ -468,6 +501,20 @@ export default function ThemePage() {
                   onChange={setBackground}
                 />
               </CardContent>
+              {/* Auto-generated palette */}
+              <div className="px-6 pb-4 pt-2 border-t">
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wide font-medium mb-2">Auto-generated from your brand colors</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {derivedColors.map((dc) => (
+                    <div key={dc.name} className="group relative">
+                      <div className="w-7 h-7 rounded border border-border" style={{ backgroundColor: dc.isRgba ? undefined : dc.value, background: dc.isRgba ? dc.value : undefined }} />
+                      <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-1 px-2 py-1 rounded border bg-background shadow-sm text-[10px] text-foreground whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity" style={{ zIndex: 99999 }}>
+                        {dc.name}: {dc.value}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </Card>
 
             {/* ------ Section 2: Alternate Backgrounds ------ */}
@@ -475,7 +522,7 @@ export default function ThemePage() {
               <CardHeader className="pb-4">
                 <CardTitle className="text-base">Alternate Backgrounds</CardTitle>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Section backgrounds that alternate with the base background. Minimum 2 required — sections distribute automatically.
+                  Section backgrounds that alternate with the base. Minimum 2 — sections distribute automatically.
                 </p>
               </CardHeader>
               <CardContent className="flex flex-col gap-4">
@@ -484,46 +531,61 @@ export default function ThemePage() {
                     <div className="flex items-center justify-between">
                       <span className="text-sm font-medium">Alternate {i + 1}</span>
                       <div className="flex items-center gap-2">
-                        <button
-                          type="button"
-                          onClick={() => updateAltBg(i, { type: bg.type === "solid" ? "gradient" : "solid" })}
-                          className="text-xs px-2 py-1 rounded border hover:bg-muted transition-colors"
-                        >
-                          {bg.type === "solid" ? "Solid" : "Gradient"}
-                        </button>
+                        <div className="flex rounded-md border text-xs overflow-hidden">
+                          <button type="button" onClick={() => updateAltBg(i, { type: "solid" })} className={`px-2.5 py-1 transition-colors ${bg.type === "solid" ? "bg-foreground text-background" : "hover:bg-muted"}`}>Solid</button>
+                          <button type="button" onClick={() => updateAltBg(i, { type: "gradient" })} className={`px-2.5 py-1 transition-colors ${bg.type === "gradient" ? "bg-foreground text-background" : "hover:bg-muted"}`}>Gradient</button>
+                        </div>
                         {altBackgrounds.length > 2 && (
                           <button type="button" onClick={() => removeAltBg(i)} className="text-xs text-muted-foreground hover:text-destructive transition-colors">Remove</button>
                         )}
                       </div>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <label className="w-8 h-8 rounded border border-border flex-shrink-0 cursor-pointer block relative overflow-hidden" style={{ backgroundColor: bg.color }}>
-                        <input type="color" value={bg.color} onChange={(e) => updateAltBg(i, { color: e.target.value })} className="absolute inset-0 opacity-0 cursor-pointer" />
-                      </label>
-                      <Input value={bg.color} onChange={(e) => updateAltBg(i, { color: e.target.value })} className="font-mono text-sm h-8 w-24" />
-                      <div className="flex items-center gap-1.5 flex-1">
-                        <span className="text-xs text-muted-foreground w-6 text-right">{bg.opacity}%</span>
-                        <input type="range" min={0} max={100} value={bg.opacity} onChange={(e) => updateAltBg(i, { opacity: Number(e.target.value) })} className="flex-1 h-1.5 accent-foreground" />
-                      </div>
-                    </div>
-                    {bg.type === "gradient" && (
+
+                    {/* Preview bar — solid or gradient */}
+                    <div className="h-8 rounded border" style={{ background: getAltBgCSS(bg) }} />
+
+                    {bg.type === "solid" ? (
                       <div className="flex items-center gap-3">
-                        <label className="w-8 h-8 rounded border border-border flex-shrink-0 cursor-pointer block relative overflow-hidden" style={{ backgroundColor: bg.color2 || "#ffffff" }}>
-                          <input type="color" value={bg.color2 || "#ffffff"} onChange={(e) => updateAltBg(i, { color2: e.target.value })} className="absolute inset-0 opacity-0 cursor-pointer" />
+                        <label className="w-8 h-8 rounded border border-border flex-shrink-0 cursor-pointer block relative overflow-hidden" style={{ backgroundColor: bg.color }}>
+                          <input type="color" value={bg.color} onChange={(e) => updateAltBg(i, { color: e.target.value })} className="absolute inset-0 opacity-0 cursor-pointer" />
                         </label>
-                        <Input value={bg.color2 || "#ffffff"} onChange={(e) => updateAltBg(i, { color2: e.target.value })} className="font-mono text-sm h-8 w-24" />
+                        <Input value={bg.color} onChange={(e) => updateAltBg(i, { color: e.target.value })} className="font-mono text-sm h-8 w-24" />
                         <div className="flex items-center gap-1.5 flex-1">
-                          <span className="text-xs text-muted-foreground w-6 text-right">{bg.opacity2 ?? 100}%</span>
-                          <input type="range" min={0} max={100} value={bg.opacity2 ?? 100} onChange={(e) => updateAltBg(i, { opacity2: Number(e.target.value) })} className="flex-1 h-1.5 accent-foreground" />
+                          <input type="range" min={0} max={100} value={bg.opacity} onChange={(e) => updateAltBg(i, { opacity: Number(e.target.value) })} className="flex-1 h-1.5 accent-foreground" />
+                          <span className="text-xs text-muted-foreground tabular-nums w-8">{bg.opacity}%</span>
                         </div>
                       </div>
+                    ) : (
+                      <div className="space-y-2">
+                        {/* Angle control */}
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs text-muted-foreground w-10">Angle</span>
+                          <input type="range" min={0} max={360} value={bg.gradientAngle} onChange={(e) => updateAltBg(i, { gradientAngle: Number(e.target.value) })} className="flex-1 h-1.5 accent-foreground" />
+                          <span className="text-xs text-muted-foreground tabular-nums w-8">{bg.gradientAngle}°</span>
+                        </div>
+                        {/* Color stops */}
+                        {bg.stops.map((stop, si) => (
+                          <div key={si} className="flex items-center gap-2">
+                            <label className="w-6 h-6 rounded border border-border flex-shrink-0 cursor-pointer block relative overflow-hidden" style={{ backgroundColor: stop.color }}>
+                              <input type="color" value={stop.color} onChange={(e) => updateStop(i, si, { color: e.target.value })} className="absolute inset-0 opacity-0 cursor-pointer" />
+                            </label>
+                            <Input value={stop.color} onChange={(e) => updateStop(i, si, { color: e.target.value })} className="font-mono text-xs h-7 w-20" />
+                            <div className="flex items-center gap-1 flex-1">
+                              <input type="range" min={0} max={100} value={stop.opacity} onChange={(e) => updateStop(i, si, { opacity: Number(e.target.value) })} className="flex-1 h-1 accent-foreground" />
+                              <span className="text-[10px] text-muted-foreground tabular-nums w-7">{stop.opacity}%</span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <input type="number" min={0} max={100} value={stop.position} onChange={(e) => updateStop(i, si, { position: Number(e.target.value) })} className="w-12 h-7 text-xs text-center border rounded tabular-nums" />
+                              <span className="text-[10px] text-muted-foreground">%</span>
+                            </div>
+                            {bg.stops.length > 2 && (
+                              <button type="button" onClick={() => removeStop(i, si)} className="text-muted-foreground hover:text-destructive transition-colors"><svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg></button>
+                            )}
+                          </div>
+                        ))}
+                        <button type="button" onClick={() => addStop(i)} className="text-xs text-muted-foreground hover:text-foreground transition-colors">+ Add stop</button>
+                      </div>
                     )}
-                    {/* Preview strip */}
-                    <div className="h-6 rounded" style={{
-                      background: bg.type === "solid"
-                        ? `rgba(${hexToRgb(bg.color).r}, ${hexToRgb(bg.color).g}, ${hexToRgb(bg.color).b}, ${bg.opacity / 100})`
-                        : `linear-gradient(90deg, rgba(${hexToRgb(bg.color).r}, ${hexToRgb(bg.color).g}, ${hexToRgb(bg.color).b}, ${bg.opacity / 100}), rgba(${hexToRgb(bg.color2 || "#ffffff").r}, ${hexToRgb(bg.color2 || "#ffffff").g}, ${hexToRgb(bg.color2 || "#ffffff").b}, ${(bg.opacity2 ?? 100) / 100}))`
-                    }} />
                   </div>
                 ))}
                 <Button variant="outline" size="sm" onClick={addAltBg} className="w-full">
@@ -733,15 +795,7 @@ export default function ThemePage() {
                   {/* Alternate backgrounds preview strip */}
                   <div className="flex h-6">
                     {altBackgrounds.map((bg, i) => (
-                      <div
-                        key={i}
-                        className="flex-1"
-                        style={{
-                          background: bg.type === "solid"
-                            ? `rgba(${hexToRgb(bg.color).r}, ${hexToRgb(bg.color).g}, ${hexToRgb(bg.color).b}, ${bg.opacity / 100})`
-                            : `linear-gradient(90deg, rgba(${hexToRgb(bg.color).r}, ${hexToRgb(bg.color).g}, ${hexToRgb(bg.color).b}, ${bg.opacity / 100}), rgba(${hexToRgb(bg.color2 || "#ffffff").r}, ${hexToRgb(bg.color2 || "#ffffff").g}, ${hexToRgb(bg.color2 || "#ffffff").b}, ${(bg.opacity2 ?? 100) / 100}))`
-                        }}
-                      />
+                      <div key={i} className="flex-1" style={{ background: getAltBgCSS(bg) }} />
                     ))}
                   </div>
 
