@@ -753,7 +753,6 @@ export function Orders({ dateRange, compact, maxRows }: { dateRange?: DateRange;
 
   const totalPages = Math.max(1, Math.ceil(sorted.length / pageSize))
   const safePage = Math.min(page, totalPages - 1)
-  const effectivePageSize = maxRows ?? pageSize
   const paged = maxRows ? sorted.slice(0, maxRows) : sorted.slice(safePage * pageSize, safePage * pageSize + pageSize)
 
   // Build grouped view from the paged slice. Insert group headers when the
