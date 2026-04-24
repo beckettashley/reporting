@@ -361,6 +361,8 @@ export default function ThemePage() {
   // Section 1: Brand Colors — all editable, initialized from defaults
   const [brandPrimary, setBrandPrimary] = useState("#3d348b");
   const [accent, setAccent] = useState("#ffd61f");
+  const [accent2, setAccent2] = useState("#e1f3ff");
+  const [accent3, setAccent3] = useState("#fcf3df");
   const [background, setBackground] = useState("#ffffff");
   const [brandPrimaryDarkOverride, setBrandPrimaryDarkOverride] = useState(() => darkenHex("#3d348b", 20));
   const [brandPrimarySubtleOverride, setBrandPrimarySubtleOverride] = useState(() => hexWithOpacity("#3d348b", 0.1, "#ffffff"));
@@ -373,62 +375,6 @@ export default function ThemePage() {
   const [borderSubtleOverride, setBorderSubtleOverride] = useState(() => hexWithOpacity("#1a1a1a", 0.1, "#ffffff"));
   const [dangerOverride, setDangerOverride] = useState("#dc2626");
 
-  // Section 2: Alternate Backgrounds
-  interface GradientStop { position: number; color: string; opacity: number }
-  interface AltBackground {
-    type: "solid" | "gradient";
-    color: string;
-    opacity: number;
-    gradientAngle: number;
-    stops: GradientStop[];
-  }
-  const makeDefault = (color: string): AltBackground => ({
-    type: "solid", color, opacity: 100, gradientAngle: 180,
-    stops: [{ position: 0, color: "#ffffff", opacity: 100 }, { position: 100, color, opacity: 60 }],
-  });
-  const [altBackgrounds, setAltBackgrounds] = useState<AltBackground[]>([
-    makeDefault("#faf8f6"),
-    makeDefault("#fcf3df"),
-  ]);
-  const updateAltBg = (index: number, updates: Partial<AltBackground>) => {
-    setAltBackgrounds((prev) => prev.map((bg, i) => i === index ? { ...bg, ...updates } : bg));
-  };
-  const updateStop = (bgIndex: number, stopIndex: number, updates: Partial<GradientStop>) => {
-    setAltBackgrounds((prev) => prev.map((bg, i) => {
-      if (i !== bgIndex) return bg;
-      const stops = bg.stops.map((s, si) => si === stopIndex ? { ...s, ...updates } : s);
-      return { ...bg, stops };
-    }));
-  };
-  const addStop = (bgIndex: number) => {
-    setAltBackgrounds((prev) => prev.map((bg, i) => {
-      if (i !== bgIndex) return bg;
-      const last = bg.stops[bg.stops.length - 1];
-      return { ...bg, stops: [...bg.stops, { position: Math.min((last?.position ?? 50) + 25, 100), color: "#cccccc", opacity: 80 }] };
-    }));
-  };
-  const removeStop = (bgIndex: number, stopIndex: number) => {
-    setAltBackgrounds((prev) => prev.map((bg, i) => {
-      if (i !== bgIndex || bg.stops.length <= 2) return bg;
-      return { ...bg, stops: bg.stops.filter((_, si) => si !== stopIndex) };
-    }));
-  };
-  const addAltBg = () => setAltBackgrounds((prev) => [...prev, makeDefault("#f0f0f0")]);
-  const removeAltBg = (index: number) => {
-    if (altBackgrounds.length <= 2) return;
-    setAltBackgrounds((prev) => prev.filter((_, i) => i !== index));
-  };
-  const getAltBgCSS = (bg: AltBackground): string => {
-    if (bg.type === "solid") {
-      const { r, g, b } = hexToRgb(bg.color);
-      return `rgba(${r}, ${g}, ${b}, ${bg.opacity / 100})`;
-    }
-    const stopsCSS = [...bg.stops].sort((a, b) => a.position - b.position).map((s) => {
-      const { r, g, b } = hexToRgb(s.color);
-      return `rgba(${r}, ${g}, ${b}, ${s.opacity / 100}) ${s.position}%`;
-    }).join(", ");
-    return `linear-gradient(${bg.gradientAngle}deg, ${stopsCSS})`;
-  };
 
   // Section 3: Typography (family only — text color determined by surface)
   const [displayFont, setDisplayFont] = useState("Libre Baskerville");
@@ -479,10 +425,12 @@ export default function ThemePage() {
                 <CardTitle className="text-base">Brand Colors</CardTitle>
               </CardHeader>
               <CardContent className="grid grid-cols-2 gap-4">
-                <ColorField label="Brand Primary" value={brandPrimary} onChange={setBrandPrimary} />
-                <ColorField label="Brand Primary Dark" value={brandPrimaryDarkOverride} onChange={setBrandPrimaryDarkOverride} />
-                <ColorField label="Brand Primary Subtle" value={brandPrimarySubtleOverride} onChange={setBrandPrimarySubtleOverride} />
-                <ColorField label="Accent" value={accent} onChange={setAccent} />
+                <ColorField label="Primary" value={brandPrimary} onChange={setBrandPrimary} />
+                <ColorField label="Primary Dark" value={brandPrimaryDarkOverride} onChange={setBrandPrimaryDarkOverride} />
+                <ColorField label="Primary Subtle" value={brandPrimarySubtleOverride} onChange={setBrandPrimarySubtleOverride} />
+                <ColorField label="Accent 1" value={accent} onChange={setAccent} />
+                <ColorField label="Accent 2" value={accent2} onChange={setAccent2} />
+                <ColorField label="Accent 3" value={accent3} onChange={setAccent3} />
                 <ColorField label="Accent Subtle" value={accentSubtleOverride} onChange={setAccentSubtleOverride} />
                 <ColorField label="Background" value={background} onChange={setBackground} />
                 <ColorField label="Surface Subtle" value={surfaceSubtleOverride} onChange={setSurfaceSubtleOverride} />
@@ -495,82 +443,6 @@ export default function ThemePage() {
               </CardContent>
             </Card>
 
-            {/* ------ Section 2: Alternate Backgrounds ------ */}
-            <Card>
-              <CardHeader className="pb-4">
-                <CardTitle className="text-base">Alternate Backgrounds</CardTitle>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Section backgrounds that alternate with the base. Minimum 2 — sections distribute automatically.
-                </p>
-              </CardHeader>
-              <CardContent className="flex flex-col gap-4">
-                {altBackgrounds.map((bg, i) => (
-                  <div key={i} className="rounded-lg border p-3 space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium">Alternate {i + 1}</span>
-                      <div className="flex items-center gap-2">
-                        <div className="flex rounded-md border text-xs overflow-hidden">
-                          <button type="button" onClick={() => updateAltBg(i, { type: "solid" })} className={`px-2.5 py-1 transition-colors ${bg.type === "solid" ? "bg-foreground text-background" : "hover:bg-muted"}`}>Solid</button>
-                          <button type="button" onClick={() => updateAltBg(i, { type: "gradient" })} className={`px-2.5 py-1 transition-colors ${bg.type === "gradient" ? "bg-foreground text-background" : "hover:bg-muted"}`}>Gradient</button>
-                        </div>
-                        {altBackgrounds.length > 2 && (
-                          <button type="button" onClick={() => removeAltBg(i)} className="text-xs text-muted-foreground hover:text-destructive transition-colors">Remove</button>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Preview bar — solid or gradient */}
-                    <div className="h-8 rounded border" style={{ background: getAltBgCSS(bg) }} />
-
-                    {bg.type === "solid" ? (
-                      <div className="flex items-center gap-3">
-                        <label className="w-8 h-8 rounded border border-border flex-shrink-0 cursor-pointer block relative overflow-hidden" style={{ backgroundColor: bg.color }}>
-                          <input type="color" value={bg.color} onChange={(e) => updateAltBg(i, { color: e.target.value })} className="absolute inset-0 opacity-0 cursor-pointer" />
-                        </label>
-                        <Input value={bg.color} onChange={(e) => updateAltBg(i, { color: e.target.value })} className="font-mono text-sm h-8 w-24" />
-                        <div className="flex items-center gap-1.5 flex-1">
-                          <input type="range" min={0} max={100} value={bg.opacity} onChange={(e) => updateAltBg(i, { opacity: Number(e.target.value) })} className="flex-1 h-1.5 accent-foreground" />
-                          <span className="text-xs text-muted-foreground tabular-nums w-8">{bg.opacity}%</span>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="space-y-2">
-                        {/* Angle control */}
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs text-muted-foreground w-10">Angle</span>
-                          <input type="range" min={0} max={360} value={bg.gradientAngle} onChange={(e) => updateAltBg(i, { gradientAngle: Number(e.target.value) })} className="flex-1 h-1.5 accent-foreground" />
-                          <span className="text-xs text-muted-foreground tabular-nums w-8">{bg.gradientAngle}°</span>
-                        </div>
-                        {/* Color stops */}
-                        {bg.stops.map((stop, si) => (
-                          <div key={si} className="flex items-center gap-2">
-                            <label className="w-6 h-6 rounded border border-border flex-shrink-0 cursor-pointer block relative overflow-hidden" style={{ backgroundColor: stop.color }}>
-                              <input type="color" value={stop.color} onChange={(e) => updateStop(i, si, { color: e.target.value })} className="absolute inset-0 opacity-0 cursor-pointer" />
-                            </label>
-                            <Input value={stop.color} onChange={(e) => updateStop(i, si, { color: e.target.value })} className="font-mono text-xs h-7 w-20" />
-                            <div className="flex items-center gap-1 flex-1">
-                              <input type="range" min={0} max={100} value={stop.opacity} onChange={(e) => updateStop(i, si, { opacity: Number(e.target.value) })} className="flex-1 h-1 accent-foreground" />
-                              <span className="text-[10px] text-muted-foreground tabular-nums w-7">{stop.opacity}%</span>
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <input type="number" min={0} max={100} value={stop.position} onChange={(e) => updateStop(i, si, { position: Number(e.target.value) })} className="w-12 h-7 text-xs text-center border rounded tabular-nums" />
-                              <span className="text-[10px] text-muted-foreground">%</span>
-                            </div>
-                            {bg.stops.length > 2 && (
-                              <button type="button" onClick={() => removeStop(i, si)} className="text-muted-foreground hover:text-destructive transition-colors"><svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg></button>
-                            )}
-                          </div>
-                        ))}
-                        <button type="button" onClick={() => addStop(i)} className="text-xs text-muted-foreground hover:text-foreground transition-colors">+ Add stop</button>
-                      </div>
-                    )}
-                  </div>
-                ))}
-                <Button variant="outline" size="sm" onClick={addAltBg} className="w-full">
-                  + Add alternate background
-                </Button>
-              </CardContent>
-            </Card>
 
             {/* ------ Section 3: Typography ------ */}
             <Card>
@@ -762,10 +634,10 @@ export default function ThemePage() {
                     </button>
                   </div>
 
-                  {/* Alternate backgrounds preview strip */}
+                  {/* Accent colors preview strip */}
                   <div className="flex h-6">
-                    {altBackgrounds.map((bg, i) => (
-                      <div key={i} className="flex-1" style={{ background: getAltBgCSS(bg) }} />
+                    {[accent, accent2, accent3].map((c, i) => (
+                      <div key={i} className="flex-1" style={{ backgroundColor: c }} />
                     ))}
                   </div>
 
