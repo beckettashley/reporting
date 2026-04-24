@@ -263,7 +263,6 @@ function FontSelect({
             type="button"
             onClick={() => { setOpen(!open); setSearch(""); }}
             className="w-full flex items-center justify-between px-3 py-2 rounded-md border text-sm transition-colors bg-background hover:bg-muted text-left h-9"
-            style={{ fontFamily: value === "Custom" ? undefined : value }}
           >
           <span className="truncate">{displayValue}</span>
           <svg className="w-4 h-4 text-muted-foreground shrink-0 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={open ? "M18 15l-6-6-6 6" : "M6 9l6 6 6-6"} /></svg>
@@ -287,7 +286,6 @@ function FontSelect({
                   type="button"
                   onClick={() => { onChange(font); setOpen(false); }}
                   className={`w-full text-left px-3 py-2 text-sm transition-colors hover:bg-muted ${value === font ? "bg-muted font-medium" : ""}`}
-                  style={{ fontFamily: font === "Custom" ? undefined : font }}
                 >
                   {font === "Custom" && customFont ? `Custom (${customFont})` : font}
                 </button>
