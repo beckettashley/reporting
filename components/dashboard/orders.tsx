@@ -608,7 +608,7 @@ function generateOrdersByDay(start: Date, end: Date): DayData[] {
   return data
 }
 
-export function Orders({ dateRange }: { dateRange?: DateRange }) {
+export function Orders({ dateRange, compact }: { dateRange?: DateRange; compact?: boolean }) {
   const [selected, setSelected] = useState<Order | null>(null)
   const [search, setSearch] = useState("")
   const [groupBy, setGroupBy] = useState<OrderGroupBy>("none")
@@ -810,31 +810,33 @@ export function Orders({ dateRange }: { dateRange?: DateRange }) {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold">Orders</h2>
-        {(() => {
-          const totalRevenue = processed.reduce((s, o) => s + o.total, 0)
-          return (
-            <div className="grid grid-cols-3 gap-2" style={{ width: 420 }}>
-              <div className="rounded-xl border bg-background px-4 py-3">
-                <p className="text-xs text-muted-foreground mb-1">Orders</p>
-                <p className="text-xl font-bold tabular-nums">{processed.length.toLocaleString()}</p>
+      {!compact && (
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold">Orders</h2>
+          {(() => {
+            const totalRevenue = processed.reduce((s, o) => s + o.total, 0)
+            return (
+              <div className="grid grid-cols-3 gap-2" style={{ width: 420 }}>
+                <div className="rounded-xl border bg-background px-4 py-3">
+                  <p className="text-xs text-muted-foreground mb-1">Orders</p>
+                  <p className="text-xl font-bold tabular-nums">{processed.length.toLocaleString()}</p>
+                </div>
+                <div className="rounded-xl border bg-background px-4 py-3">
+                  <p className="text-xs text-muted-foreground mb-1">Revenue</p>
+                  <p className="text-xl font-bold tabular-nums">${totalRevenue.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                </div>
+                <div className="rounded-xl border bg-background px-4 py-3">
+                  <p className="text-xs text-muted-foreground mb-1">AOV</p>
+                  <p className="text-xl font-bold tabular-nums">${processed.length > 0 ? (totalRevenue / processed.length).toFixed(2) : "0.00"}</p>
+                </div>
               </div>
-              <div className="rounded-xl border bg-background px-4 py-3">
-                <p className="text-xs text-muted-foreground mb-1">Revenue</p>
-                <p className="text-xl font-bold tabular-nums">${totalRevenue.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
-              </div>
-              <div className="rounded-xl border bg-background px-4 py-3">
-                <p className="text-xs text-muted-foreground mb-1">AOV</p>
-                <p className="text-xl font-bold tabular-nums">${processed.length > 0 ? (totalRevenue / processed.length).toFixed(2) : "0.00"}</p>
-              </div>
-            </div>
-          )
-        })()}
-      </div>
+            )
+          })()}
+        </div>
+      )}
 
       {/* Chart */}
-      {(() => {
+      {!compact && (() => {
         const showStripe = paymentFilters.length === 0 || paymentFilters.includes("Stripe")
         const showPayPal = paymentFilters.length === 0 || paymentFilters.includes("PayPal")
         const showBoth = showStripe && showPayPal

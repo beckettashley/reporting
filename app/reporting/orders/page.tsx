@@ -120,8 +120,6 @@ export default function OrdersPage() {
         </div>
       </header>
 
-      <h2 className="text-lg font-semibold">Orders</h2>
-
       <Orders dateRange={dateRange} />
     </div>
   )

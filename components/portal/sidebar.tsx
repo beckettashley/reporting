@@ -16,11 +16,6 @@ import {
   Palette,
   CheckSquare,
   Users,
-  ShoppingCart,
-  BookOpen,
-  Tag,
-  Lightbulb,
-  Megaphone,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -73,6 +68,13 @@ const NAV_ITEMS: NavItem[] = [
       { label: "Orders", href: "/reporting" },
       { label: "Insights", href: "/reporting/insights" },
       { label: "Offers", href: "/reporting/offers" },
+      { label: "---" , href: "" },
+      { label: "Offers (Old)", href: "/reporting-v2/offers-old" },
+      { label: "Insights (Old)", href: "/reporting-v2/insights-v1" },
+      { label: "Experiments (Old)", href: "/reporting-v2" },
+      { label: "Summary (Old)", href: "/reporting/summary" },
+      { label: "Ads (Old)", href: "/" },
+      { label: "Products (Old)", href: "/" },
     ],
   },
   {
@@ -94,14 +96,6 @@ const NAV_ITEMS: NavItem[] = [
   },
 ]
 
-const REFERENCE_ITEMS = [
-  { label: "Offers (Old)", href: "/reporting-v2/offers-old", icon: <Tag className="w-4 h-4" /> },
-  { label: "Insights (Old)", href: "/reporting-v2/insights-v1", icon: <BookOpen className="w-4 h-4" /> },
-  { label: "Experiments (Old)", href: "/reporting-v2", icon: <Lightbulb className="w-4 h-4" /> },
-  { label: "Summary (Old)", href: "/reporting/summary", icon: <LayoutDashboard className="w-4 h-4" /> },
-  { label: "Ads (Old)", href: "/", icon: <Megaphone className="w-4 h-4" /> },
-  { label: "Products (Old)", href: "/", icon: <Package className="w-4 h-4" /> },
-]
 
 const TOTAL_WIZARD_STEPS = 6
 
@@ -175,9 +169,17 @@ export default function PortalSidebar() {
                     {isExpanded && (
                       <ul className="ml-7 mt-1 flex flex-col gap-1 border-l border-sidebar-border pl-3">
                         {item.children!.map((child) => {
+                          if (child.label === "---") {
+                            return (
+                              <li key="divider" className="pt-2 pb-1">
+                                <p className="px-3 text-[9px] font-semibold uppercase tracking-wide text-sidebar-foreground/25">Ignore — Reference only</p>
+                              </li>
+                            )
+                          }
                           const childActive = pathname === child.href
+                          const isOld = child.label.includes("(Old)")
                           return (
-                            <li key={child.href}>
+                            <li key={child.href + child.label}>
                               <Link
                                 href={child.href}
                                 onClick={() => setMobileOpen(false)}
@@ -185,7 +187,9 @@ export default function PortalSidebar() {
                                   "block px-3 py-1.5 rounded-md text-sm transition-colors",
                                   childActive
                                     ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
-                                    : "text-sidebar-foreground/60 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
+                                    : isOld
+                                      ? "text-sidebar-foreground/30 hover:bg-sidebar-accent/30 hover:text-sidebar-foreground/50"
+                                      : "text-sidebar-foreground/60 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
                                 )}
                               >
                                 {child.label}
@@ -221,26 +225,6 @@ export default function PortalSidebar() {
           })}
         </ul>
 
-        {/* Reference section */}
-        <div className="mt-4 pt-4 border-t border-sidebar-border">
-          <p className="px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wide text-sidebar-foreground/30">
-            Ignore — Reference only
-          </p>
-          <ul className="flex flex-col gap-0.5 mt-1">
-            {REFERENCE_ITEMS.map((item) => (
-              <li key={item.label}>
-                <Link
-                  href={item.href}
-                  onClick={() => setMobileOpen(false)}
-                  className="flex items-center gap-3 px-3 py-1.5 rounded-md text-sm text-sidebar-foreground/30 hover:bg-sidebar-accent/30 hover:text-sidebar-foreground/50 transition-colors"
-                >
-                  {item.icon}
-                  <span>{item.label}</span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
       </nav>
 
       {/* Footer */}
