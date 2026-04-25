@@ -168,7 +168,7 @@ function ColorField({
   return (
     <div className="flex items-center gap-3">
       <label
-        className="w-10 h-10 rounded border border-border flex-shrink-0 cursor-pointer block relative overflow-hidden"
+        className="w-10 h-12 rounded-md border border-border flex-shrink-0 cursor-pointer block relative overflow-hidden"
         style={{ backgroundColor: value }}
       >
         <input
@@ -178,12 +178,12 @@ function ColorField({
           className="absolute inset-0 opacity-0 cursor-pointer"
         />
       </label>
-      <div className="flex flex-col gap-1 flex-1">
-        <Label className="text-sm font-medium">{label}</Label>
+      <div className="flex-1">
+        <Label className="text-xs font-medium text-muted-foreground">{label}</Label>
         <Input
-          value={value}
+          value={value.toUpperCase()}
           onChange={(e) => onChange(e.target.value)}
-          className="font-mono text-sm h-8"
+          className="font-mono text-sm h-8 mt-0.5"
           placeholder="#000000"
         />
       </div>
@@ -458,24 +458,51 @@ export default function ThemePage() {
             <Card>
               <CardHeader className="flex flex-row items-center gap-2 pb-4">
                 <Palette className="w-4 h-4 text-muted-foreground" />
-                <CardTitle className="text-base">Brand Colors</CardTitle>
+                <CardTitle className="text-base">Color Palette</CardTitle>
               </CardHeader>
-              <CardContent className="grid grid-cols-2 gap-4">
-                <ColorField label="Primary" value={brandPrimary} onChange={setBrandPrimary} />
-                <ColorField label="Primary Dark" value={brandPrimaryDarkOverride} onChange={setBrandPrimaryDarkOverride} />
-                <ColorField label="Primary Subtle" value={brandPrimarySubtleOverride} onChange={setBrandPrimarySubtleOverride} />
-                <ColorField label="Accent 1" value={accent} onChange={setAccent} />
-                <ColorField label="Accent 2" value={accent2} onChange={setAccent2} />
-                <ColorField label="Accent 3" value={accent3} onChange={setAccent3} />
-                <ColorField label="Accent Subtle" value={accentSubtleOverride} onChange={setAccentSubtleOverride} />
-                <ColorField label="Background" value={background} onChange={setBackground} />
-                <ColorField label="Surface Subtle" value={surfaceSubtleOverride} onChange={setSurfaceSubtleOverride} />
-                <ColorField label="Surface Inverse" value={surfaceInverseOverride} onChange={setSurfaceInverseOverride} />
-                <ColorField label="Text" value={text} onChange={setText} />
-                <ColorField label="Text Inverse" value={textInverse} onChange={setTextInverse} />
-                <ColorField label="Border Default" value={borderDefaultOverride} onChange={setBorderDefaultOverride} />
-                <ColorField label="Border Subtle" value={borderSubtleOverride} onChange={setBorderSubtleOverride} />
-                <ColorField label="Danger" value={dangerOverride} onChange={setDangerOverride} />
+              <CardContent className="space-y-6">
+                {/* Primary */}
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-3">Primary</p>
+                  <div className="space-y-2.5">
+                    <ColorField label="Primary" value={brandPrimary} onChange={setBrandPrimary} />
+                    <ColorField label="Primary Dark" value={brandPrimaryDarkOverride} onChange={setBrandPrimaryDarkOverride} />
+                    <ColorField label="Primary Subtle" value={brandPrimarySubtleOverride} onChange={setBrandPrimarySubtleOverride} />
+                  </div>
+                </div>
+
+                {/* Accents */}
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-3">Accents</p>
+                  <div className="space-y-2.5">
+                    <ColorField label="Accent 1" value={accent} onChange={setAccent} />
+                    <ColorField label="Accent 2" value={accent2} onChange={setAccent2} />
+                    <ColorField label="Accent 3" value={accent3} onChange={setAccent3} />
+                    <ColorField label="Accent Subtle" value={accentSubtleOverride} onChange={setAccentSubtleOverride} />
+                  </div>
+                </div>
+
+                {/* Buttons */}
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-3">Buttons</p>
+                  <div className="space-y-2.5">
+                    <ColorField label="Background" value={background} onChange={setBackground} />
+                    <ColorField label="Text" value={text} onChange={setText} />
+                    <ColorField label="Text Inverse" value={textInverse} onChange={setTextInverse} />
+                  </div>
+                </div>
+
+                {/* UI Elements */}
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-3">UI Elements</p>
+                  <div className="space-y-2.5">
+                    <ColorField label="Surface Subtle" value={surfaceSubtleOverride} onChange={setSurfaceSubtleOverride} />
+                    <ColorField label="Surface Inverse" value={surfaceInverseOverride} onChange={setSurfaceInverseOverride} />
+                    <ColorField label="Border Default" value={borderDefaultOverride} onChange={setBorderDefaultOverride} />
+                    <ColorField label="Border Subtle" value={borderSubtleOverride} onChange={setBorderSubtleOverride} />
+                    <ColorField label="Danger" value={dangerOverride} onChange={setDangerOverride} />
+                  </div>
+                </div>
               </CardContent>
             </Card>
 
