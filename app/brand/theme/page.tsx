@@ -167,25 +167,27 @@ function ColorField({
 }) {
   return (
     <div className="flex items-center gap-3">
-      <label
-        className="w-10 h-12 rounded-md border border-border flex-shrink-0 cursor-pointer block relative overflow-hidden"
-        style={{ backgroundColor: value }}
-      >
-        <input
-          type="color"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          className="absolute inset-0 opacity-0 cursor-pointer"
-        />
-      </label>
       <div className="flex-1">
         <Label className="text-xs font-medium text-muted-foreground">{label}</Label>
-        <Input
-          value={value.toUpperCase()}
-          onChange={(e) => onChange(e.target.value)}
-          className="font-mono text-sm h-8 mt-0.5"
-          placeholder="#000000"
-        />
+        <div className="flex items-center gap-2 mt-0.5">
+          <label
+            className="w-8 h-8 rounded-md border border-border flex-shrink-0 cursor-pointer block relative overflow-hidden"
+            style={{ backgroundColor: value }}
+          >
+            <input
+              type="color"
+              value={value}
+              onChange={(e) => onChange(e.target.value)}
+              className="absolute inset-0 opacity-0 cursor-pointer"
+            />
+          </label>
+          <Input
+            value={value.toUpperCase()}
+            onChange={(e) => onChange(e.target.value)}
+            className="font-mono text-sm h-8"
+            placeholder="#000000"
+          />
+        </div>
       </div>
     </div>
   );
