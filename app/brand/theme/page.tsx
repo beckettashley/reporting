@@ -484,7 +484,6 @@ export default function ThemePage() {
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-3">Buttons</p>
                   <div className="space-y-2.5">
-                    <ColorField label="Background Primary" value={backgroundPrimary} onChange={setBackgroundPrimary} />
                     <ColorField label="Button Primary" value={buttonPrimary} onChange={setButtonPrimary} />
                     <ColorField label="Button Primary Text" value={buttonPrimaryText} onChange={setButtonPrimaryText} />
                     <ColorField label="Button Secondary" value={buttonSecondary} onChange={setButtonSecondary} />
@@ -496,6 +495,7 @@ export default function ThemePage() {
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-3">UI Elements</p>
                   <div className="space-y-2.5">
+                    <ColorField label="Background Primary" value={backgroundPrimary} onChange={setBackgroundPrimary} />
                     <ColorField label="Border Default" value={borderDefault} onChange={setBorderDefault} />
                     <ColorField label="Border Subtle" value={borderSubtle} onChange={setBorderSubtle} />
                     <ColorField label="Surface Subtle" value={surfaceSubtle} onChange={setSurfaceSubtle} />
