@@ -116,7 +116,7 @@ function computeDerivedColors(
   const isLightBg = bgLum > 0.5;
 
   const brandPrimaryLum = luminance(brandPrimary);
-  const brandPrimaryDark =
+  const primaryDark =
     brandPrimaryLum < 0.05
       ? brandPrimary
       : darkenHex(brandPrimary, 20);
@@ -133,7 +133,7 @@ function computeDerivedColors(
   const borderSubtle = hexWithOpacity(borderSource, 0.1, background);
 
   return [
-    { name: "Brand Primary Dark", value: brandPrimaryDark },
+    { name: "Brand Primary Dark", value: primaryDark },
     { name: "Brand Primary Subtle", value: brandPrimarySubtle },
     { name: "Accent Subtle", value: accentSubtle },
     { name: "Text Inverse", value: "#ffffff" },
@@ -388,22 +388,26 @@ function ImageUploadField({
 // ---------------------------------------------------------------------------
 
 export default function ThemePage() {
-  // Section 1: Brand Colors — all editable, initialized from defaults
-  const [brandPrimary, setBrandPrimary] = useState("#3d348b");
-  const [accent, setAccent] = useState("#ffd61f");
-  const [accent2, setAccent2] = useState("#e1f3ff");
-  const [accent3, setAccent3] = useState("#fcf3df");
-  const [background, setBackground] = useState("#ffffff");
-  const [brandPrimaryDarkOverride, setBrandPrimaryDarkOverride] = useState(() => darkenHex("#3d348b", 20));
-  const [brandPrimarySubtleOverride, setBrandPrimarySubtleOverride] = useState(() => hexWithOpacity("#3d348b", 0.1, "#ffffff"));
-  const [accentSubtleOverride, setAccentSubtleOverride] = useState(() => hexWithOpacity("#ffd61f", 0.15, "#ffffff"));
-  const [surfaceSubtleOverride, setSurfaceSubtleOverride] = useState(() => darkenHex("#ffffff", 3));
-  const [text, setText] = useState("#1a1a1a");
-  const [textInverse, setTextInverse] = useState("#ffffff");
-  const [surfaceInverseOverride, setSurfaceInverseOverride] = useState("#000000");
-  const [borderDefaultOverride, setBorderDefaultOverride] = useState(() => hexWithOpacity("#1a1a1a", 0.2, "#ffffff"));
-  const [borderSubtleOverride, setBorderSubtleOverride] = useState(() => hexWithOpacity("#1a1a1a", 0.1, "#ffffff"));
-  const [dangerOverride, setDangerOverride] = useState("#dc2626");
+  // Section 1: Color Palette — matching PDF reference exactly
+  // Primary
+  const [primary, setPrimary] = useState("#3D358B");
+  const [primaryDark, setPrimaryDark] = useState("#312A6F");
+  // Accents
+  const [accent1, setAccent1] = useState("#E2F4FF");
+  const [accent2, setAccent2] = useState("#FDF4DF");
+  const [accent3, setAccent3] = useState("#ECEBF4");
+  // Buttons
+  const [backgroundPrimary, setBackgroundPrimary] = useState("#FFFFFF");
+  const [buttonPrimary, setButtonPrimary] = useState("#312A6F");
+  const [buttonPrimaryText, setButtonPrimaryText] = useState("#FFFFFF");
+  const [buttonSecondary, setButtonSecondary] = useState("#FFD61E");
+  const [buttonSecondaryText, setButtonSecondaryText] = useState("#000000");
+  // UI Elements
+  const [borderDefault, setBorderDefault] = useState("#D1D1D1");
+  const [borderSubtle, setBorderSubtle] = useState("#D1D1D1");
+  const [surfaceSubtle, setSurfaceSubtle] = useState("#F7F7F7");
+  const [surfaceInverse, setSurfaceInverse] = useState("#D1D1D1");
+  const [danger, setDanger] = useState("#DC2627");
 
 
   // Section 3: Typography (family + weight + color per role)
@@ -431,13 +435,7 @@ export default function ThemePage() {
   const [ogImage, setOgImage] = useState<string | null>(null);
   const [logoLink, setLogoLink] = useState("https://javvy.com");
 
-  // Derived colors (computed reactively)
-  const derivedColors = useMemo(
-    () => computeDerivedColors(brandPrimary, accent, text, background),
-    [brandPrimary, accent, text, background]
-  );
-
-  const brandPrimaryDark = brandPrimaryDarkOverride;
+  // No derived colors needed — all values are explicit
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -467,9 +465,8 @@ export default function ThemePage() {
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-3">Primary</p>
                   <div className="space-y-2.5">
-                    <ColorField label="Primary" value={brandPrimary} onChange={setBrandPrimary} />
-                    <ColorField label="Primary Dark" value={brandPrimaryDarkOverride} onChange={setBrandPrimaryDarkOverride} />
-                    <ColorField label="Primary Subtle" value={brandPrimarySubtleOverride} onChange={setBrandPrimarySubtleOverride} />
+                    <ColorField label="Primary" value={primary} onChange={setPrimary} />
+                    <ColorField label="Primary Dark" value={primaryDark} onChange={setPrimaryDark} />
                   </div>
                 </div>
 
@@ -477,10 +474,9 @@ export default function ThemePage() {
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-3">Accents</p>
                   <div className="space-y-2.5">
-                    <ColorField label="Accent 1" value={accent} onChange={setAccent} />
+                    <ColorField label="Accent 1" value={accent1} onChange={setAccent1} />
                     <ColorField label="Accent 2" value={accent2} onChange={setAccent2} />
                     <ColorField label="Accent 3" value={accent3} onChange={setAccent3} />
-                    <ColorField label="Accent Subtle" value={accentSubtleOverride} onChange={setAccentSubtleOverride} />
                   </div>
                 </div>
 
@@ -488,9 +484,11 @@ export default function ThemePage() {
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-3">Buttons</p>
                   <div className="space-y-2.5">
-                    <ColorField label="Background" value={background} onChange={setBackground} />
-                    <ColorField label="Text" value={text} onChange={setText} />
-                    <ColorField label="Text Inverse" value={textInverse} onChange={setTextInverse} />
+                    <ColorField label="Background Primary" value={backgroundPrimary} onChange={setBackgroundPrimary} />
+                    <ColorField label="Button Primary" value={buttonPrimary} onChange={setButtonPrimary} />
+                    <ColorField label="Button Primary Text" value={buttonPrimaryText} onChange={setButtonPrimaryText} />
+                    <ColorField label="Button Secondary" value={buttonSecondary} onChange={setButtonSecondary} />
+                    <ColorField label="Button Secondary Text" value={buttonSecondaryText} onChange={setButtonSecondaryText} />
                   </div>
                 </div>
 
@@ -498,11 +496,11 @@ export default function ThemePage() {
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-3">UI Elements</p>
                   <div className="space-y-2.5">
-                    <ColorField label="Surface Subtle" value={surfaceSubtleOverride} onChange={setSurfaceSubtleOverride} />
-                    <ColorField label="Surface Inverse" value={surfaceInverseOverride} onChange={setSurfaceInverseOverride} />
-                    <ColorField label="Border Default" value={borderDefaultOverride} onChange={setBorderDefaultOverride} />
-                    <ColorField label="Border Subtle" value={borderSubtleOverride} onChange={setBorderSubtleOverride} />
-                    <ColorField label="Danger" value={dangerOverride} onChange={setDangerOverride} />
+                    <ColorField label="Border Default" value={borderDefault} onChange={setBorderDefault} />
+                    <ColorField label="Border Subtle" value={borderSubtle} onChange={setBorderSubtle} />
+                    <ColorField label="Surface Subtle" value={surfaceSubtle} onChange={setSurfaceSubtle} />
+                    <ColorField label="Surface Inverse" value={surfaceInverse} onChange={setSurfaceInverse} />
+                    <ColorField label="Danger" value={danger} onChange={setDanger} />
                   </div>
                 </div>
               </CardContent>
@@ -640,12 +638,12 @@ export default function ThemePage() {
               <CardContent>
                 <div
                   className="rounded-lg border overflow-hidden"
-                  style={{ backgroundColor: background }}
+                  style={{ backgroundColor: backgroundPrimary }}
                 >
                   {/* Navbar mockup */}
                   <div
                     className="flex items-center justify-between px-4 py-3 border-b"
-                    style={{ borderColor: borderDefaultOverride }}
+                    style={{ borderColor: borderDefault }}
                   >
                     <div
                       className="text-sm"
@@ -707,7 +705,7 @@ export default function ThemePage() {
                     <button
                       className="px-5 py-2.5 rounded-md text-sm font-semibold transition-colors"
                       style={{
-                        backgroundColor: brandPrimaryDark,
+                        backgroundColor: primaryDark,
                         color: "#ffffff",
                         fontFamily: uiFont,
                         fontSize: `${baseFontSize * 1.125}px`,
@@ -719,7 +717,7 @@ export default function ThemePage() {
 
                   {/* Accent colors preview strip */}
                   <div className="flex h-6">
-                    {[accent, accent2, accent3].map((c, i) => (
+                    {[accent1, accent2, accent3].map((c, i) => (
                       <div key={i} className="flex-1" style={{ backgroundColor: c }} />
                     ))}
                   </div>
@@ -728,8 +726,8 @@ export default function ThemePage() {
                   <div
                     className="px-4 py-2 text-center text-xs font-bold uppercase tracking-wider"
                     style={{
-                      backgroundColor: accent,
-                      color: text,
+                      backgroundColor: buttonSecondary,
+                      color: buttonSecondaryText,
                       fontFamily: condensedFont,
                     }}
                   >
