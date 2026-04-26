@@ -713,7 +713,7 @@ export default function ThemePage() {
                       ))}
                     </ul>
                     <button className="w-full rounded-lg border-0 cursor-pointer shadow-sm" style={{ backgroundColor: buttonPrimary, color: contrastText(buttonPrimary), fontFamily: uiFont, fontWeight: uiWeight, fontSize: s(14), letterSpacing: "0.04em", textAlign: "center" as const, padding: "12px" }}>
-                      CLAIM YOUR DISCOUNT →
+                      BUTTON PRIMARY →
                     </button>
                   </div>
 
@@ -741,7 +741,7 @@ export default function ThemePage() {
                   {/* CTA section — button secondary */}
                   <div className="px-4 py-3" style={{ backgroundColor: "#ffffff" }}>
                     <button className="w-full rounded-lg border-0 cursor-pointer shadow-sm" style={{ backgroundColor: buttonSecondary, color: contrastText(buttonSecondary), fontFamily: uiFont, fontWeight: uiWeight, fontSize: s(14), letterSpacing: "0.04em", textAlign: "center" as const, padding: "14px" }}>
-                      GET YOUR OFFER →
+                      BUTTON SECONDARY →
                     </button>
                   </div>
 
