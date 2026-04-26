@@ -799,7 +799,7 @@ function OfferDetail({ offer }: { offer: AggregatedOffer }) {
           return (
             <div className="space-y-3">
               <div className="flex items-center gap-1.5">
-                <p className="text-sm font-semibold text-foreground">Compare Offer Configurations</p>
+                <p className="text-sm font-semibold text-red-700">Compare Offer Configurations <span className="text-xs font-normal text-red-400">— placeholder, not included in v1</span></p>
                 <div className="relative group">
                   <Info className="h-3.5 w-3.5 text-muted-foreground/50 cursor-help" />
                   <div className="absolute left-0 top-full mt-1.5 px-3 py-2 rounded-lg border bg-background shadow-md text-xs text-foreground text-left w-64 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity" style={{ zIndex: 99999 }}>
@@ -807,7 +807,7 @@ function OfferDetail({ offer }: { offer: AggregatedOffer }) {
                   </div>
                 </div>
               </div>
-              <div className="rounded-xl border overflow-hidden">
+              <div className="rounded-xl border-2 border-red-300 overflow-hidden">
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="bg-muted border-b">
