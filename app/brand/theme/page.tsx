@@ -711,9 +711,9 @@ export default function ThemePage() {
 
                   {/* 4. Placeholder section 1 — white/accent1/white gradient */}
                   <div className="p-4 flex flex-col gap-3" style={{ background: `linear-gradient(180deg, #ffffff 0%, ${accent1} 50%, #ffffff 100%)` }}>
-                    <h3 style={{ fontFamily: displayFont, fontWeight: displayWeight, fontSize: "16px", margin: 0, color: displayColor }}>Section Heading</h3>
+                    <h3 style={{ fontFamily: displayFont, fontWeight: displayWeight, fontSize: "22px", lineHeight: 1.15, letterSpacing: "-0.4px", margin: 0, color: displayColor }}>Section Heading</h3>
                     <p style={{ fontFamily: bodyFont, fontWeight: bodyWeight, fontSize: "12px", lineHeight: 1.5, margin: 0, color: bodyColor, opacity: 0.8 }}>
-                      Placeholder body text for this section. This demonstrates how your brand fonts and accent colors render on alternating page sections.
+                      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
                     </p>
                     <div className="w-full aspect-video rounded-md flex items-center justify-center" style={{ backgroundColor: `${bodyColor}08` }}>
                       <ImageIcon className="w-6 h-6" style={{ color: `${bodyColor}30` }} />
@@ -722,9 +722,9 @@ export default function ThemePage() {
 
                   {/* 5. Placeholder section 2 — white/accent2/white gradient */}
                   <div className="p-4 flex flex-col gap-3" style={{ background: `linear-gradient(180deg, #ffffff 0%, ${accent2} 50%, #ffffff 100%)` }}>
-                    <h3 style={{ fontFamily: displayFont, fontWeight: displayWeight, fontSize: "16px", margin: 0, color: displayColor }}>Another Section</h3>
+                    <h3 style={{ fontFamily: displayFont, fontWeight: displayWeight, fontSize: "22px", lineHeight: 1.15, letterSpacing: "-0.4px", margin: 0, color: displayColor }}>Section Heading</h3>
                     <p style={{ fontFamily: bodyFont, fontWeight: bodyWeight, fontSize: "12px", lineHeight: 1.5, margin: 0, color: bodyColor, opacity: 0.8 }}>
-                      A second alternating section showing how the second accent color applies. Each section background is derived from your accent palette.
+                      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.
                     </p>
                     <div className="w-full aspect-video rounded-md flex items-center justify-center" style={{ backgroundColor: `${bodyColor}08` }}>
                       <ImageIcon className="w-6 h-6" style={{ color: `${bodyColor}30` }} />
