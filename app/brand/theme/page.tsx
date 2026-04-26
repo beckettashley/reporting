@@ -260,7 +260,7 @@ function FontSelect({
         >
           <input type="color" value={color} onChange={(e) => onColorChange(e.target.value)} className="absolute inset-0 opacity-0 cursor-pointer" />
         </label>
-        <div className="relative flex-1">
+        <div className="relative flex-[0.9] min-w-0">
           <button
             type="button"
             onClick={() => { setOpen(!open); setSearch(""); }}
@@ -313,7 +313,7 @@ function FontSelect({
         <select
           value={weight}
           onChange={(e) => onWeightChange(e.target.value)}
-          className="w-24 h-9 rounded-md border bg-background text-sm px-2 cursor-pointer"
+          className="w-32 h-9 rounded-md border bg-background text-sm px-2 cursor-pointer"
         >
           <option value="200">Extra Light</option>
           <option value="300">Light</option>
