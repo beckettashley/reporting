@@ -661,7 +661,7 @@ export default function ThemePage() {
                 <CardTitle className="text-base">Preview</CardTitle>
               </CardHeader>
               <CardContent className="p-4">
-                <div className="rounded-lg overflow-hidden shadow-sm mx-auto" style={{ backgroundColor: backgroundPrimary, color: bodyColor, fontFamily: bodyFont, fontSize: `${baseFontSize}px`, maxWidth: "320px" }}>
+                <div className="rounded-lg overflow-hidden shadow-xl mx-auto" style={{ backgroundColor: backgroundPrimary, color: bodyColor, fontFamily: bodyFont, fontSize: `${baseFontSize}px`, maxWidth: "320px" }}>
 
                   {/* 1a. Urgency banner — primary dark + condensed */}
                   <div className="text-center uppercase tracking-wider" style={{ backgroundColor: primaryDark, color: contrastText(primaryDark), fontFamily: condensedFont, fontWeight: 900, fontSize: s(12), letterSpacing: "0.04em", padding: "6px 12px" }}>
