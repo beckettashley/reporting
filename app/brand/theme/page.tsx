@@ -404,6 +404,8 @@ function ImageUploadField({
 // ---------------------------------------------------------------------------
 
 export default function ThemePage() {
+  // Section 4: Images
+
   // Section 1: Color Palette — matching PDF reference exactly
   // Primary
   const [primary, setPrimary] = useState("#3D358B");
@@ -444,7 +446,6 @@ export default function ThemePage() {
     display: null, body: null, ui: null, condensed: null,
   });
 
-  // Section 4: Images
   const [logo, setLogo] = useState<string | null>(null);
   const [logoDark, setLogoDark] = useState<string | null>(null);
   const [favicon, setFavicon] = useState<string | null>(null);
@@ -484,7 +485,21 @@ export default function ThemePage() {
           {/* LEFT COLUMN: All input sections */}
           {/* ============================================================= */}
           <div className="flex flex-col gap-6">
-            {/* ------ Section 1: Brand Colors ------ */}
+            {/* ------ Images ------ */}
+            <Card>
+              <CardHeader className="flex flex-row items-center gap-2 pb-4">
+                <ImageIcon className="w-4 h-4 text-muted-foreground" />
+                <CardTitle className="text-base">Images</CardTitle>
+              </CardHeader>
+              <CardContent className="flex flex-col gap-5">
+                <ImageUploadField label="Logo" preview={logo} onUpload={setLogo} />
+                <ImageUploadField label="Logo Dark Variant" helper="For dark backgrounds. Falls back to primary logo." preview={logoDark} onUpload={setLogoDark} />
+                <ImageUploadField label="Favicon" preview={favicon} onUpload={setFavicon} />
+                <ImageUploadField label="OG Image" preview={ogImage} onUpload={setOgImage} />
+              </CardContent>
+            </Card>
+
+            {/* ------ Color Palette ------ */}
             <Card>
               <CardHeader className="flex flex-row items-center gap-2 pb-4">
                 <Palette className="w-4 h-4 text-muted-foreground" />
@@ -545,8 +560,8 @@ export default function ThemePage() {
               </CardHeader>
               <CardContent className="flex flex-col gap-5">
                 <FontSelect
-                  label="Display Font"
-                  description="Hero headlines, section display text"
+                  label="Heading Font"
+                  description="H1–H6 headings, section titles"
                   value={displayFont}
                   onChange={setDisplayFont}
                   color={displayColor}
@@ -557,8 +572,8 @@ export default function ThemePage() {
                   onCustomFontUpload={(name) => setCustomFonts((p) => ({ ...p, display: name }))}
                 />
                 <FontSelect
-                  label="Body Font"
-                  description="Paragraphs, descriptions"
+                  label="Regular Font"
+                  description="Body text, paragraphs, descriptions"
                   value={bodyFont}
                   onChange={setBodyFont}
                   color={bodyColor}
@@ -614,36 +629,6 @@ export default function ThemePage() {
               </CardContent>
             </Card>
 
-            {/* ------ Section 4: Images ------ */}
-            <Card>
-              <CardHeader className="flex flex-row items-center gap-2 pb-4">
-                <ImageIcon className="w-4 h-4 text-muted-foreground" />
-                <CardTitle className="text-base">Images</CardTitle>
-              </CardHeader>
-              <CardContent className="flex flex-col gap-5">
-                <ImageUploadField
-                  label="Logo"
-                  preview={logo}
-                  onUpload={setLogo}
-                />
-                <ImageUploadField
-                  label="Logo Dark Variant"
-                  helper="For dark backgrounds. Falls back to primary logo."
-                  preview={logoDark}
-                  onUpload={setLogoDark}
-                />
-                <ImageUploadField
-                  label="Favicon"
-                  preview={favicon}
-                  onUpload={setFavicon}
-                />
-                <ImageUploadField
-                  label="OG Image"
-                  preview={ogImage}
-                  onUpload={setOgImage}
-                />
-              </CardContent>
-            </Card>
           </div>
 
           {/* ============================================================= */}
@@ -658,12 +643,17 @@ export default function ThemePage() {
               <CardContent className="p-4">
                 <div className="rounded-lg overflow-hidden shadow-sm mx-auto" style={{ backgroundColor: backgroundPrimary, color: bodyColor, fontFamily: bodyFont, fontSize: `${baseFontSize}px`, maxWidth: "320px" }}>
 
-                  {/* 1. Urgency banner — primary dark + condensed */}
+                  {/* 1a. Urgency banner — primary dark + condensed */}
                   <div className="text-center uppercase tracking-wider" style={{ backgroundColor: primaryDark, color: buttonPrimaryText, fontFamily: condensedFont, fontWeight: 900, fontSize: "12px", letterSpacing: "0.04em", padding: "6px 12px" }}>
                     ⚡ Spring sale — up to 58% off today
                   </div>
 
-                  {/* 2. Navbar — logo + ui font */}
+                  {/* 1b. Secondary banner — primary */}
+                  <div className="text-center" style={{ backgroundColor: primary, color: buttonPrimaryText, fontFamily: uiFont, fontWeight: 600, fontSize: "11px", letterSpacing: "0.02em", padding: "5px 12px" }}>
+                    Free shipping on orders over $40
+                  </div>
+
+                  {/* 2. Navbar — logo + hamburger */}
                   <div className="flex items-center justify-between px-4 py-2.5" style={{ borderBottom: `1px solid ${borderSubtle}` }}>
                     {logo ? (
                       <img src={logo} alt="Logo" className="h-5 max-w-[80px] object-contain" />
@@ -673,9 +663,7 @@ export default function ThemePage() {
                         <span className="text-xs text-muted-foreground" style={{ fontFamily: uiFont }}>Logo</span>
                       </div>
                     )}
-                    <div className="flex gap-3" style={{ fontFamily: uiFont, fontSize: "12px", fontWeight: 600, color: bodyColor }}>
-                      <span>Shop</span><span>FAQ</span>
-                    </div>
+                    <svg className="w-5 h-5" style={{ color: bodyColor }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
                   </div>
 
                   {/* 3. Hero — image + display + body + bullets + CTA */}
@@ -712,22 +700,32 @@ export default function ThemePage() {
                   {/* 4. Placeholder section 1 — white/accent1/white gradient */}
                   <div className="p-4 flex flex-col gap-3" style={{ background: `linear-gradient(180deg, #ffffff 0%, ${accent1} 50%, #ffffff 100%)` }}>
                     <h3 style={{ fontFamily: displayFont, fontWeight: displayWeight, fontSize: "22px", lineHeight: 1.15, letterSpacing: "-0.4px", margin: 0, color: displayColor }}>Section Heading</h3>
-                    <p style={{ fontFamily: bodyFont, fontWeight: bodyWeight, fontSize: "12px", lineHeight: 1.5, margin: 0, color: bodyColor, opacity: 0.8 }}>
+                    <p style={{ fontFamily: bodyFont, fontWeight: bodyWeight, fontSize: "14px", lineHeight: 1.5, margin: 0, color: bodyColor, opacity: 0.8 }}>
                       Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
                     </p>
-                    <div className="w-full aspect-video rounded-md flex items-center justify-center" style={{ backgroundColor: `${bodyColor}08` }}>
-                      <ImageIcon className="w-6 h-6" style={{ color: `${bodyColor}30` }} />
+                    <div className="w-full aspect-video rounded-md relative overflow-hidden" style={{ backgroundColor: `${bodyColor}08` }}>
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <ImageIcon className="w-6 h-6" style={{ color: `${bodyColor}30` }} />
+                      </div>
+                      <div className="absolute bottom-0 left-0 right-0 px-3 py-1.5" style={{ backgroundColor: primary, color: buttonPrimaryText, fontFamily: uiFont, fontSize: "10px", fontWeight: 600 }}>
+                        Image caption
+                      </div>
                     </div>
                   </div>
 
                   {/* 5. Placeholder section 2 — white/accent2/white gradient */}
                   <div className="p-4 flex flex-col gap-3" style={{ background: `linear-gradient(180deg, #ffffff 0%, ${accent2} 50%, #ffffff 100%)` }}>
                     <h3 style={{ fontFamily: displayFont, fontWeight: displayWeight, fontSize: "22px", lineHeight: 1.15, letterSpacing: "-0.4px", margin: 0, color: displayColor }}>Section Heading</h3>
-                    <p style={{ fontFamily: bodyFont, fontWeight: bodyWeight, fontSize: "12px", lineHeight: 1.5, margin: 0, color: bodyColor, opacity: 0.8 }}>
+                    <p style={{ fontFamily: bodyFont, fontWeight: bodyWeight, fontSize: "14px", lineHeight: 1.5, margin: 0, color: bodyColor, opacity: 0.8 }}>
                       Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.
                     </p>
-                    <div className="w-full aspect-video rounded-md flex items-center justify-center" style={{ backgroundColor: `${bodyColor}08` }}>
-                      <ImageIcon className="w-6 h-6" style={{ color: `${bodyColor}30` }} />
+                    <div className="w-full aspect-video rounded-md relative overflow-hidden" style={{ backgroundColor: `${bodyColor}08` }}>
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <ImageIcon className="w-6 h-6" style={{ color: `${bodyColor}30` }} />
+                      </div>
+                      <div className="absolute bottom-0 left-0 right-0 px-3 py-1.5" style={{ backgroundColor: primary, color: buttonPrimaryText, fontFamily: uiFont, fontSize: "10px", fontWeight: 600 }}>
+                        Image caption
+                      </div>
                     </div>
                   </div>
 
