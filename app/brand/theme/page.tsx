@@ -450,7 +450,22 @@ export default function ThemePage() {
   const [favicon, setFavicon] = useState<string | null>(null);
   const [ogImage, setOgImage] = useState<string | null>(null);
 
-  // No derived colors needed — all values are explicit
+  // Dynamically load Google Fonts for preview
+  React.useEffect(() => {
+    const fonts = [displayFont, bodyFont, uiFont, condensedFont].filter((f) => f !== "Custom" && f !== "Geist")
+    if (fonts.length === 0) return
+    const families = fonts.map((f) => f.replace(/ /g, "+") + ":wght@200;300;400;500;600;700;800;900").join("&family=")
+    const href = `https://fonts.googleapis.com/css2?family=${families}&display=swap`
+    const id = "theme-preview-fonts"
+    let link = document.getElementById(id) as HTMLLinkElement | null
+    if (!link) {
+      link = document.createElement("link")
+      link.id = id
+      link.rel = "stylesheet"
+      document.head.appendChild(link)
+    }
+    link.href = href
+  }, [displayFont, bodyFont, uiFont, condensedFont])
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -640,8 +655,8 @@ export default function ThemePage() {
               <CardHeader className="pb-4">
                 <CardTitle className="text-base">Preview</CardTitle>
               </CardHeader>
-              <CardContent className="p-0">
-                <div className="rounded-lg overflow-hidden shadow-sm" style={{ backgroundColor: backgroundPrimary, color: bodyColor, fontFamily: bodyFont, fontSize: `${baseFontSize}px` }}>
+              <CardContent className="p-4">
+                <div className="rounded-lg overflow-hidden shadow-sm mx-auto" style={{ backgroundColor: backgroundPrimary, color: bodyColor, fontFamily: bodyFont, fontSize: `${baseFontSize}px`, maxWidth: "320px" }}>
 
                   {/* 1. Urgency banner — accent + condensed */}
                   <div className="text-center uppercase tracking-wider" style={{ backgroundColor: buttonSecondary, color: buttonSecondaryText, fontFamily: condensedFont, fontWeight: 900, fontSize: "12px", letterSpacing: "0.04em", padding: "6px 12px" }}>
