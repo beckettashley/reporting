@@ -318,8 +318,7 @@ function FontSelect({
         <select
           value={weight}
           onChange={(e) => onWeightChange(e.target.value)}
-          className="w-36 h-9 rounded-md border bg-background text-sm pl-2.5 pr-6 cursor-pointer appearance-none"
-          style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23999' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M6 9l6 6 6-6'/%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 8px center", backgroundSize: "16px" }}
+          className="w-36 h-9 rounded-md border bg-background text-sm pl-3 pr-8 cursor-pointer"
         >
           <option value="200">Extra Light</option>
           <option value="300">Light</option>
