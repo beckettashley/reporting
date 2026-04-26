@@ -717,8 +717,8 @@ export default function ThemePage() {
                     </button>
                   </div>
 
-                  {/* 4. Placeholder section 1 — white/accent1/white gradient + all heading levels */}
-                  <div className="p-4 flex flex-col gap-2" style={{ background: `linear-gradient(180deg, #ffffff 0%, #ffffff 15%, ${accent1} 50%, #ffffff 85%, #ffffff 100%)` }}>
+                  {/* 4. Placeholder section 1 — simple */}
+                  <div className="p-4 flex flex-col gap-3" style={{ background: `linear-gradient(180deg, #ffffff 0%, #ffffff 15%, ${accent1} 50%, #ffffff 85%, #ffffff 100%)` }}>
                     <div style={{ fontFamily: headings.H1.font, fontWeight: headings.H1.weight, fontSize: s(22), lineHeight: 1.15, letterSpacing: "-0.4px", color: headings.H1.color }}>Heading 1</div>
                     <div style={{ fontFamily: headings.H2.font, fontWeight: headings.H2.weight, fontSize: s(18), lineHeight: 1.2, color: headings.H2.color }}>Heading 2</div>
                     <p style={{ fontFamily: bodyFont, fontWeight: bodyWeight, fontSize: s(14), lineHeight: 1.5, margin: 0, color: bodyColor, opacity: 0.8 }}>
@@ -732,10 +732,6 @@ export default function ThemePage() {
                         Image caption
                       </div>
                     </div>
-                    <div style={{ fontFamily: headings.H3.font, fontWeight: headings.H3.weight, fontSize: s(16), lineHeight: 1.25, color: headings.H3.color }}>Heading 3</div>
-                    <div style={{ fontFamily: headings.H4.font, fontWeight: headings.H4.weight, fontSize: s(14), lineHeight: 1.3, color: headings.H4.color }}>Heading 4</div>
-                    <div style={{ fontFamily: headings.H5.font, fontWeight: headings.H5.weight, fontSize: s(13), lineHeight: 1.3, color: headings.H5.color }}>Heading 5</div>
-                    <div style={{ fontFamily: headings.H6.font, fontWeight: headings.H6.weight, fontSize: s(12), lineHeight: 1.3, color: headings.H6.color }}>Heading 6</div>
                   </div>
 
                   {/* CTA section — button secondary */}
@@ -745,10 +741,14 @@ export default function ThemePage() {
                     </button>
                   </div>
 
-                  {/* 5. Placeholder section 2 — white/accent2/white gradient */}
-                  <div className="p-4 flex flex-col gap-3" style={{ background: `linear-gradient(180deg, #ffffff 0%, #ffffff 15%, ${accent2} 50%, #ffffff 85%, #ffffff 100%)` }}>
+                  {/* 5. Placeholder section 2 — all heading levels */}
+                  <div className="p-4 flex flex-col gap-2" style={{ background: `linear-gradient(180deg, #ffffff 0%, #ffffff 15%, ${accent2} 50%, #ffffff 85%, #ffffff 100%)` }}>
                     <div style={{ fontFamily: headings.H1.font, fontWeight: headings.H1.weight, fontSize: s(22), lineHeight: 1.15, letterSpacing: "-0.4px", color: headings.H1.color }}>Heading 1</div>
                     <div style={{ fontFamily: headings.H2.font, fontWeight: headings.H2.weight, fontSize: s(18), lineHeight: 1.2, color: headings.H2.color }}>Heading 2</div>
+                    <div style={{ fontFamily: headings.H3.font, fontWeight: headings.H3.weight, fontSize: s(16), lineHeight: 1.25, color: headings.H3.color }}>Heading 3</div>
+                    <div style={{ fontFamily: headings.H4.font, fontWeight: headings.H4.weight, fontSize: s(14), lineHeight: 1.3, color: headings.H4.color }}>Heading 4</div>
+                    <div style={{ fontFamily: headings.H5.font, fontWeight: headings.H5.weight, fontSize: s(13), lineHeight: 1.3, color: headings.H5.color }}>Heading 5</div>
+                    <div style={{ fontFamily: headings.H6.font, fontWeight: headings.H6.weight, fontSize: s(12), lineHeight: 1.3, color: headings.H6.color }}>Heading 6</div>
                     <p style={{ fontFamily: bodyFont, fontWeight: bodyWeight, fontSize: s(14), lineHeight: 1.5, margin: 0, color: bodyColor, opacity: 0.8 }}>
                       Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.
                     </p>
