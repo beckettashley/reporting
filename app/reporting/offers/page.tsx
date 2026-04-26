@@ -730,8 +730,8 @@ function OfferDetail({ offer }: { offer: AggregatedOffer }) {
         {/* Insights */}
         {insightRows.length > 0 && (
           <div className="space-y-3">
-            <p className="text-sm font-semibold text-foreground">Insights</p>
-            <div className="rounded-xl border overflow-hidden">
+            <p className="text-sm font-semibold text-red-700">Insights <span className="text-xs font-normal text-red-400">— placeholder, not included in v1</span></p>
+            <div className="rounded-xl border-2 border-red-300 overflow-hidden">
               <table className="w-full text-sm" style={{ tableLayout: "fixed" }}>
                 <colgroup>
                   <col />
