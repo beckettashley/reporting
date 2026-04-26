@@ -696,7 +696,7 @@ export default function ThemePage() {
                     <p style={{ fontFamily: bodyFont, fontSize: "14px", lineHeight: 1.5, fontWeight: bodyWeight, margin: 0, color: bodyColor }}>
                       The smoother, smarter way to start your day — packed with what your body actually needs.
                     </p>
-                    <ul className="flex flex-col gap-2" style={{ fontSize: "13px", fontFamily: bodyFont }}>
+                    <ul className="flex flex-col gap-2" style={{ fontSize: "13px", fontFamily: bodyFont, fontWeight: bodyWeight }}>
                       {["Real ingredients, no shortcuts", "Loved by 18,000+ customers", "30-day money-back guarantee"].map((b) => (
                         <li key={b} className="flex items-center gap-2">
                           <span className="w-[18px] h-[18px] rounded-full flex items-center justify-center text-[11px] font-bold shrink-0" style={{ backgroundColor: `${primary}20`, color: primary, fontFamily: uiFont }}>✓</span>
