@@ -736,7 +736,6 @@ export default function ThemePage() {
                     <div style={{ fontFamily: headings.H4.font, fontWeight: headings.H4.weight, fontSize: s(14), lineHeight: 1.3, color: headings.H4.color }}>Heading 4</div>
                     <div style={{ fontFamily: headings.H5.font, fontWeight: headings.H5.weight, fontSize: s(13), lineHeight: 1.3, color: headings.H5.color }}>Heading 5</div>
                     <div style={{ fontFamily: headings.H6.font, fontWeight: headings.H6.weight, fontSize: s(12), lineHeight: 1.3, color: headings.H6.color }}>Heading 6</div>
-                    </div>
                   </div>
 
                   {/* CTA section — button secondary */}
