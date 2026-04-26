@@ -679,7 +679,7 @@ export default function ThemePage() {
                   </div>
 
                   {/* 3. Hero — image + display + body + bullets + CTA */}
-                  <div className="p-4 flex flex-col gap-3" style={{ background: `radial-gradient(circle at 50% 0%, #fff 0%, ${accent1} 100%)` }}>
+                  <div className="p-4 flex flex-col gap-3" style={{ backgroundColor: "#ffffff" }}>
                     {/* Product image placeholder */}
                     <div className="w-full aspect-square rounded-lg" style={{ backgroundColor: `${primary}15`, backgroundImage: "url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 fill=%22none%22 viewBox=%220 0 24 24%22 stroke=%22%23999%22 stroke-width=%221%22%3E%3Crect x=%223%22 y=%223%22 width=%2218%22 height=%2218%22 rx=%222%22/%3E%3Ccircle cx=%228.5%22 cy=%228.5%22 r=%221.5%22/%3E%3Cpath d=%22m21 15-5-5L5 21%22/%3E%3C/svg%3E')", backgroundPosition: "center", backgroundRepeat: "no-repeat", backgroundSize: "48px" }} />
                     <div className="flex items-center gap-1.5">
@@ -721,13 +721,21 @@ export default function ThemePage() {
                     </div>
                   </div>
 
-                  {/* 6. Callout strip — accent 3 */}
-                  <div className="text-center" style={{ backgroundColor: accent3, fontFamily: bodyFont, fontSize: "12px", padding: "12px 16px", color: bodyColor }}>
-                    Free shipping over $40 · 30-day refund guarantee
+                  {/* 5. Placeholder section 1 — white/accent1/white gradient */}
+                  <div className="p-4 flex flex-col gap-2" style={{ background: `linear-gradient(180deg, #ffffff 0%, ${accent1} 50%, #ffffff 100%)` }}>
+                    <div className="h-2.5 rounded-full w-3/4" style={{ backgroundColor: `${bodyColor}20` }} />
+                    <div className="h-2.5 rounded-full w-full" style={{ backgroundColor: `${bodyColor}10` }} />
+                    <div className="h-2.5 rounded-full w-5/6" style={{ backgroundColor: `${bodyColor}10` }} />
+                    <div className="h-2.5 rounded-full w-2/3" style={{ backgroundColor: `${bodyColor}10` }} />
                   </div>
 
-                  {/* 7. Gradient band — accent 1 + accent 2 */}
-                  <div className="h-8" style={{ background: `linear-gradient(${accent1} 0%, ${accent2} 100%)` }} />
+                  {/* 6. Placeholder section 2 — white/accent2/white gradient */}
+                  <div className="p-4 flex flex-col gap-2" style={{ background: `linear-gradient(180deg, #ffffff 0%, ${accent2} 50%, #ffffff 100%)` }}>
+                    <div className="h-2.5 rounded-full w-2/3" style={{ backgroundColor: `${bodyColor}20` }} />
+                    <div className="h-2.5 rounded-full w-full" style={{ backgroundColor: `${bodyColor}10` }} />
+                    <div className="h-2.5 rounded-full w-4/5" style={{ backgroundColor: `${bodyColor}10` }} />
+                    <div className="h-2.5 rounded-full w-1/2" style={{ backgroundColor: `${bodyColor}10` }} />
+                  </div>
 
                   {/* 8. Footer — primary dark + inverse text */}
                   <div className="flex flex-col gap-2.5 p-4" style={{ backgroundColor: primaryDark, color: buttonPrimaryText }}>
