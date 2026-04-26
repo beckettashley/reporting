@@ -751,7 +751,7 @@ export default function ThemePage() {
                   </div>
 
                   {/* CTA section — button secondary */}
-                  <div className="p-4" style={{ backgroundColor: "#ffffff" }}>
+                  <div className="px-4 pb-4" style={{ backgroundColor: "#ffffff" }}>
                     <button className="w-full rounded-lg border-0 cursor-pointer shadow-sm" style={{ backgroundColor: buttonSecondary, color: contrastText(buttonSecondary), fontFamily: uiFont, fontWeight: uiWeight, fontSize: "14px", letterSpacing: "0.04em", textAlign: "center" as const, padding: "14px" }}>
                       GET YOUR OFFER →
                     </button>
