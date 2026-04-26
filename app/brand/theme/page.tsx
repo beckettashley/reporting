@@ -689,7 +689,9 @@ export default function ThemePage() {
                   {/* 3. Hero — image + display + body + bullets + CTA */}
                   <div className="p-4 flex flex-col gap-3" style={{ backgroundColor: backgroundPrimary }}>
                     {/* Product image placeholder */}
-                    <div className="w-full aspect-square rounded-lg" style={{ backgroundColor: `${primary}15`, backgroundImage: "url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 fill=%22none%22 viewBox=%220 0 24 24%22 stroke=%22%23999%22 stroke-width=%221%22%3E%3Crect x=%223%22 y=%223%22 width=%2218%22 height=%2218%22 rx=%222%22/%3E%3Ccircle cx=%228.5%22 cy=%228.5%22 r=%221.5%22/%3E%3Cpath d=%22m21 15-5-5L5 21%22/%3E%3C/svg%3E')", backgroundPosition: "center", backgroundRepeat: "no-repeat", backgroundSize: "48px" }} />
+                    <div className="w-full aspect-square rounded-lg flex items-center justify-center" style={{ backgroundColor: "#f0f0f0" }}>
+                      <ImageIcon className="w-8 h-8 text-white/60" />
+                    </div>
                     <div className="flex items-center gap-1.5">
                       <div className="flex items-center gap-0.5">
                         {[1,2,3,4,5].map((s) => (
@@ -724,7 +726,7 @@ export default function ThemePage() {
                     <p style={{ fontFamily: bodyFont, fontWeight: bodyWeight, fontSize: s(14), lineHeight: 1.5, margin: 0, color: bodyColor, opacity: 0.8 }}>
                       Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
                     </p>
-                    <div className="w-full aspect-video rounded-md relative overflow-hidden" style={{ backgroundColor: "#e5e5e5" }}>
+                    <div className="w-full aspect-video rounded-md relative overflow-hidden" style={{ backgroundColor: "#f0f0f0" }}>
                       <div className="absolute inset-0 flex items-center justify-center">
                         <ImageIcon className="w-6 h-6 text-white/60" />
                       </div>
@@ -741,7 +743,7 @@ export default function ThemePage() {
                     <p style={{ fontFamily: bodyFont, fontWeight: bodyWeight, fontSize: s(14), lineHeight: 1.5, margin: 0, color: bodyColor, opacity: 0.8 }}>
                       Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
                     </p>
-                    <div className="w-full aspect-video rounded-md relative overflow-hidden" style={{ backgroundColor: "#e5e5e5" }}>
+                    <div className="w-full aspect-video rounded-md relative overflow-hidden" style={{ backgroundColor: "#f0f0f0" }}>
                       <div className="absolute inset-0 flex items-center justify-center">
                         <ImageIcon className="w-6 h-6 text-white/60" />
                       </div>
@@ -769,7 +771,7 @@ export default function ThemePage() {
                     <p style={{ fontFamily: bodyFont, fontWeight: bodyWeight, fontSize: s(14), lineHeight: 1.5, margin: 0, color: bodyColor, opacity: 0.8 }}>
                       Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.
                     </p>
-                    <div className="w-full aspect-video rounded-md relative overflow-hidden" style={{ backgroundColor: "#e5e5e5" }}>
+                    <div className="w-full aspect-video rounded-md relative overflow-hidden" style={{ backgroundColor: "#f0f0f0" }}>
                       <div className="absolute inset-0 flex items-center justify-center">
                         <ImageIcon className="w-6 h-6 text-white/60" />
                       </div>
