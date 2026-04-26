@@ -690,7 +690,7 @@ export default function ThemePage() {
                   <div className="p-4 flex flex-col gap-3" style={{ backgroundColor: backgroundPrimary }}>
                     {/* Product image placeholder */}
                     <div className="w-full aspect-square rounded-lg flex items-center justify-center" style={{ backgroundColor: "#f0f0f0" }}>
-                      <ImageIcon className="w-8 h-8 text-white/60" />
+                      <ImageIcon className="w-8 h-8 text-gray-400" />
                     </div>
                     <div className="flex items-center gap-1.5">
                       <div className="flex items-center gap-0.5">
@@ -729,7 +729,7 @@ export default function ThemePage() {
                     </p>
                     <div className="w-full aspect-video rounded-md relative overflow-hidden" style={{ backgroundColor: "#f0f0f0" }}>
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <ImageIcon className="w-6 h-6 text-white/60" />
+                        <ImageIcon className="w-6 h-6 text-gray-400" />
                       </div>
                       <div className="absolute bottom-0 left-0 right-0 px-3 py-1.5" style={{ backgroundColor: primary, color: contrastText(primary), fontFamily: uiFont, fontSize: s(10), fontWeight: 600 }}>
                         Image caption
@@ -746,7 +746,7 @@ export default function ThemePage() {
                     </p>
                     <div className="w-full aspect-video rounded-md relative overflow-hidden" style={{ backgroundColor: "#f0f0f0" }}>
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <ImageIcon className="w-6 h-6 text-white/60" />
+                        <ImageIcon className="w-6 h-6 text-gray-400" />
                       </div>
                       <div className="absolute bottom-0 left-0 right-0 px-3 py-1.5" style={{ backgroundColor: primary, color: contrastText(primary), fontFamily: uiFont, fontSize: s(10), fontWeight: 600 }}>
                         Image caption
@@ -774,7 +774,7 @@ export default function ThemePage() {
                     </p>
                     <div className="w-full aspect-video rounded-md relative overflow-hidden" style={{ backgroundColor: "#f0f0f0" }}>
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <ImageIcon className="w-6 h-6 text-white/60" />
+                        <ImageIcon className="w-6 h-6 text-gray-400" />
                       </div>
                       <div className="absolute bottom-0 left-0 right-0 px-3 py-1.5" style={{ backgroundColor: primary, color: contrastText(primary), fontFamily: uiFont, fontSize: s(10), fontWeight: 600 }}>
                         Image caption
