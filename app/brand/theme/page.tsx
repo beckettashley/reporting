@@ -662,10 +662,15 @@ export default function ThemePage() {
                         <img
                           src={logo}
                           alt="Logo"
-                          className="h-6 object-contain"
+                          className="h-6 max-w-[120px] object-contain"
                         />
                       ) : (
-                        "Brand Logo"
+                        <div className="flex items-center gap-1.5">
+                          <div className="w-6 h-6 rounded bg-muted flex items-center justify-center">
+                            <ImageIcon className="w-3.5 h-3.5 text-muted-foreground" />
+                          </div>
+                          <span className="text-muted-foreground">Brand Logo</span>
+                        </div>
                       )}
                     </div>
                     <div
