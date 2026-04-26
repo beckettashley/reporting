@@ -364,7 +364,7 @@ function ImageUploadField({
         <button
           type="button"
           onClick={() => preview && setModalOpen(true)}
-          className="w-8 h-8 flex-shrink-0 border rounded-md flex items-center justify-center bg-muted relative overflow-hidden cursor-pointer hover:ring-1 hover:ring-ring transition-all"
+          className={`w-8 h-8 flex-shrink-0 border rounded-md flex items-center justify-center bg-muted relative overflow-hidden transition-all ${preview ? "cursor-pointer hover:ring-1 hover:ring-ring" : "cursor-default"}`}
         >
           {preview ? (
             <img src={preview} alt={label} className="w-full h-full object-contain" />
