@@ -691,7 +691,7 @@ export default function ThemePage() {
                       <span style={{ fontSize: "12px", fontFamily: bodyFont, color: bodyColor }}>18,623 reviews</span>
                     </div>
                     <h2 style={{ fontFamily: displayFont, fontSize: "22px", lineHeight: 1.15, fontWeight: displayWeight, letterSpacing: "-0.4px", margin: 0, color: displayColor }}>
-                      Better mornings, <span style={{ color: primary }}>brewed for you</span>.
+                      Better mornings, brewed for you.
                     </h2>
                     <p style={{ fontFamily: bodyFont, fontSize: "14px", lineHeight: 1.5, fontWeight: bodyWeight, margin: 0, color: bodyColor }}>
                       The smoother, smarter way to start your day — packed with what your body actually needs.
