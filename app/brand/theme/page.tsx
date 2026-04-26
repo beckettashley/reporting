@@ -346,6 +346,8 @@ function ImageUploadField({
   onUpload: (dataUrl: string) => void;
   accept?: string;
 }) {
+  const [modalOpen, setModalOpen] = useState(false);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -355,30 +357,44 @@ function ImageUploadField({
   };
 
   return (
-    <div className="flex items-start gap-3">
-      <div className="w-12 h-10 flex-shrink-0 border rounded flex items-center justify-center bg-muted relative overflow-hidden">
-        {preview ? (
-          <img
-            src={preview}
-            alt={label}
-            className="w-full h-full object-contain"
-          />
-        ) : (
-          <ImageIcon className="w-5 h-5 text-muted-foreground" />
-        )}
-      </div>
-      <div className="flex-1 flex flex-col gap-1">
-        <Label className="text-sm font-medium">{label}</Label>
-        {helper && (
-          <p className="text-xs text-muted-foreground">{helper}</p>
-        )}
+    <div className="flex-1">
+      <Label className="text-xs font-medium text-muted-foreground">{label}</Label>
+      {helper && <p className="text-[10px] text-muted-foreground mt-0.5">{helper}</p>}
+      <div className="flex items-center gap-2 mt-1">
+        <button
+          type="button"
+          onClick={() => preview && setModalOpen(true)}
+          className="w-8 h-8 flex-shrink-0 border rounded-md flex items-center justify-center bg-muted relative overflow-hidden cursor-pointer hover:ring-1 hover:ring-ring transition-all"
+        >
+          {preview ? (
+            <img src={preview} alt={label} className="w-full h-full object-contain" />
+          ) : (
+            <ImageIcon className="w-4 h-4 text-muted-foreground" />
+          )}
+        </button>
         <Input
           type="file"
           accept={accept}
           onChange={handleChange}
-          className="cursor-pointer h-9"
+          className="cursor-pointer h-8 text-sm"
         />
       </div>
+
+      {/* Preview modal */}
+      {modalOpen && preview && (
+        <>
+          <div className="fixed inset-0 bg-black/40 z-[99998]" onClick={() => setModalOpen(false)} />
+          <div className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[99999] bg-background border rounded-xl shadow-2xl p-4 max-w-md w-[90vw]">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-sm font-medium">{label}</p>
+              <button onClick={() => setModalOpen(false)} className="p-1 rounded-md hover:bg-muted transition-colors">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+            </div>
+            <img src={preview} alt={label} className="w-full object-contain rounded border max-h-[60vh]" />
+          </div>
+        </>
+      )}
     </div>
   );
 }
