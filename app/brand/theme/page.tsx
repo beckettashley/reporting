@@ -449,7 +449,6 @@ export default function ThemePage() {
   const [logoDark, setLogoDark] = useState<string | null>(null);
   const [favicon, setFavicon] = useState<string | null>(null);
   const [ogImage, setOgImage] = useState<string | null>(null);
-  const [logoLink, setLogoLink] = useState("https://javvy.com");
 
   // No derived colors needed — all values are explicit
 
@@ -628,16 +627,6 @@ export default function ThemePage() {
                   preview={ogImage}
                   onUpload={setOgImage}
                 />
-                <div className="flex flex-col gap-1.5">
-                  <Label className="text-sm font-medium">Logo Link</Label>
-                  <Input
-                    type="url"
-                    value={logoLink}
-                    onChange={(e) => setLogoLink(e.target.value)}
-                    placeholder="https://brand.com"
-                    className="h-9"
-                  />
-                </div>
               </CardContent>
             </Card>
           </div>
