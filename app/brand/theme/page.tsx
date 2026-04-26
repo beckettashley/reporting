@@ -673,10 +673,15 @@ export default function ThemePage() {
                     Free shipping on orders over $40
                   </div>
 
-                  {/* 2. Navbar — logo + hamburger */}
+                  {/* 2. Navbar — logo auto-switches based on bg contrast */}
                   <div className="flex items-center justify-between px-4 py-2.5" style={{ borderBottom: `1px solid ${borderSubtle}` }}>
                     {logo ? (
-                      <img src={logo} alt="Logo" className="h-5 max-w-[80px] object-contain" />
+                      <img
+                        src={luminance(backgroundPrimary) < 0.45 ? (logoDark || logo) : logo}
+                        alt="Logo"
+                        className="h-5 max-w-[80px] object-contain"
+                        style={luminance(backgroundPrimary) < 0.45 && !logoDark ? { filter: "brightness(0) invert(1)" } : undefined}
+                      />
                     ) : (
                       <div className="flex items-center gap-1.5">
                         <div className="w-5 h-5 rounded bg-muted flex items-center justify-center"><ImageIcon className="w-3 h-3 text-muted-foreground" /></div>
@@ -707,7 +712,7 @@ export default function ThemePage() {
                       The smoother, smarter way to start your day — packed with what your body actually needs.
                     </p>
                     <hr style={{ border: "none", borderTop: `1px solid ${borderSubtle}`, margin: 0 }} />
-                    <ul className="flex flex-col gap-2" style={{ fontSize: s(13), fontFamily: bodyFont, fontWeight: bodyWeight }}>
+                    <ul className="flex flex-col gap-2" style={{ fontSize: s(14), fontFamily: bodyFont, fontWeight: bodyWeight }}>
                       {["Real ingredients, no shortcuts", "Loved by 18,000+ customers", "30-day money-back guarantee"].map((b) => (
                         <li key={b} className="flex items-center gap-2">
                           <span className="w-[18px] h-[18px] rounded-full flex items-center justify-center text-[11px] font-bold shrink-0" style={{ backgroundColor: `${primary}20`, color: primary, fontFamily: uiFont }}>✓</span>
@@ -785,7 +790,12 @@ export default function ThemePage() {
                   {/* 8. Footer — primary dark + inverse text */}
                   <div className="flex flex-col gap-2.5 p-4" style={{ backgroundColor: primaryDark, color: contrastText(primaryDark) }}>
                     {logo ? (
-                      <img src={logoDark || logo} alt="Logo" className="h-5 max-w-[90px] object-contain" style={!logoDark ? { filter: "brightness(0) invert(1)" } : undefined} />
+                      <img
+                        src={luminance(primaryDark) < 0.45 ? (logoDark || logo) : logo}
+                        alt="Logo"
+                        className="h-5 max-w-[90px] object-contain"
+                        style={luminance(primaryDark) < 0.45 && !logoDark ? { filter: "brightness(0) invert(1)" } : undefined}
+                      />
                     ) : (
                       <span className="text-xs opacity-75" style={{ fontFamily: uiFont }}>Brand Logo</span>
                     )}
