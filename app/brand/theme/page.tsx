@@ -761,6 +761,13 @@ export default function ThemePage() {
                     </div>
                   </div>
 
+                  {/* CTA section — button secondary */}
+                  <div className="p-4" style={{ backgroundColor: "#ffffff" }}>
+                    <button className="w-full rounded-lg border-0 cursor-pointer" style={{ backgroundColor: buttonSecondary, color: contrastText(buttonSecondary), fontFamily: uiFont, fontWeight: uiWeight, fontSize: "14px", letterSpacing: "0.04em", textAlign: "center" as const, padding: "14px" }}>
+                      GET YOUR OFFER →
+                    </button>
+                  </div>
+
                   {/* 8. Footer — primary dark + inverse text */}
                   <div className="flex flex-col gap-2.5 p-4" style={{ backgroundColor: primaryDark, color: contrastText(primaryDark) }}>
                     {logo ? (
