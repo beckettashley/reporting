@@ -487,6 +487,9 @@ export default function ThemePage() {
     link.href = href
   }, [displayFont, bodyFont, uiFont, condensedFont])
 
+  // Scale factor for preview — all sizes proportional to base font size
+  const s = (px: number) => `${(px * baseFontSize / 16).toFixed(1)}px`
+
   return (
     <div className="flex flex-col min-h-screen">
       <div className="flex-1 p-6 lg:p-8">
@@ -661,12 +664,12 @@ export default function ThemePage() {
                 <div className="rounded-lg overflow-hidden shadow-sm mx-auto" style={{ backgroundColor: backgroundPrimary, color: bodyColor, fontFamily: bodyFont, fontSize: `${baseFontSize}px`, maxWidth: "320px" }}>
 
                   {/* 1a. Urgency banner — primary dark + condensed */}
-                  <div className="text-center uppercase tracking-wider" style={{ backgroundColor: primaryDark, color: contrastText(primaryDark), fontFamily: condensedFont, fontWeight: 900, fontSize: "12px", letterSpacing: "0.04em", padding: "6px 12px" }}>
+                  <div className="text-center uppercase tracking-wider" style={{ backgroundColor: primaryDark, color: contrastText(primaryDark), fontFamily: condensedFont, fontWeight: 900, fontSize: s(12), letterSpacing: "0.04em", padding: "6px 12px" }}>
                     ⚡ Spring sale — up to 58% off today
                   </div>
 
                   {/* 1b. Secondary banner — primary */}
-                  <div className="text-center" style={{ backgroundColor: primary, color: contrastText(primary), fontFamily: uiFont, fontWeight: 600, fontSize: "11px", letterSpacing: "0.02em", padding: "5px 12px" }}>
+                  <div className="text-center" style={{ backgroundColor: primary, color: contrastText(primary), fontFamily: uiFont, fontWeight: 600, fontSize: s(11), letterSpacing: "0.02em", padding: "5px 12px" }}>
                     Free shipping on orders over $40
                   </div>
 
@@ -693,15 +696,15 @@ export default function ThemePage() {
                           <svg key={s} width="14" height="14" viewBox="0 0 24 24" fill="#f59e0b" stroke="none"><path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z" /></svg>
                         ))}
                       </div>
-                      <span style={{ fontSize: "12px", fontFamily: bodyFont, color: bodyColor }}>18,623 reviews</span>
+                      <span style={{ fontSize: s(12), fontFamily: bodyFont, color: bodyColor }}>18,623 reviews</span>
                     </div>
-                    <h2 style={{ fontFamily: displayFont, fontSize: "22px", lineHeight: 1.15, fontWeight: displayWeight, letterSpacing: "-0.4px", margin: 0, color: displayColor }}>
+                    <h2 style={{ fontFamily: displayFont, fontSize: s(22), lineHeight: 1.15, fontWeight: displayWeight, letterSpacing: "-0.4px", margin: 0, color: displayColor }}>
                       Better mornings, brewed for you.
                     </h2>
-                    <p style={{ fontFamily: bodyFont, fontSize: "14px", lineHeight: 1.5, fontWeight: bodyWeight, margin: 0, color: bodyColor }}>
+                    <p style={{ fontFamily: bodyFont, fontSize: s(14), lineHeight: 1.5, fontWeight: bodyWeight, margin: 0, color: bodyColor }}>
                       The smoother, smarter way to start your day — packed with what your body actually needs.
                     </p>
-                    <ul className="flex flex-col gap-2" style={{ fontSize: "13px", fontFamily: bodyFont, fontWeight: bodyWeight }}>
+                    <ul className="flex flex-col gap-2" style={{ fontSize: s(13), fontFamily: bodyFont, fontWeight: bodyWeight }}>
                       {["Real ingredients, no shortcuts", "Loved by 18,000+ customers", "30-day money-back guarantee"].map((b) => (
                         <li key={b} className="flex items-center gap-2">
                           <span className="w-[18px] h-[18px] rounded-full flex items-center justify-center text-[11px] font-bold shrink-0" style={{ backgroundColor: `${primary}20`, color: primary, fontFamily: uiFont }}>✓</span>
@@ -709,23 +712,23 @@ export default function ThemePage() {
                         </li>
                       ))}
                     </ul>
-                    <button className="w-full rounded-lg border-0 cursor-pointer shadow-sm" style={{ backgroundColor: buttonPrimary, color: contrastText(buttonPrimary), fontFamily: uiFont, fontWeight: uiWeight, fontSize: "14px", letterSpacing: "0.04em", textAlign: "center" as const, padding: "12px" }}>
+                    <button className="w-full rounded-lg border-0 cursor-pointer shadow-sm" style={{ backgroundColor: buttonPrimary, color: contrastText(buttonPrimary), fontFamily: uiFont, fontWeight: uiWeight, fontSize: s(14), letterSpacing: "0.04em", textAlign: "center" as const, padding: "12px" }}>
                       CLAIM YOUR DISCOUNT →
                     </button>
                   </div>
 
                   {/* 4. Placeholder section 1 — white/accent1/white gradient */}
                   <div className="p-4 flex flex-col gap-3" style={{ background: `linear-gradient(180deg, #ffffff 0%, #ffffff 15%, ${accent1} 50%, #ffffff 85%, #ffffff 100%)` }}>
-                    <h3 style={{ fontFamily: headings.H1.font, fontWeight: headings.H1.weight, fontSize: "22px", lineHeight: 1.15, letterSpacing: "-0.4px", margin: 0, color: headings.H1.color }}>Section Heading</h3>
-                    <h4 style={{ fontFamily: headings.H2.font, fontWeight: headings.H2.weight, fontSize: "16px", lineHeight: 1.2, margin: 0, color: headings.H2.color }}>Subheading text here</h4>
-                    <p style={{ fontFamily: bodyFont, fontWeight: bodyWeight, fontSize: "14px", lineHeight: 1.5, margin: 0, color: bodyColor, opacity: 0.8 }}>
+                    <h3 style={{ fontFamily: headings.H1.font, fontWeight: headings.H1.weight, fontSize: s(22), lineHeight: 1.15, letterSpacing: "-0.4px", margin: 0, color: headings.H1.color }}>Section Heading</h3>
+                    <h4 style={{ fontFamily: headings.H2.font, fontWeight: headings.H2.weight, fontSize: s(16), lineHeight: 1.2, margin: 0, color: headings.H2.color }}>Subheading text here</h4>
+                    <p style={{ fontFamily: bodyFont, fontWeight: bodyWeight, fontSize: s(14), lineHeight: 1.5, margin: 0, color: bodyColor, opacity: 0.8 }}>
                       Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
                     </p>
                     <div className="w-full aspect-video rounded-md relative overflow-hidden" style={{ backgroundColor: "#e5e5e5" }}>
                       <div className="absolute inset-0 flex items-center justify-center">
                         <ImageIcon className="w-6 h-6 text-white/60" />
                       </div>
-                      <div className="absolute bottom-0 left-0 right-0 px-3 py-1.5" style={{ backgroundColor: primary, color: contrastText(primary), fontFamily: uiFont, fontSize: "10px", fontWeight: 600 }}>
+                      <div className="absolute bottom-0 left-0 right-0 px-3 py-1.5" style={{ backgroundColor: primary, color: contrastText(primary), fontFamily: uiFont, fontSize: s(10), fontWeight: 600 }}>
                         Image caption
                       </div>
                     </div>
@@ -735,16 +738,16 @@ export default function ThemePage() {
 
                   {/* 5. Placeholder section 2 — white/accent2/white gradient */}
                   <div className="p-4 flex flex-col gap-3" style={{ background: `linear-gradient(180deg, #ffffff 0%, #ffffff 15%, ${accent2} 50%, #ffffff 85%, #ffffff 100%)` }}>
-                    <h3 style={{ fontFamily: headings.H1.font, fontWeight: headings.H1.weight, fontSize: "22px", lineHeight: 1.15, letterSpacing: "-0.4px", margin: 0, color: headings.H1.color }}>Section Heading</h3>
-                    <h4 style={{ fontFamily: headings.H2.font, fontWeight: headings.H2.weight, fontSize: "16px", lineHeight: 1.2, margin: 0, color: headings.H2.color }}>Subheading text here</h4>
-                    <p style={{ fontFamily: bodyFont, fontWeight: bodyWeight, fontSize: "14px", lineHeight: 1.5, margin: 0, color: bodyColor, opacity: 0.8 }}>
+                    <h3 style={{ fontFamily: headings.H1.font, fontWeight: headings.H1.weight, fontSize: s(22), lineHeight: 1.15, letterSpacing: "-0.4px", margin: 0, color: headings.H1.color }}>Section Heading</h3>
+                    <h4 style={{ fontFamily: headings.H2.font, fontWeight: headings.H2.weight, fontSize: s(16), lineHeight: 1.2, margin: 0, color: headings.H2.color }}>Subheading text here</h4>
+                    <p style={{ fontFamily: bodyFont, fontWeight: bodyWeight, fontSize: s(14), lineHeight: 1.5, margin: 0, color: bodyColor, opacity: 0.8 }}>
                       Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.
                     </p>
                     <div className="w-full aspect-video rounded-md relative overflow-hidden" style={{ backgroundColor: "#e5e5e5" }}>
                       <div className="absolute inset-0 flex items-center justify-center">
                         <ImageIcon className="w-6 h-6 text-white/60" />
                       </div>
-                      <div className="absolute bottom-0 left-0 right-0 px-3 py-1.5" style={{ backgroundColor: primary, color: contrastText(primary), fontFamily: uiFont, fontSize: "10px", fontWeight: 600 }}>
+                      <div className="absolute bottom-0 left-0 right-0 px-3 py-1.5" style={{ backgroundColor: primary, color: contrastText(primary), fontFamily: uiFont, fontSize: s(10), fontWeight: 600 }}>
                         Image caption
                       </div>
                     </div>
@@ -752,7 +755,7 @@ export default function ThemePage() {
 
                   {/* CTA section — button secondary */}
                   <div className="px-4 pb-4" style={{ backgroundColor: "#ffffff" }}>
-                    <button className="w-full rounded-lg border-0 cursor-pointer shadow-sm" style={{ backgroundColor: buttonSecondary, color: contrastText(buttonSecondary), fontFamily: uiFont, fontWeight: uiWeight, fontSize: "14px", letterSpacing: "0.04em", textAlign: "center" as const, padding: "14px" }}>
+                    <button className="w-full rounded-lg border-0 cursor-pointer shadow-sm" style={{ backgroundColor: buttonSecondary, color: contrastText(buttonSecondary), fontFamily: uiFont, fontWeight: uiWeight, fontSize: s(14), letterSpacing: "0.04em", textAlign: "center" as const, padding: "14px" }}>
                       GET YOUR OFFER →
                     </button>
                   </div>
@@ -764,10 +767,10 @@ export default function ThemePage() {
                     ) : (
                       <span className="text-xs opacity-75" style={{ fontFamily: uiFont }}>Brand Logo</span>
                     )}
-                    <div className="flex gap-3.5 uppercase" style={{ fontFamily: uiFont, fontSize: "11px", fontWeight: 600, letterSpacing: "0.04em" }}>
+                    <div className="flex gap-3.5 uppercase" style={{ fontFamily: uiFont, fontSize: s(11), fontWeight: 600, letterSpacing: "0.04em" }}>
                       <span>Privacy</span><span>Terms</span><span>Contact</span>
                     </div>
-                    <div style={{ fontFamily: bodyFont, fontSize: "11px", opacity: 0.75 }}>
+                    <div style={{ fontFamily: bodyFont, fontSize: s(11), opacity: 0.75 }}>
                       © 2026 — All rights reserved.
                     </div>
                   </div>
