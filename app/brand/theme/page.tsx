@@ -438,7 +438,7 @@ export default function ThemePage() {
   interface HeadingConfig { font: string; weight: string; color: string }
   const [headings, setHeadings] = useState<Record<string, HeadingConfig>>({
     H1: { font: "Libre Baskerville", weight: "800", color: "#3d348b" },
-    H2: { font: "Libre Baskerville", weight: "700", color: "#3d348b" },
+    H2: { font: "Libre Baskerville", weight: "700", color: "#1a1a1a" },
     H3: { font: "DM Sans", weight: "700", color: "#1a1a1a" },
     H4: { font: "DM Sans", weight: "600", color: "#1a1a1a" },
     H5: { font: "DM Sans", weight: "600", color: "#1a1a1a" },
@@ -721,10 +721,6 @@ export default function ThemePage() {
                   <div className="p-4 flex flex-col gap-2" style={{ background: `linear-gradient(180deg, #ffffff 0%, #ffffff 15%, ${accent1} 50%, #ffffff 85%, #ffffff 100%)` }}>
                     <div style={{ fontFamily: headings.H1.font, fontWeight: headings.H1.weight, fontSize: s(22), lineHeight: 1.15, letterSpacing: "-0.4px", color: headings.H1.color }}>Heading 1</div>
                     <div style={{ fontFamily: headings.H2.font, fontWeight: headings.H2.weight, fontSize: s(18), lineHeight: 1.2, color: headings.H2.color }}>Heading 2</div>
-                    <div style={{ fontFamily: headings.H3.font, fontWeight: headings.H3.weight, fontSize: s(16), lineHeight: 1.25, color: headings.H3.color }}>Heading 3</div>
-                    <div style={{ fontFamily: headings.H4.font, fontWeight: headings.H4.weight, fontSize: s(14), lineHeight: 1.3, color: headings.H4.color }}>Heading 4</div>
-                    <div style={{ fontFamily: headings.H5.font, fontWeight: headings.H5.weight, fontSize: s(13), lineHeight: 1.3, color: headings.H5.color }}>Heading 5</div>
-                    <div style={{ fontFamily: headings.H6.font, fontWeight: headings.H6.weight, fontSize: s(12), lineHeight: 1.3, color: headings.H6.color }}>Heading 6</div>
                     <p style={{ fontFamily: bodyFont, fontWeight: bodyWeight, fontSize: s(14), lineHeight: 1.5, margin: 0, color: bodyColor, opacity: 0.8 }}>
                       Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
                     </p>
@@ -735,6 +731,11 @@ export default function ThemePage() {
                       <div className="absolute bottom-0 left-0 right-0 px-3 py-1.5" style={{ backgroundColor: primary, color: contrastText(primary), fontFamily: uiFont, fontSize: s(10), fontWeight: 600 }}>
                         Image caption
                       </div>
+                    </div>
+                    <div style={{ fontFamily: headings.H3.font, fontWeight: headings.H3.weight, fontSize: s(16), lineHeight: 1.25, color: headings.H3.color }}>Heading 3</div>
+                    <div style={{ fontFamily: headings.H4.font, fontWeight: headings.H4.weight, fontSize: s(14), lineHeight: 1.3, color: headings.H4.color }}>Heading 4</div>
+                    <div style={{ fontFamily: headings.H5.font, fontWeight: headings.H5.weight, fontSize: s(13), lineHeight: 1.3, color: headings.H5.color }}>Heading 5</div>
+                    <div style={{ fontFamily: headings.H6.font, fontWeight: headings.H6.weight, fontSize: s(12), lineHeight: 1.3, color: headings.H6.color }}>Heading 6</div>
                     </div>
                   </div>
 
