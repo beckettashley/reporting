@@ -715,7 +715,7 @@ export default function ThemePage() {
                         </li>
                       ))}
                     </ul>
-                    <button className="w-full rounded-lg border-0 cursor-pointer shadow-sm" style={{ backgroundColor: buttonPrimary, color: contrastText(buttonPrimary), fontFamily: uiFont, fontWeight: uiWeight, fontSize: s(14), letterSpacing: "0.04em", textAlign: "center" as const, padding: "12px" }}>
+                    <button className="w-full rounded-lg border-0 cursor-pointer shadow-sm" style={{ backgroundColor: buttonPrimary, color: contrastText(buttonPrimary), fontFamily: uiFont, fontWeight: uiWeight, fontSize: "14px", letterSpacing: "0.04em", textAlign: "center" as const, padding: "12px" }}>
                       BUTTON PRIMARY →
                     </button>
                   </div>
@@ -756,7 +756,7 @@ export default function ThemePage() {
 
                   {/* CTA section — button secondary */}
                   <div className="px-4 py-3" style={{ backgroundColor: "#ffffff" }}>
-                    <button className="w-full rounded-lg border-0 cursor-pointer shadow-sm" style={{ backgroundColor: buttonSecondary, color: contrastText(buttonSecondary), fontFamily: uiFont, fontWeight: uiWeight, fontSize: s(14), letterSpacing: "0.04em", textAlign: "center" as const, padding: "14px" }}>
+                    <button className="w-full rounded-lg border-0 cursor-pointer shadow-sm" style={{ backgroundColor: buttonSecondary, color: contrastText(buttonSecondary), fontFamily: uiFont, fontWeight: uiWeight, fontSize: "14px", letterSpacing: "0.04em", textAlign: "center" as const, padding: "14px" }}>
                       BUTTON SECONDARY →
                     </button>
                   </div>
