@@ -250,9 +250,9 @@ function FontSelect({
   const displayValue = value === "Custom" && customFont ? `Custom (${customFont})` : value;
 
   return (
-    <div className="flex flex-col gap-1.5" ref={dropdownRef}>
-      <Label className="text-sm font-medium">{label}</Label>
-      <p className="text-xs text-muted-foreground">{description}</p>
+    <div className="flex flex-col gap-1" ref={dropdownRef}>
+      <Label className="text-xs font-medium text-muted-foreground">{label}</Label>
+      {description && <p className="text-[10px] text-muted-foreground">{description}</p>}
       <div className="flex items-center gap-2">
         <label
           className="w-8 h-8 rounded border border-border flex-shrink-0 cursor-pointer block relative overflow-hidden"
@@ -725,7 +725,7 @@ export default function ThemePage() {
                   </div>
 
                   {/* 4. Placeholder section 1 — white/accent1/white gradient */}
-                  <div className="p-4 flex flex-col gap-3" style={{ background: `linear-gradient(180deg, #ffffff 0%, #ffffff 20%, ${accent1}30 50%, #ffffff 80%, #ffffff 100%)` }}>
+                  <div className="p-4 flex flex-col gap-3" style={{ background: `linear-gradient(180deg, #ffffff 0%, #ffffff 15%, ${accent1} 50%, #ffffff 85%, #ffffff 100%)` }}>
                     <h3 style={{ fontFamily: displayFont, fontWeight: displayWeight, fontSize: "22px", lineHeight: 1.15, letterSpacing: "-0.4px", margin: 0, color: displayColor }}>Section Heading</h3>
                     <p style={{ fontFamily: bodyFont, fontWeight: bodyWeight, fontSize: "14px", lineHeight: 1.5, margin: 0, color: bodyColor, opacity: 0.8 }}>
                       Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
@@ -743,7 +743,7 @@ export default function ThemePage() {
                   <div className="h-4" style={{ backgroundColor: "#ffffff" }} />
 
                   {/* 5. Placeholder section 2 — white/accent2/white gradient */}
-                  <div className="p-4 flex flex-col gap-3" style={{ background: `linear-gradient(180deg, #ffffff 0%, #ffffff 20%, ${accent2}30 50%, #ffffff 80%, #ffffff 100%)` }}>
+                  <div className="p-4 flex flex-col gap-3" style={{ background: `linear-gradient(180deg, #ffffff 0%, #ffffff 15%, ${accent2} 50%, #ffffff 85%, #ffffff 100%)` }}>
                     <h3 style={{ fontFamily: displayFont, fontWeight: displayWeight, fontSize: "22px", lineHeight: 1.15, letterSpacing: "-0.4px", margin: 0, color: displayColor }}>Section Heading</h3>
                     <p style={{ fontFamily: bodyFont, fontWeight: bodyWeight, fontSize: "14px", lineHeight: 1.5, margin: 0, color: bodyColor, opacity: 0.8 }}>
                       Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.
