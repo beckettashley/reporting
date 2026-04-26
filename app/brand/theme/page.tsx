@@ -59,6 +59,11 @@ function luminance(hex: string): number {
   return 0.2126 * toLinear(r) + 0.7152 * toLinear(g) + 0.0722 * toLinear(b);
 }
 
+/** Return black or white text depending on background luminance. */
+function contrastText(bgHex: string): string {
+  return luminance(bgHex) > 0.45 ? "#000000" : "#ffffff";
+}
+
 /** Lighten a hex color by a percentage (0-100). */
 function lightenHex(hex: string, percent: number): string {
   const { r, g, b } = hexToRgb(hex);
@@ -576,7 +581,6 @@ export default function ThemePage() {
               <CardContent className="flex flex-col gap-5">
                 {/* Headings H1-H6 */}
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-3">Headings</p>
                   <div className="flex flex-col gap-4">
                     {(["H1", "H2", "H3", "H4", "H5", "H6"] as const).map((level) => (
                       <FontSelect
@@ -594,9 +598,6 @@ export default function ThemePage() {
                       />
                     ))}
                   </div>
-                </div>
-                <div className="border-t pt-4">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-3">Body & UI</p>
                 </div>
                 <FontSelect
                   label="Regular Font"
@@ -671,12 +672,12 @@ export default function ThemePage() {
                 <div className="rounded-lg overflow-hidden shadow-sm mx-auto" style={{ backgroundColor: backgroundPrimary, color: bodyColor, fontFamily: bodyFont, fontSize: `${baseFontSize}px`, maxWidth: "320px" }}>
 
                   {/* 1a. Urgency banner — primary dark + condensed */}
-                  <div className="text-center uppercase tracking-wider" style={{ backgroundColor: primaryDark, color: buttonPrimaryText, fontFamily: condensedFont, fontWeight: 900, fontSize: "12px", letterSpacing: "0.04em", padding: "6px 12px" }}>
+                  <div className="text-center uppercase tracking-wider" style={{ backgroundColor: primaryDark, color: contrastText(primaryDark), fontFamily: condensedFont, fontWeight: 900, fontSize: "12px", letterSpacing: "0.04em", padding: "6px 12px" }}>
                     ⚡ Spring sale — up to 58% off today
                   </div>
 
                   {/* 1b. Secondary banner — primary */}
-                  <div className="text-center" style={{ backgroundColor: primary, color: buttonPrimaryText, fontFamily: uiFont, fontWeight: 600, fontSize: "11px", letterSpacing: "0.02em", padding: "5px 12px" }}>
+                  <div className="text-center" style={{ backgroundColor: primary, color: contrastText(primary), fontFamily: uiFont, fontWeight: 600, fontSize: "11px", letterSpacing: "0.02em", padding: "5px 12px" }}>
                     Free shipping on orders over $40
                   </div>
 
@@ -719,7 +720,7 @@ export default function ThemePage() {
                         </li>
                       ))}
                     </ul>
-                    <button className="w-full rounded-lg border-0 cursor-pointer" style={{ backgroundColor: buttonPrimary, color: buttonPrimaryText, fontFamily: uiFont, fontWeight: uiWeight, fontSize: "14px", letterSpacing: "0.04em", textAlign: "center" as const, padding: "12px" }}>
+                    <button className="w-full rounded-lg border-0 cursor-pointer" style={{ backgroundColor: buttonPrimary, color: contrastText(buttonPrimary), fontFamily: uiFont, fontWeight: uiWeight, fontSize: "14px", letterSpacing: "0.04em", textAlign: "center" as const, padding: "12px" }}>
                       CLAIM YOUR DISCOUNT →
                     </button>
                   </div>
@@ -734,7 +735,7 @@ export default function ThemePage() {
                       <div className="absolute inset-0 flex items-center justify-center">
                         <ImageIcon className="w-6 h-6 text-white/60" />
                       </div>
-                      <div className="absolute bottom-0 left-0 right-0 px-3 py-1.5" style={{ backgroundColor: primary, color: buttonPrimaryText, fontFamily: uiFont, fontSize: "10px", fontWeight: 600 }}>
+                      <div className="absolute bottom-0 left-0 right-0 px-3 py-1.5" style={{ backgroundColor: primary, color: contrastText(primary), fontFamily: uiFont, fontSize: "10px", fontWeight: 600 }}>
                         Image caption
                       </div>
                     </div>
@@ -752,14 +753,14 @@ export default function ThemePage() {
                       <div className="absolute inset-0 flex items-center justify-center">
                         <ImageIcon className="w-6 h-6 text-white/60" />
                       </div>
-                      <div className="absolute bottom-0 left-0 right-0 px-3 py-1.5" style={{ backgroundColor: primary, color: buttonPrimaryText, fontFamily: uiFont, fontSize: "10px", fontWeight: 600 }}>
+                      <div className="absolute bottom-0 left-0 right-0 px-3 py-1.5" style={{ backgroundColor: primary, color: contrastText(primary), fontFamily: uiFont, fontSize: "10px", fontWeight: 600 }}>
                         Image caption
                       </div>
                     </div>
                   </div>
 
                   {/* 8. Footer — primary dark + inverse text */}
-                  <div className="flex flex-col gap-2.5 p-4" style={{ backgroundColor: primaryDark, color: buttonPrimaryText }}>
+                  <div className="flex flex-col gap-2.5 p-4" style={{ backgroundColor: primaryDark, color: contrastText(primaryDark) }}>
                     {logo ? (
                       <img src={logoDark || logo} alt="Logo" className="h-5 max-w-[90px] object-contain" style={!logoDark ? { filter: "brightness(0) invert(1)" } : undefined} />
                     ) : (
