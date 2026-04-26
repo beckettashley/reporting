@@ -658,8 +658,8 @@ export default function ThemePage() {
               <CardContent className="p-4">
                 <div className="rounded-lg overflow-hidden shadow-sm mx-auto" style={{ backgroundColor: backgroundPrimary, color: bodyColor, fontFamily: bodyFont, fontSize: `${baseFontSize}px`, maxWidth: "320px" }}>
 
-                  {/* 1. Urgency banner — accent + condensed */}
-                  <div className="text-center uppercase tracking-wider" style={{ backgroundColor: buttonSecondary, color: buttonSecondaryText, fontFamily: condensedFont, fontWeight: 900, fontSize: "12px", letterSpacing: "0.04em", padding: "6px 12px" }}>
+                  {/* 1. Urgency banner — primary dark + condensed */}
+                  <div className="text-center uppercase tracking-wider" style={{ backgroundColor: primaryDark, color: buttonPrimaryText, fontFamily: condensedFont, fontWeight: 900, fontSize: "12px", letterSpacing: "0.04em", padding: "6px 12px" }}>
                     ⚡ Spring sale — up to 58% off today
                   </div>
 
@@ -682,8 +682,13 @@ export default function ThemePage() {
                   <div className="p-4 flex flex-col gap-3" style={{ background: `radial-gradient(circle at 50% 0%, #fff 0%, ${accent1} 100%)` }}>
                     {/* Product image placeholder */}
                     <div className="w-full aspect-square rounded-lg" style={{ backgroundColor: `${primary}15`, backgroundImage: "url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 fill=%22none%22 viewBox=%220 0 24 24%22 stroke=%22%23999%22 stroke-width=%221%22%3E%3Crect x=%223%22 y=%223%22 width=%2218%22 height=%2218%22 rx=%222%22/%3E%3Ccircle cx=%228.5%22 cy=%228.5%22 r=%221.5%22/%3E%3Cpath d=%22m21 15-5-5L5 21%22/%3E%3C/svg%3E')", backgroundPosition: "center", backgroundRepeat: "no-repeat", backgroundSize: "48px" }} />
-                    <div style={{ fontFamily: condensedFont, fontWeight: 900, fontSize: "11px", letterSpacing: "0.06em", textTransform: "uppercase" as const, color: primary }}>
-                      Limited time · Free shipping
+                    <div className="flex items-center gap-1.5">
+                      <div className="flex items-center gap-0.5">
+                        {[1,2,3,4,5].map((s) => (
+                          <svg key={s} width="14" height="14" viewBox="0 0 24 24" fill="#f59e0b" stroke="none"><path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z" /></svg>
+                        ))}
+                      </div>
+                      <span style={{ fontSize: "12px", fontFamily: bodyFont, color: bodyColor }}>18,623 reviews</span>
                     </div>
                     <h2 style={{ fontFamily: displayFont, fontSize: "22px", lineHeight: 1.15, fontWeight: displayWeight, letterSpacing: "-0.4px", margin: 0, color: displayColor }}>
                       Better mornings, <span style={{ color: primary }}>brewed for you</span>.
@@ -704,12 +709,7 @@ export default function ThemePage() {
                     </button>
                   </div>
 
-                  {/* 4. As Seen On strip — accent 2 */}
-                  <div className="text-center uppercase" style={{ backgroundColor: accent2, fontFamily: uiFont, fontSize: "11px", fontWeight: 700, letterSpacing: "0.12em", padding: "10px 16px", color: bodyColor }}>
-                    As seen on · Forbes · Vogue · GQ
-                  </div>
-
-                  {/* 5. Price card — primary subtle + danger */}
+                  {/* 4. Price card — primary subtle + danger */}
                   <div className="mx-4 my-4 rounded-xl p-3.5 flex items-center justify-between gap-3" style={{ backgroundColor: `${primary}15` }}>
                     <div style={{ fontFamily: bodyFont, fontSize: "13px", fontWeight: 700 }}>
                       Starter Bundle
