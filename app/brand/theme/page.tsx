@@ -491,12 +491,7 @@ export default function ThemePage() {
     <div className="flex flex-col min-h-screen">
       <div className="flex-1 p-6 lg:p-8">
         <div className="mb-8">
-          <h1 className="text-2xl font-semibold text-foreground">
-            Theme{" "}
-            <span className="text-sm font-normal text-muted-foreground">
-              — placeholder, not connected to backend
-            </span>
-          </h1>
+          <h1 className="text-2xl font-semibold text-foreground">Theme</h1>
         </div>
 
         <div className="grid lg:grid-cols-2 gap-6 mb-24">
@@ -512,7 +507,7 @@ export default function ThemePage() {
               </CardHeader>
               <CardContent className="flex flex-col gap-5">
                 <ImageUploadField label="Logo" preview={logo} onUpload={setLogo} />
-                <ImageUploadField label="Logo Dark Variant" helper="For dark backgrounds. Falls back to primary logo." preview={logoDark} onUpload={setLogoDark} />
+                <ImageUploadField label="Logo Dark Variant" preview={logoDark} onUpload={setLogoDark} />
                 <ImageUploadField label="Favicon" preview={favicon} onUpload={setFavicon} />
               </CardContent>
             </Card>
@@ -526,7 +521,6 @@ export default function ThemePage() {
               <CardContent className="space-y-6">
                 {/* Primary */}
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-3">Primary</p>
                   <div className="space-y-2.5">
                     <ColorField label="Primary" value={primary} onChange={setPrimary} />
                     <ColorField label="Primary Dark" value={primaryDark} onChange={setPrimaryDark} />
@@ -535,7 +529,6 @@ export default function ThemePage() {
 
                 {/* Accents */}
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-3">Accents</p>
                   <div className="space-y-2.5">
                     <ColorField label="Accent 1" value={accent1} onChange={setAccent1} />
                     <ColorField label="Accent 2" value={accent2} onChange={setAccent2} />
@@ -545,7 +538,6 @@ export default function ThemePage() {
 
                 {/* Buttons */}
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-3">Buttons</p>
                   <div className="space-y-2.5">
                     <ColorField label="Button Primary" value={buttonPrimary} onChange={setButtonPrimary} />
                     <ColorField label="Button Primary Text" value={buttonPrimaryText} onChange={setButtonPrimaryText} />
@@ -556,7 +548,6 @@ export default function ThemePage() {
 
                 {/* UI Elements */}
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-3">UI Elements</p>
                   <div className="space-y-2.5">
                     <ColorField label="Background Primary" value={backgroundPrimary} onChange={setBackgroundPrimary} />
                     <ColorField label="Border Default" value={borderDefault} onChange={setBorderDefault} />
@@ -579,7 +570,7 @@ export default function ThemePage() {
               <CardContent className="flex flex-col gap-5">
                 {/* Headings H1-H6 */}
                 <div>
-                  <div className="flex flex-col gap-4">
+                  <div className="flex flex-col gap-2">
                     {(["H1", "H2", "H3", "H4", "H5", "H6"] as const).map((level) => (
                       <FontSelect
                         key={level}
@@ -599,7 +590,7 @@ export default function ThemePage() {
                 </div>
                 <FontSelect
                   label="Regular Font"
-                  description="Body text, paragraphs, descriptions"
+                  description=""
                   value={bodyFont}
                   onChange={setBodyFont}
                   color={bodyColor}
@@ -611,7 +602,7 @@ export default function ThemePage() {
                 />
                 <FontSelect
                   label="UI Font"
-                  description="Buttons, tables, badges, nav"
+                  description=""
                   value={uiFont}
                   onChange={setUiFont}
                   color={uiColor}
@@ -623,7 +614,7 @@ export default function ThemePage() {
                 />
                 <FontSelect
                   label="Condensed Font"
-                  description="Urgency banners"
+                  description=""
                   value={condensedFont}
                   onChange={setCondensedFont}
                   color={condensedColor}
@@ -693,7 +684,7 @@ export default function ThemePage() {
                   </div>
 
                   {/* 3. Hero — image + display + body + bullets + CTA */}
-                  <div className="p-4 flex flex-col gap-3" style={{ backgroundColor: "#ffffff" }}>
+                  <div className="p-4 flex flex-col gap-3" style={{ backgroundColor: backgroundPrimary }}>
                     {/* Product image placeholder */}
                     <div className="w-full aspect-square rounded-lg" style={{ backgroundColor: `${primary}15`, backgroundImage: "url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 fill=%22none%22 viewBox=%220 0 24 24%22 stroke=%22%23999%22 stroke-width=%221%22%3E%3Crect x=%223%22 y=%223%22 width=%2218%22 height=%2218%22 rx=%222%22/%3E%3Ccircle cx=%228.5%22 cy=%228.5%22 r=%221.5%22/%3E%3Cpath d=%22m21 15-5-5L5 21%22/%3E%3C/svg%3E')", backgroundPosition: "center", backgroundRepeat: "no-repeat", backgroundSize: "48px" }} />
                     <div className="flex items-center gap-1.5">
