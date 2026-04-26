@@ -640,109 +640,95 @@ export default function ThemePage() {
               <CardHeader className="pb-4">
                 <CardTitle className="text-base">Preview</CardTitle>
               </CardHeader>
-              <CardContent>
-                <div
-                  className="rounded-lg border overflow-hidden"
-                  style={{ backgroundColor: backgroundPrimary }}
-                >
-                  {/* Navbar mockup */}
-                  <div
-                    className="flex items-center justify-between px-4 py-3 border-b"
-                    style={{ borderColor: borderDefault }}
-                  >
-                    <div
-                      className="text-sm"
-                      style={{
-                        color: uiColor,
-                        fontFamily: uiFont,
-                        fontWeight: uiWeight,
-                      }}
-                    >
-                      {logo ? (
-                        <img
-                          src={logo}
-                          alt="Logo"
-                          className="h-6 max-w-[120px] object-contain"
-                        />
-                      ) : (
-                        <div className="flex items-center gap-1.5">
-                          <div className="w-6 h-6 rounded bg-muted flex items-center justify-center">
-                            <ImageIcon className="w-3.5 h-3.5 text-muted-foreground" />
-                          </div>
-                          <span className="text-muted-foreground">Brand Logo</span>
-                        </div>
-                      )}
-                    </div>
-                    <div
-                      className="flex gap-3 text-xs"
-                      style={{
-                        color: uiColor,
-                        fontFamily: uiFont,
-                      }}
-                    >
-                      <span>Shop</span>
-                      <span>About</span>
-                      <span>Contact</span>
+              <CardContent className="p-0">
+                <div className="rounded-lg overflow-hidden shadow-sm" style={{ backgroundColor: backgroundPrimary, color: bodyColor, fontFamily: bodyFont, fontSize: `${baseFontSize}px` }}>
+
+                  {/* 1. Urgency banner — accent + condensed */}
+                  <div className="text-center uppercase tracking-wider" style={{ backgroundColor: buttonSecondary, color: buttonSecondaryText, fontFamily: condensedFont, fontWeight: 900, fontSize: "12px", letterSpacing: "0.04em", padding: "6px 12px" }}>
+                    ⚡ Spring sale — up to 58% off today
+                  </div>
+
+                  {/* 2. Navbar — logo + ui font */}
+                  <div className="flex items-center justify-between px-4 py-2.5" style={{ borderBottom: `1px solid ${borderSubtle}` }}>
+                    {logo ? (
+                      <img src={logo} alt="Logo" className="h-5 max-w-[80px] object-contain" />
+                    ) : (
+                      <div className="flex items-center gap-1.5">
+                        <div className="w-5 h-5 rounded bg-muted flex items-center justify-center"><ImageIcon className="w-3 h-3 text-muted-foreground" /></div>
+                        <span className="text-xs text-muted-foreground" style={{ fontFamily: uiFont }}>Logo</span>
+                      </div>
+                    )}
+                    <div className="flex gap-3" style={{ fontFamily: uiFont, fontSize: "12px", fontWeight: 600, color: bodyColor }}>
+                      <span>Shop</span><span>FAQ</span>
                     </div>
                   </div>
 
-                  {/* Hero section */}
-                  <div className="px-6 py-8">
-                    <h2
-                      className="text-xl mb-2"
-                      style={{
-                        color: displayColor,
-                        fontFamily: displayFont,
-                        fontWeight: displayWeight,
-                        fontSize: `${baseFontSize * 1.5}px`,
-                      }}
-                    >
-                      Your Brand Headline
+                  {/* 3. Hero — image + display + body + bullets + CTA */}
+                  <div className="p-4 flex flex-col gap-3" style={{ background: `radial-gradient(circle at 50% 0%, #fff 0%, ${accent1} 100%)` }}>
+                    {/* Product image placeholder */}
+                    <div className="w-full aspect-square rounded-lg" style={{ backgroundColor: `${primary}15`, backgroundImage: "url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 fill=%22none%22 viewBox=%220 0 24 24%22 stroke=%22%23999%22 stroke-width=%221%22%3E%3Crect x=%223%22 y=%223%22 width=%2218%22 height=%2218%22 rx=%222%22/%3E%3Ccircle cx=%228.5%22 cy=%228.5%22 r=%221.5%22/%3E%3Cpath d=%22m21 15-5-5L5 21%22/%3E%3C/svg%3E')", backgroundPosition: "center", backgroundRepeat: "no-repeat", backgroundSize: "48px" }} />
+                    <div style={{ fontFamily: condensedFont, fontWeight: 900, fontSize: "11px", letterSpacing: "0.06em", textTransform: "uppercase" as const, color: primary }}>
+                      Limited time · Free shipping
+                    </div>
+                    <h2 style={{ fontFamily: displayFont, fontSize: "22px", lineHeight: 1.15, fontWeight: displayWeight, letterSpacing: "-0.4px", margin: 0, color: displayColor }}>
+                      Better mornings, <span style={{ color: primary }}>brewed for you</span>.
                     </h2>
-                    <p
-                      className="mb-4 leading-relaxed"
-                      style={{
-                        color: bodyColor,
-                        fontFamily: bodyFont,
-                        fontWeight: bodyWeight,
-                        fontSize: `${baseFontSize}px`,
-                      }}
-                    >
-                      This is body text rendered in your chosen Body Font. It
-                      shows how paragraphs and descriptions will appear across
-                      your pages.
+                    <p style={{ fontFamily: bodyFont, fontSize: "14px", lineHeight: 1.5, fontWeight: bodyWeight, margin: 0, color: bodyColor }}>
+                      The smoother, smarter way to start your day — packed with what your body actually needs.
                     </p>
-                    <button
-                      className="px-5 py-2.5 rounded-md text-sm font-semibold transition-colors"
-                      style={{
-                        backgroundColor: primaryDark,
-                        color: "#ffffff",
-                        fontFamily: uiFont,
-                        fontSize: `${baseFontSize * 1.125}px`,
-                      }}
-                    >
-                      Shop Now
+                    <ul className="flex flex-col gap-2" style={{ fontSize: "13px", fontFamily: bodyFont }}>
+                      {["Real ingredients, no shortcuts", "Loved by 18,000+ customers", "30-day money-back guarantee"].map((b) => (
+                        <li key={b} className="flex items-center gap-2">
+                          <span className="w-[18px] h-[18px] rounded-full flex items-center justify-center text-[11px] font-bold shrink-0" style={{ backgroundColor: `${primary}20`, color: primary, fontFamily: uiFont }}>✓</span>
+                          {b}
+                        </li>
+                      ))}
+                    </ul>
+                    <button className="w-full rounded-lg border-0 cursor-pointer" style={{ backgroundColor: buttonPrimary, color: buttonPrimaryText, fontFamily: uiFont, fontWeight: uiWeight, fontSize: "14px", letterSpacing: "0.04em", textAlign: "center" as const, padding: "12px" }}>
+                      CLAIM YOUR DISCOUNT →
                     </button>
                   </div>
 
-                  {/* Accent colors preview strip */}
-                  <div className="flex h-6">
-                    {[accent1, accent2, accent3].map((c, i) => (
-                      <div key={i} className="flex-1" style={{ backgroundColor: c }} />
-                    ))}
+                  {/* 4. As Seen On strip — accent 2 */}
+                  <div className="text-center uppercase" style={{ backgroundColor: accent2, fontFamily: uiFont, fontSize: "11px", fontWeight: 700, letterSpacing: "0.12em", padding: "10px 16px", color: bodyColor }}>
+                    As seen on · Forbes · Vogue · GQ
                   </div>
 
-                  {/* Urgency banner mockup */}
-                  <div
-                    className="px-4 py-2 text-center text-xs font-bold uppercase tracking-wider"
-                    style={{
-                      backgroundColor: buttonSecondary,
-                      color: buttonSecondaryText,
-                      fontFamily: condensedFont,
-                    }}
-                  >
-                    Limited Time — Up to 40% Off
+                  {/* 5. Price card — primary subtle + danger */}
+                  <div className="mx-4 my-4 rounded-xl p-3.5 flex items-center justify-between gap-3" style={{ backgroundColor: `${primary}15` }}>
+                    <div style={{ fontFamily: bodyFont, fontSize: "13px", fontWeight: 700 }}>
+                      Starter Bundle
+                      <span className="block font-medium text-[11px] opacity-75">3 bags + free shaker</span>
+                    </div>
+                    <div className="text-right" style={{ fontFamily: uiFont, fontWeight: 700, fontSize: "16px", color: primary }}>
+                      $39
+                      <span className="block line-through font-medium text-[12px]" style={{ color: danger }}>$92</span>
+                    </div>
                   </div>
+
+                  {/* 6. Callout strip — accent 3 */}
+                  <div className="text-center" style={{ backgroundColor: accent3, fontFamily: bodyFont, fontSize: "12px", padding: "12px 16px", color: bodyColor }}>
+                    Free shipping over $40 · 30-day refund guarantee
+                  </div>
+
+                  {/* 7. Gradient band — accent 1 + accent 2 */}
+                  <div className="h-8" style={{ background: `linear-gradient(${accent1} 0%, ${accent2} 100%)` }} />
+
+                  {/* 8. Footer — primary dark + inverse text */}
+                  <div className="flex flex-col gap-2.5 p-4" style={{ backgroundColor: primaryDark, color: buttonPrimaryText }}>
+                    {logo ? (
+                      <img src={logoDark || logo} alt="Logo" className="h-5 max-w-[90px] object-contain" style={!logoDark ? { filter: "brightness(0) invert(1)" } : undefined} />
+                    ) : (
+                      <span className="text-xs opacity-75" style={{ fontFamily: uiFont }}>Brand Logo</span>
+                    )}
+                    <div className="flex gap-3.5 uppercase" style={{ fontFamily: uiFont, fontSize: "11px", fontWeight: 600, letterSpacing: "0.04em" }}>
+                      <span>Privacy</span><span>Terms</span><span>Contact</span>
+                    </div>
+                    <div style={{ fontFamily: bodyFont, fontSize: "11px", opacity: 0.75 }}>
+                      © 2026 — All rights reserved.
+                    </div>
+                  </div>
+
                 </div>
               </CardContent>
             </Card>
