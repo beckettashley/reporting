@@ -793,7 +793,7 @@ export default function ThemePage() {
                       <img
                         src={luminance(primaryDark) < 0.45 ? (logoDark || logo) : logo}
                         alt="Logo"
-                        className="h-5 max-w-[90px] object-contain"
+                        className="h-5 max-w-[90px] object-contain self-start"
                         style={luminance(primaryDark) < 0.45 && !logoDark ? { filter: "brightness(0) invert(1)" } : undefined}
                       />
                     ) : (
