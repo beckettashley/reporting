@@ -428,10 +428,21 @@ export default function ThemePage() {
   const [danger, setDanger] = useState("#DC2627");
 
 
-  // Section 3: Typography (family + weight + color per role)
-  const [displayFont, setDisplayFont] = useState("Libre Baskerville");
-  const [displayWeight, setDisplayWeight] = useState("800");
-  const [displayColor, setDisplayColor] = useState("#3d348b");
+  // Section 3: Typography
+  // Headings (H1-H6 each with own family + weight + color)
+  interface HeadingConfig { font: string; weight: string; color: string }
+  const [headings, setHeadings] = useState<Record<string, HeadingConfig>>({
+    H1: { font: "Libre Baskerville", weight: "800", color: "#3d348b" },
+    H2: { font: "Libre Baskerville", weight: "700", color: "#3d348b" },
+    H3: { font: "DM Sans", weight: "700", color: "#1a1a1a" },
+    H4: { font: "DM Sans", weight: "600", color: "#1a1a1a" },
+    H5: { font: "DM Sans", weight: "600", color: "#1a1a1a" },
+    H6: { font: "DM Sans", weight: "600", color: "#1a1a1a" },
+  });
+  const updateHeading = (level: string, updates: Partial<HeadingConfig>) => {
+    setHeadings((prev) => ({ ...prev, [level]: { ...prev[level], ...updates } }));
+  };
+  // Body / UI / Condensed
   const [bodyFont, setBodyFont] = useState("DM Sans");
   const [bodyWeight, setBodyWeight] = useState("500");
   const [bodyColor, setBodyColor] = useState("#1a1a1a");
@@ -443,8 +454,12 @@ export default function ThemePage() {
   const [condensedColor, setCondensedColor] = useState("#1a1a1a");
   const [baseFontSize, setBaseFontSize] = useState(16);
   const [customFonts, setCustomFonts] = useState<Record<string, string | null>>({
-    display: null, body: null, ui: null, condensed: null,
+    H1: null, H2: null, H3: null, H4: null, H5: null, H6: null, body: null, ui: null, condensed: null,
   });
+  // Convenience aliases for preview
+  const displayFont = headings.H1.font;
+  const displayWeight = headings.H1.weight;
+  const displayColor = headings.H1.color;
 
   const [logo, setLogo] = useState<string | null>(null);
   const [logoDark, setLogoDark] = useState<string | null>(null);
@@ -559,18 +574,30 @@ export default function ThemePage() {
                 <CardTitle className="text-base">Typography</CardTitle>
               </CardHeader>
               <CardContent className="flex flex-col gap-5">
-                <FontSelect
-                  label="Heading Font"
-                  description="H1–H6 headings, section titles"
-                  value={displayFont}
-                  onChange={setDisplayFont}
-                  color={displayColor}
-                  onColorChange={setDisplayColor}
-                  weight={displayWeight}
-                  onWeightChange={setDisplayWeight}
-                  customFont={customFonts.display}
-                  onCustomFontUpload={(name) => setCustomFonts((p) => ({ ...p, display: name }))}
-                />
+                {/* Headings H1-H6 */}
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-3">Headings</p>
+                  <div className="flex flex-col gap-4">
+                    {(["H1", "H2", "H3", "H4", "H5", "H6"] as const).map((level) => (
+                      <FontSelect
+                        key={level}
+                        label={level}
+                        description=""
+                        value={headings[level].font}
+                        onChange={(v) => updateHeading(level, { font: v })}
+                        color={headings[level].color}
+                        onColorChange={(v) => updateHeading(level, { color: v })}
+                        weight={headings[level].weight}
+                        onWeightChange={(v) => updateHeading(level, { weight: v })}
+                        customFont={customFonts[level]}
+                        onCustomFontUpload={(name) => setCustomFonts((p) => ({ ...p, [level]: name }))}
+                      />
+                    ))}
+                  </div>
+                </div>
+                <div className="border-t pt-4">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-3">Body & UI</p>
+                </div>
                 <FontSelect
                   label="Regular Font"
                   description="Body text, paragraphs, descriptions"
@@ -698,14 +725,14 @@ export default function ThemePage() {
                   </div>
 
                   {/* 4. Placeholder section 1 — white/accent1/white gradient */}
-                  <div className="p-4 flex flex-col gap-3" style={{ background: `linear-gradient(180deg, #ffffff 0%, ${accent1} 50%, #ffffff 100%)` }}>
+                  <div className="p-4 flex flex-col gap-3" style={{ background: `linear-gradient(180deg, #ffffff 0%, #ffffff 20%, ${accent1}30 50%, #ffffff 80%, #ffffff 100%)` }}>
                     <h3 style={{ fontFamily: displayFont, fontWeight: displayWeight, fontSize: "22px", lineHeight: 1.15, letterSpacing: "-0.4px", margin: 0, color: displayColor }}>Section Heading</h3>
                     <p style={{ fontFamily: bodyFont, fontWeight: bodyWeight, fontSize: "14px", lineHeight: 1.5, margin: 0, color: bodyColor, opacity: 0.8 }}>
                       Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
                     </p>
-                    <div className="w-full aspect-video rounded-md relative overflow-hidden" style={{ backgroundColor: `${bodyColor}08` }}>
+                    <div className="w-full aspect-video rounded-md relative overflow-hidden" style={{ backgroundColor: "#e5e5e5" }}>
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <ImageIcon className="w-6 h-6" style={{ color: `${bodyColor}30` }} />
+                        <ImageIcon className="w-6 h-6 text-white/60" />
                       </div>
                       <div className="absolute bottom-0 left-0 right-0 px-3 py-1.5" style={{ backgroundColor: primary, color: buttonPrimaryText, fontFamily: uiFont, fontSize: "10px", fontWeight: 600 }}>
                         Image caption
@@ -713,15 +740,17 @@ export default function ThemePage() {
                     </div>
                   </div>
 
+                  <div className="h-4" style={{ backgroundColor: "#ffffff" }} />
+
                   {/* 5. Placeholder section 2 — white/accent2/white gradient */}
-                  <div className="p-4 flex flex-col gap-3" style={{ background: `linear-gradient(180deg, #ffffff 0%, ${accent2} 50%, #ffffff 100%)` }}>
+                  <div className="p-4 flex flex-col gap-3" style={{ background: `linear-gradient(180deg, #ffffff 0%, #ffffff 20%, ${accent2}30 50%, #ffffff 80%, #ffffff 100%)` }}>
                     <h3 style={{ fontFamily: displayFont, fontWeight: displayWeight, fontSize: "22px", lineHeight: 1.15, letterSpacing: "-0.4px", margin: 0, color: displayColor }}>Section Heading</h3>
                     <p style={{ fontFamily: bodyFont, fontWeight: bodyWeight, fontSize: "14px", lineHeight: 1.5, margin: 0, color: bodyColor, opacity: 0.8 }}>
                       Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.
                     </p>
-                    <div className="w-full aspect-video rounded-md relative overflow-hidden" style={{ backgroundColor: `${bodyColor}08` }}>
+                    <div className="w-full aspect-video rounded-md relative overflow-hidden" style={{ backgroundColor: "#e5e5e5" }}>
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <ImageIcon className="w-6 h-6" style={{ color: `${bodyColor}30` }} />
+                        <ImageIcon className="w-6 h-6 text-white/60" />
                       </div>
                       <div className="absolute bottom-0 left-0 right-0 px-3 py-1.5" style={{ backgroundColor: primary, color: buttonPrimaryText, fontFamily: uiFont, fontSize: "10px", fontWeight: 600 }}>
                         Image caption
