@@ -264,7 +264,7 @@ function FontSelect({
           <button
             type="button"
             onClick={() => { setOpen(!open); setSearch(""); }}
-            className="w-full flex items-center justify-between px-3 py-2 rounded-md border text-sm transition-colors bg-background hover:bg-muted text-left h-9"
+            className="w-full flex items-center justify-between pl-3 pr-4 py-2 rounded-md border text-sm transition-colors bg-background hover:bg-muted text-left h-9"
           >
           <span className="truncate">{displayValue}</span>
           <svg className="w-4 h-4 text-muted-foreground shrink-0 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={open ? "M18 15l-6-6-6 6" : "M6 9l6 6 6-6"} /></svg>
