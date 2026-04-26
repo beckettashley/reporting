@@ -469,7 +469,6 @@ export default function ThemePage() {
   const [logo, setLogo] = useState<string | null>(null);
   const [logoDark, setLogoDark] = useState<string | null>(null);
   const [favicon, setFavicon] = useState<string | null>(null);
-  const [ogImage, setOgImage] = useState<string | null>(null);
 
   // Dynamically load Google Fonts for preview
   React.useEffect(() => {
@@ -515,7 +514,6 @@ export default function ThemePage() {
                 <ImageUploadField label="Logo" preview={logo} onUpload={setLogo} />
                 <ImageUploadField label="Logo Dark Variant" helper="For dark backgrounds. Falls back to primary logo." preview={logoDark} onUpload={setLogoDark} />
                 <ImageUploadField label="Favicon" preview={favicon} onUpload={setFavicon} />
-                <ImageUploadField label="OG Image" preview={ogImage} onUpload={setOgImage} />
               </CardContent>
             </Card>
 
