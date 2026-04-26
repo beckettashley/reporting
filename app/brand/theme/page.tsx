@@ -709,32 +709,26 @@ export default function ThemePage() {
                     </button>
                   </div>
 
-                  {/* 4. Price card — primary subtle + danger */}
-                  <div className="mx-4 my-4 rounded-xl p-3.5 flex items-center justify-between gap-3" style={{ backgroundColor: `${primary}15` }}>
-                    <div style={{ fontFamily: bodyFont, fontSize: "13px", fontWeight: 700 }}>
-                      Starter Bundle
-                      <span className="block font-medium text-[11px] opacity-75">3 bags + free shaker</span>
-                    </div>
-                    <div className="text-right" style={{ fontFamily: uiFont, fontWeight: 700, fontSize: "16px", color: primary }}>
-                      $39
-                      <span className="block line-through font-medium text-[12px]" style={{ color: danger }}>$92</span>
+                  {/* 4. Placeholder section 1 — white/accent1/white gradient */}
+                  <div className="p-4 flex flex-col gap-3" style={{ background: `linear-gradient(180deg, #ffffff 0%, ${accent1} 50%, #ffffff 100%)` }}>
+                    <h3 style={{ fontFamily: displayFont, fontWeight: displayWeight, fontSize: "16px", margin: 0, color: displayColor }}>Section Heading</h3>
+                    <p style={{ fontFamily: bodyFont, fontWeight: bodyWeight, fontSize: "12px", lineHeight: 1.5, margin: 0, color: bodyColor, opacity: 0.8 }}>
+                      Placeholder body text for this section. This demonstrates how your brand fonts and accent colors render on alternating page sections.
+                    </p>
+                    <div className="w-full aspect-video rounded-md flex items-center justify-center" style={{ backgroundColor: `${bodyColor}08` }}>
+                      <ImageIcon className="w-6 h-6" style={{ color: `${bodyColor}30` }} />
                     </div>
                   </div>
 
-                  {/* 5. Placeholder section 1 — white/accent1/white gradient */}
-                  <div className="p-4 flex flex-col gap-2" style={{ background: `linear-gradient(180deg, #ffffff 0%, ${accent1} 50%, #ffffff 100%)` }}>
-                    <div className="h-2.5 rounded-full w-3/4" style={{ backgroundColor: `${bodyColor}20` }} />
-                    <div className="h-2.5 rounded-full w-full" style={{ backgroundColor: `${bodyColor}10` }} />
-                    <div className="h-2.5 rounded-full w-5/6" style={{ backgroundColor: `${bodyColor}10` }} />
-                    <div className="h-2.5 rounded-full w-2/3" style={{ backgroundColor: `${bodyColor}10` }} />
-                  </div>
-
-                  {/* 6. Placeholder section 2 — white/accent2/white gradient */}
-                  <div className="p-4 flex flex-col gap-2" style={{ background: `linear-gradient(180deg, #ffffff 0%, ${accent2} 50%, #ffffff 100%)` }}>
-                    <div className="h-2.5 rounded-full w-2/3" style={{ backgroundColor: `${bodyColor}20` }} />
-                    <div className="h-2.5 rounded-full w-full" style={{ backgroundColor: `${bodyColor}10` }} />
-                    <div className="h-2.5 rounded-full w-4/5" style={{ backgroundColor: `${bodyColor}10` }} />
-                    <div className="h-2.5 rounded-full w-1/2" style={{ backgroundColor: `${bodyColor}10` }} />
+                  {/* 5. Placeholder section 2 — white/accent2/white gradient */}
+                  <div className="p-4 flex flex-col gap-3" style={{ background: `linear-gradient(180deg, #ffffff 0%, ${accent2} 50%, #ffffff 100%)` }}>
+                    <h3 style={{ fontFamily: displayFont, fontWeight: displayWeight, fontSize: "16px", margin: 0, color: displayColor }}>Another Section</h3>
+                    <p style={{ fontFamily: bodyFont, fontWeight: bodyWeight, fontSize: "12px", lineHeight: 1.5, margin: 0, color: bodyColor, opacity: 0.8 }}>
+                      A second alternating section showing how the second accent color applies. Each section background is derived from your accent palette.
+                    </p>
+                    <div className="w-full aspect-video rounded-md flex items-center justify-center" style={{ backgroundColor: `${bodyColor}08` }}>
+                      <ImageIcon className="w-6 h-6" style={{ color: `${bodyColor}30` }} />
+                    </div>
                   </div>
 
                   {/* 8. Footer — primary dark + inverse text */}
