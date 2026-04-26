@@ -797,7 +797,7 @@ export default function ThemePage() {
                         style={luminance(primaryDark) < 0.45 && !logoDark ? { filter: "brightness(0) invert(1)" } : undefined}
                       />
                     ) : (
-                      <span className="text-xs opacity-75" style={{ fontFamily: uiFont }}>Brand Logo</span>
+                      <span className="text-xs opacity-75" style={{ fontFamily: uiFont }}>Logo</span>
                     )}
                     <div className="flex gap-3.5 uppercase" style={{ fontFamily: uiFont, fontSize: s(11), fontWeight: 600, letterSpacing: "0.04em" }}>
                       <span>Privacy</span><span>Terms</span><span>Contact</span>
