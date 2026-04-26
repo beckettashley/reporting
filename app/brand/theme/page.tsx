@@ -797,7 +797,10 @@ export default function ThemePage() {
                         style={luminance(primaryDark) < 0.45 && !logoDark ? { filter: "brightness(0) invert(1)" } : undefined}
                       />
                     ) : (
-                      <span className="text-xs opacity-75" style={{ fontFamily: uiFont }}>Logo</span>
+                      <div className="flex items-center gap-1.5">
+                        <div className="w-5 h-5 rounded flex items-center justify-center" style={{ backgroundColor: "rgba(255,255,255,0.15)" }}><ImageIcon className="w-3 h-3" style={{ color: "rgba(255,255,255,0.5)" }} /></div>
+                        <span className="text-xs opacity-75" style={{ fontFamily: uiFont }}>Logo</span>
+                      </div>
                     )}
                     <div className="flex gap-3.5 uppercase" style={{ fontFamily: uiFont, fontSize: s(11), fontWeight: 600, letterSpacing: "0.04em" }}>
                       <span>Privacy</span><span>Terms</span><span>Contact</span>
