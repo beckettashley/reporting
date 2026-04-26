@@ -715,7 +715,7 @@ export default function ThemePage() {
                     <ul className="flex flex-col gap-2" style={{ fontSize: s(14), fontFamily: bodyFont, fontWeight: bodyWeight }}>
                       {["Real ingredients, no shortcuts", "Loved by 18,000+ customers", "30-day money-back guarantee"].map((b) => (
                         <li key={b} className="flex items-center gap-2">
-                          <span className="w-[18px] h-[18px] rounded-full flex items-center justify-center text-[11px] font-bold shrink-0" style={{ backgroundColor: `${primary}20`, color: primary, fontFamily: uiFont }}>✓</span>
+                          <span className="w-[18px] h-[18px] rounded-full flex items-center justify-center text-[11px] font-bold shrink-0" style={{ backgroundColor: primary, color: contrastText(primary), fontFamily: uiFont }}>✓</span>
                           {b}
                         </li>
                       ))}
