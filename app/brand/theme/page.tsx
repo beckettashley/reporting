@@ -726,7 +726,7 @@ export default function ThemePage() {
                   </div>
 
                   {/* 4. Placeholder section 1 — accent 1 */}
-                  <div className="p-4 flex flex-col gap-3" style={{ background: `linear-gradient(180deg, #ffffff 0%, #ffffff 15%, ${accent1} 50%, #ffffff 85%, #ffffff 100%)` }}>
+                  <div className="p-4 flex flex-col gap-3" style={{ background: `linear-gradient(180deg, #ffffff 0%, #ffffff 5%, ${accent1} 50%, #ffffff 95%, #ffffff 100%)` }}>
                     <div style={{ fontFamily: headings.H1.font, fontWeight: headings.H1.weight, fontSize: s(22), lineHeight: 1.15, letterSpacing: "-0.4px", color: headings.H1.color }}>Heading 1</div>
                     <div style={{ fontFamily: headings.H2.font, fontWeight: headings.H2.weight, fontSize: s(18), lineHeight: 1.2, color: headings.H2.color }}>Heading 2</div>
                     <p style={{ fontFamily: bodyFont, fontWeight: bodyWeight, fontSize: s(14), lineHeight: 1.5, margin: 0, color: bodyColor, opacity: 0.8 }}>
@@ -743,7 +743,7 @@ export default function ThemePage() {
                   </div>
 
                   {/* 5. Placeholder section 2 — accent 2 (clone of section 1) */}
-                  <div className="p-4 flex flex-col gap-3" style={{ background: `linear-gradient(180deg, #ffffff 0%, #ffffff 15%, ${accent2} 50%, #ffffff 85%, #ffffff 100%)` }}>
+                  <div className="p-4 flex flex-col gap-3" style={{ background: `linear-gradient(180deg, #ffffff 0%, #ffffff 5%, ${accent2} 50%, #ffffff 95%, #ffffff 100%)` }}>
                     <div style={{ fontFamily: headings.H1.font, fontWeight: headings.H1.weight, fontSize: s(22), lineHeight: 1.15, letterSpacing: "-0.4px", color: headings.H1.color }}>Heading 1</div>
                     <div style={{ fontFamily: headings.H2.font, fontWeight: headings.H2.weight, fontSize: s(18), lineHeight: 1.2, color: headings.H2.color }}>Heading 2</div>
                     <p style={{ fontFamily: bodyFont, fontWeight: bodyWeight, fontSize: s(14), lineHeight: 1.5, margin: 0, color: bodyColor, opacity: 0.8 }}>
@@ -767,7 +767,7 @@ export default function ThemePage() {
                   </div>
 
                   {/* 6. Placeholder section 3 — accent 3, all heading levels */}
-                  <div className="p-4 flex flex-col gap-2" style={{ background: `linear-gradient(180deg, #ffffff 0%, #ffffff 15%, ${accent3} 50%, #ffffff 85%, #ffffff 100%)` }}>
+                  <div className="p-4 flex flex-col gap-2" style={{ background: `linear-gradient(180deg, #ffffff 0%, #ffffff 5%, ${accent3} 50%, #ffffff 95%, #ffffff 100%)` }}>
                     <div style={{ fontFamily: headings.H1.font, fontWeight: headings.H1.weight, fontSize: s(22), lineHeight: 1.15, letterSpacing: "-0.4px", color: headings.H1.color }}>Heading 1</div>
                     <div style={{ fontFamily: headings.H2.font, fontWeight: headings.H2.weight, fontSize: s(18), lineHeight: 1.2, color: headings.H2.color }}>Heading 2</div>
                     <div style={{ fontFamily: headings.H3.font, fontWeight: headings.H3.weight, fontSize: s(16), lineHeight: 1.25, color: headings.H3.color }}>Heading 3</div>
