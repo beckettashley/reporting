@@ -567,7 +567,7 @@ export default function ThemePage() {
                 <Type className="w-4 h-4 text-muted-foreground" />
                 <CardTitle className="text-base">Typography</CardTitle>
               </CardHeader>
-              <CardContent className="flex flex-col gap-5">
+              <CardContent className="flex flex-col gap-2">
                 {/* Headings H1-H6 */}
                 <div>
                   <div className="flex flex-col gap-2">
