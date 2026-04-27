@@ -154,7 +154,7 @@ function computeDerivedColors(
       isRgba: true,
     },
     { name: "Negative", value: "#dc2626" },
-    { name: "Positive", value: "#22c55e" },
+    { name: "Positive", value: "#11b990" },
     { name: "Star Rating", value: "#f59e0b" },
   ];
 }
@@ -415,25 +415,25 @@ export default function ThemePage() {
 
   // Section 1: Color Palette — matching PDF reference exactly
   // Primary
-  const [primary, setPrimary] = useState("#3D358B");
-  const [primaryDark, setPrimaryDark] = useState("#312A6F");
+  const [primary, setPrimary] = useState("#3D348B");
+  const [primaryDark, setPrimaryDark] = useState("#2A2552");
   // Accents
-  const [accent1, setAccent1] = useState("#E2F4FF");
-  const [accent2, setAccent2] = useState("#FDF4DF");
-  const [accent3, setAccent3] = useState("#ECEBF4");
+  const [accent1, setAccent1] = useState("#E1F3FF");
+  const [accent2, setAccent2] = useState("#FCF3DF");
+  const [accent3, setAccent3] = useState("#F0EBFF");
   // Buttons
   const [backgroundPrimary, setBackgroundPrimary] = useState("#FFFFFF");
-  const [buttonPrimary, setButtonPrimary] = useState("#312A6F");
-  const [buttonPrimaryText, setButtonPrimaryText] = useState("#FFFFFF");
+  const [buttonPrimary, setButtonPrimary] = useState("#FFD61E");
+  const [buttonPrimaryText, setButtonPrimaryText] = useState("#000000");
   const [buttonSecondary, setButtonSecondary] = useState("#FFD61E");
   const [buttonSecondaryText, setButtonSecondaryText] = useState("#000000");
   // UI Elements
-  const [borderDefault, setBorderDefault] = useState("#D1D1D1");
-  const [borderSubtle, setBorderSubtle] = useState("#D1D1D1");
-  const [surfaceSubtle, setSurfaceSubtle] = useState("#F7F7F7");
-  const [surfaceInverse, setSurfaceInverse] = useState("#D1D1D1");
-  const [negative, setNegative] = useState("#DC2627");
-  const [positive, setPositive] = useState("#22C55E");
+  const [borderDefault, setBorderDefault] = useState("#cccccc");
+  const [borderSubtle, setBorderSubtle] = useState("#e5e7eb");
+  const [surfaceSubtle, setSurfaceSubtle] = useState("#f0f0f0");
+  const [surfaceInverse, setSurfaceInverse] = useState("#000000");
+  const [negative, setNegative] = useState("#dc2626");
+  const [positive, setPositive] = useState("#11B990");
   const [starRating, setStarRating] = useState("#F59E0B");
 
 
@@ -441,8 +441,8 @@ export default function ThemePage() {
   // Headings (H1-H6 each with own family + weight + color)
   interface HeadingConfig { font: string; weight: string; color: string }
   const [headings, setHeadings] = useState<Record<string, HeadingConfig>>({
-    H1: { font: "Libre Baskerville", weight: "800", color: "#3d348b" },
-    H2: { font: "Libre Baskerville", weight: "700", color: "#1a1a1a" },
+    H1: { font: "Libre Baskerville", weight: "800", color: "#1a1a1a" },
+    H2: { font: "DM Sans", weight: "900", color: "#1a1a1a" },
     H3: { font: "DM Sans", weight: "700", color: "#1a1a1a" },
     H4: { font: "DM Sans", weight: "600", color: "#1a1a1a" },
     H5: { font: "DM Sans", weight: "600", color: "#1a1a1a" },
@@ -461,9 +461,12 @@ export default function ThemePage() {
   const [condensedFont, setCondensedFont] = useState("Barlow");
   const [condensedWeight, setCondensedWeight] = useState("900");
   const [condensedColor, setCondensedColor] = useState("#1a1a1a");
+  const [mutedFont, setMutedFont] = useState("DM Sans");
+  const [mutedWeight, setMutedWeight] = useState("500");
+  const [mutedColor, setMutedColor] = useState("#666666");
   const [baseFontSize, setBaseFontSize] = useState(16);
   const [customFonts, setCustomFonts] = useState<Record<string, string | null>>({
-    H1: null, H2: null, H3: null, H4: null, H5: null, H6: null, body: null, ui: null, condensed: null,
+    H1: null, H2: null, H3: null, H4: null, H5: null, H6: null, body: null, ui: null, condensed: null, muted: null,
   });
   // Convenience aliases for preview
   const displayFont = headings.H1.font;
@@ -476,7 +479,7 @@ export default function ThemePage() {
 
   // Dynamically load Google Fonts for preview
   React.useEffect(() => {
-    const fonts = [displayFont, bodyFont, uiFont, condensedFont].filter((f) => f !== "Custom" && f !== "Geist")
+    const fonts = [displayFont, bodyFont, uiFont, condensedFont, mutedFont].filter((f) => f !== "Custom" && f !== "Geist")
     if (fonts.length === 0) return
     const families = fonts.map((f) => f.replace(/ /g, "+") + ":wght@200;300;400;500;600;700;800;900").join("&family=")
     const href = `https://fonts.googleapis.com/css2?family=${families}&display=swap`
@@ -489,7 +492,7 @@ export default function ThemePage() {
       document.head.appendChild(link)
     }
     link.href = href
-  }, [displayFont, bodyFont, uiFont, condensedFont])
+  }, [displayFont, bodyFont, uiFont, condensedFont, mutedFont])
 
   // Scale factor for preview — all sizes proportional to base font size
   const s = (px: number) => `${(px * baseFontSize / 16).toFixed(1)}px`
@@ -632,6 +635,18 @@ export default function ThemePage() {
                   onWeightChange={setCondensedWeight}
                   customFont={customFonts.condensed}
                   onCustomFontUpload={(name) => setCustomFonts((p) => ({ ...p, condensed: name }))}
+                />
+                <FontSelect
+                  label="Muted Font"
+                  description=""
+                  value={mutedFont}
+                  onChange={setMutedFont}
+                  color={mutedColor}
+                  onColorChange={setMutedColor}
+                  weight={mutedWeight}
+                  onWeightChange={setMutedWeight}
+                  customFont={customFonts.muted}
+                  onCustomFontUpload={(name) => setCustomFonts((p) => ({ ...p, muted: name }))}
                 />
                 <div className="flex flex-col gap-1.5">
                   <Label className="text-sm font-medium">Base Font Size</Label>
