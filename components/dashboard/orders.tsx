@@ -80,16 +80,11 @@ function OrderDetailInline({ order, onFilterByCustomer }: { order: Order; onFilt
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold text-foreground">{item.product}</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">Product ID: {"{product id}"}</p>
                     <div className="flex items-center gap-2 mt-0.5">
-                      {item.variant && (
-                        <span className="text-xs px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
-                          {item.variant}
-                        </span>
-                      )}
-                      {item.sku && (
-                        <span className="text-xs text-muted-foreground">{item.sku}</span>
-                      )}
+                      <span className="text-xs px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
+                        {"{Variant Product Options}"}
+                      </span>
+                      <span className="text-xs text-muted-foreground">{"{SKU}"}</span>
                     </div>
                   </div>
                   <div className="flex items-center gap-4 shrink-0 text-sm tabular-nums">
