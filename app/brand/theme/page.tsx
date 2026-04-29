@@ -438,9 +438,10 @@ export default function ThemePage() {
 
 
   // Section 3: Typography
-  // Headings (H1-H6 each with own family + weight + color)
+  // Headings (Title + H1-H6 each with own family + weight + color)
   interface HeadingConfig { font: string; weight: string; color: string }
   const [headings, setHeadings] = useState<Record<string, HeadingConfig>>({
+    Title: { font: "Libre Baskerville", weight: "800", color: "#1a1a1a" },
     H1: { font: "Libre Baskerville", weight: "800", color: "#1a1a1a" },
     H2: { font: "DM Sans", weight: "900", color: "#1a1a1a" },
     H3: { font: "DM Sans", weight: "700", color: "#1a1a1a" },
@@ -466,7 +467,7 @@ export default function ThemePage() {
   const [mutedColor, setMutedColor] = useState("#666666");
   const [baseFontSize, setBaseFontSize] = useState(16);
   const [customFonts, setCustomFonts] = useState<Record<string, string | null>>({
-    H1: null, H2: null, H3: null, H4: null, H5: null, H6: null, body: null, ui: null, condensed: null, muted: null,
+    Title: null, H1: null, H2: null, H3: null, H4: null, H5: null, H6: null, body: null, ui: null, condensed: null, muted: null,
   });
   // Convenience aliases for preview
   const displayFont = headings.H1.font;
@@ -479,7 +480,7 @@ export default function ThemePage() {
 
   // Dynamically load Google Fonts for preview
   React.useEffect(() => {
-    const fonts = [displayFont, bodyFont, uiFont, condensedFont, mutedFont].filter((f) => f !== "Custom" && f !== "Geist")
+    const fonts = [headings.Title.font, displayFont, bodyFont, uiFont, condensedFont, mutedFont].filter((f) => f !== "Custom" && f !== "Geist")
     if (fonts.length === 0) return
     const families = fonts.map((f) => f.replace(/ /g, "+") + ":wght@200;300;400;500;600;700;800;900").join("&family=")
     const href = `https://fonts.googleapis.com/css2?family=${families}&display=swap`
@@ -492,7 +493,7 @@ export default function ThemePage() {
       document.head.appendChild(link)
     }
     link.href = href
-  }, [displayFont, bodyFont, uiFont, condensedFont, mutedFont])
+  }, [headings.Title.font, displayFont, bodyFont, uiFont, condensedFont, mutedFont])
 
   // Scale factor for preview — all sizes proportional to base font size
   const s = (px: number) => `${(px * baseFontSize / 16).toFixed(1)}px`
@@ -580,9 +581,22 @@ export default function ThemePage() {
                 <CardTitle className="text-base">Typography</CardTitle>
               </CardHeader>
               <CardContent className="flex flex-col gap-2">
-                {/* Headings H1-H6 */}
+                {/* Headings — Title + H1-H6 */}
                 <div>
                   <div className="flex flex-col gap-2">
+                    <FontSelect
+                      key="Title"
+                      label="Title"
+                      description=""
+                      value={headings.Title.font}
+                      onChange={(v) => updateHeading("Title", { font: v })}
+                      color={headings.Title.color}
+                      onColorChange={(v) => updateHeading("Title", { color: v })}
+                      weight={headings.Title.weight}
+                      onWeightChange={(v) => updateHeading("Title", { weight: v })}
+                      customFont={customFonts.Title}
+                      onCustomFontUpload={(name) => setCustomFonts((p) => ({ ...p, Title: name }))}
+                    />
                     {(["H1", "H2", "H3", "H4", "H5", "H6"] as const).map((level) => (
                       <FontSelect
                         key={level}
@@ -748,6 +762,7 @@ export default function ThemePage() {
 
                   {/* 4. Placeholder section 1 — accent 1 */}
                   <div className="p-4 flex flex-col gap-3" style={{ background: `linear-gradient(180deg, #ffffff 0%, #ffffff 5%, ${accent1} 50%, #ffffff 95%, #ffffff 100%)` }}>
+                    <div style={{ fontFamily: headings.Title.font, fontWeight: headings.Title.weight, fontSize: s(28), lineHeight: 1.1, letterSpacing: "-0.5px", color: headings.Title.color }}>Title</div>
                     <div style={{ fontFamily: headings.H1.font, fontWeight: headings.H1.weight, fontSize: s(22), lineHeight: 1.15, letterSpacing: "-0.4px", color: headings.H1.color }}>Heading 1</div>
                     <div style={{ fontFamily: headings.H2.font, fontWeight: headings.H2.weight, fontSize: s(18), lineHeight: 1.2, color: headings.H2.color }}>Heading 2</div>
                     <p style={{ fontFamily: bodyFont, fontWeight: bodyWeight, fontSize: s(14), lineHeight: 1.5, margin: 0, color: bodyColor, opacity: 0.8 }}>
@@ -765,6 +780,7 @@ export default function ThemePage() {
 
                   {/* 5. Placeholder section 2 — accent 2 (clone of section 1) */}
                   <div className="p-4 flex flex-col gap-3" style={{ background: `linear-gradient(180deg, #ffffff 0%, #ffffff 5%, ${accent2} 50%, #ffffff 95%, #ffffff 100%)` }}>
+                    <div style={{ fontFamily: headings.Title.font, fontWeight: headings.Title.weight, fontSize: s(28), lineHeight: 1.1, letterSpacing: "-0.5px", color: headings.Title.color }}>Title</div>
                     <div style={{ fontFamily: headings.H1.font, fontWeight: headings.H1.weight, fontSize: s(22), lineHeight: 1.15, letterSpacing: "-0.4px", color: headings.H1.color }}>Heading 1</div>
                     <div style={{ fontFamily: headings.H2.font, fontWeight: headings.H2.weight, fontSize: s(18), lineHeight: 1.2, color: headings.H2.color }}>Heading 2</div>
                     <p style={{ fontFamily: bodyFont, fontWeight: bodyWeight, fontSize: s(14), lineHeight: 1.5, margin: 0, color: bodyColor, opacity: 0.8 }}>
@@ -789,6 +805,7 @@ export default function ThemePage() {
 
                   {/* 6. Placeholder section 3 — accent 3, all heading levels */}
                   <div className="p-4 flex flex-col gap-2" style={{ background: `linear-gradient(180deg, #ffffff 0%, #ffffff 5%, ${accent3} 50%, #ffffff 95%, #ffffff 100%)` }}>
+                    <div style={{ fontFamily: headings.Title.font, fontWeight: headings.Title.weight, fontSize: s(28), lineHeight: 1.1, letterSpacing: "-0.5px", color: headings.Title.color }}>Title</div>
                     <div style={{ fontFamily: headings.H1.font, fontWeight: headings.H1.weight, fontSize: s(22), lineHeight: 1.15, letterSpacing: "-0.4px", color: headings.H1.color }}>Heading 1</div>
                     <div style={{ fontFamily: headings.H2.font, fontWeight: headings.H2.weight, fontSize: s(18), lineHeight: 1.2, color: headings.H2.color }}>Heading 2</div>
                     <div style={{ fontFamily: headings.H3.font, fontWeight: headings.H3.weight, fontSize: s(16), lineHeight: 1.25, color: headings.H3.color }}>Heading 3</div>
