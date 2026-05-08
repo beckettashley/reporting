@@ -815,6 +815,9 @@ export default function ThemePage() {
                     <p style={{ fontFamily: bodyFont, fontWeight: bodyWeight, fontSize: s(14), lineHeight: 1.5, margin: 0, color: bodyColor, opacity: 0.8 }}>
                       Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.
                     </p>
+                    <p style={{ fontFamily: mutedFont, fontWeight: mutedWeight, fontSize: s(11), lineHeight: 1.4, margin: 0, color: mutedColor }}>
+                      — Sarah K., verified customer · March 2026
+                    </p>
                     <div className="w-full aspect-video rounded-md relative overflow-hidden" style={{ backgroundColor: "#f0f0f0" }}>
                       <div className="absolute inset-0 flex items-center justify-center">
                         <ImageIcon className="w-6 h-6 text-gray-400" />
