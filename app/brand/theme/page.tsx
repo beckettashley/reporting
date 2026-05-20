@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,6 +13,7 @@ import type {
   TypographyMap,
 } from "@/lib/theme-schema/theme-schema";
 import javvySeed from "@/lib/theme-schema/themes/javvy.json";
+import { oklabMix } from "@/lib/oklab-mix";
 
 // ---------------------------------------------------------------------------
 // Color utility functions
@@ -586,6 +587,12 @@ export default function ThemePage() {
   // v2 theme state — seeded from the Javvy reference instance.
   const [theme, setTheme] = useState<PageStyle>(javvySeed as PageStyle);
   const [activeRoleTab, setActiveRoleTab] = useState<"light" | "dark">("light");
+  // Manual-override toggles for the cta-family derivations. Default OFF —
+  // the primitive bound to ctaBorder / ctaHover auto-tracks cta. Toggling ON
+  // unlocks the hex input for hand-tuning; toggling back OFF overwrites the
+  // manual value with the recomputed derivation.
+  const [ctaBorderOverride, setCtaBorderOverride] = useState(false);
+  const [ctaHoverOverride, setCtaHoverOverride] = useState(false);
 
   // ─── Granular setters ───────────────────────────────────────────────────
 
@@ -684,6 +691,48 @@ export default function ThemePage() {
     });
   };
 
+  // ─── Derivation tracking ────────────────────────────────────────────────
+  // The primitives currently bound to the cta-family roles (read from the
+  // light surface — v1 limitation: brands with light.cta ≠ dark.cta should
+  // manual-override on dark).
+  const ctaPrim = theme.colors?.semantic?.light?.cta;
+  const ctaBorderPrim = theme.colors?.semantic?.light?.ctaBorder;
+  const ctaHoverPrim = theme.colors?.semantic?.light?.ctaHover;
+  const ctaHex = ctaPrim ? theme.colors?.primitives?.[ctaPrim] : undefined;
+  const ctaBorderHexCurrent = ctaBorderPrim
+    ? theme.colors?.primitives?.[ctaBorderPrim]
+    : undefined;
+
+  // Auto-derive ctaBorder when override is OFF. Guard prevents infinite loop:
+  // re-fires only when an input actually changes the computed value.
+  useEffect(() => {
+    if (ctaBorderOverride) return;
+    if (!ctaBorderPrim || !ctaHex || !isValidHex(ctaHex)) return;
+    const derived = oklabMix(ctaHex, 90, "#000000");
+    if (theme.colors?.primitives?.[ctaBorderPrim] !== derived) {
+      setPrimitive(ctaBorderPrim, derived);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ctaBorderOverride, ctaBorderPrim, ctaHex]);
+
+  // Auto-derive ctaHover when override is OFF. Depends on cta + ctaBorder.
+  useEffect(() => {
+    if (ctaHoverOverride) return;
+    if (
+      !ctaHoverPrim ||
+      !ctaHex ||
+      !ctaBorderHexCurrent ||
+      !isValidHex(ctaHex) ||
+      !isValidHex(ctaBorderHexCurrent)
+    )
+      return;
+    const derived = oklabMix(ctaHex, 85, ctaBorderHexCurrent);
+    if (theme.colors?.primitives?.[ctaHoverPrim] !== derived) {
+      setPrimitive(ctaHoverPrim, derived);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ctaHoverOverride, ctaHoverPrim, ctaHex, ctaBorderHexCurrent]);
+
   // Rename: order-preserving swap of the key in primitives + pairs. Silently
   // no-ops on invalid format or name collision; the input's onBlur resets the
   // DOM in those cases.
@@ -755,72 +804,112 @@ export default function ThemePage() {
                     const onSurface =
                       theme.colors?.pairs?.[name]?.onSurface ?? "light";
                     const hexValid = isValidHex(hex);
+                    const isDerivedCtaBorder = name === ctaBorderPrim;
+                    const isDerivedCtaHover = name === ctaHoverPrim;
+                    const isDerived = isDerivedCtaBorder || isDerivedCtaHover;
+                    const override = isDerivedCtaBorder
+                      ? ctaBorderOverride
+                      : isDerivedCtaHover
+                        ? ctaHoverOverride
+                        : false;
+                    const setOverride = isDerivedCtaBorder
+                      ? setCtaBorderOverride
+                      : isDerivedCtaHover
+                        ? setCtaHoverOverride
+                        : null;
+                    const formula = isDerivedCtaBorder
+                      ? "oklab-mix(cta 90%, black 10%)"
+                      : isDerivedCtaHover
+                        ? "oklab-mix(cta 85%, ctaBorder 15%)"
+                        : null;
+                    const isReadOnly = isDerived && !override;
                     return (
-                      <div
-                        key={name}
-                        className="grid grid-cols-[1fr_2rem_8rem_5.5rem_2rem] items-center gap-2"
-                      >
-                        <input
-                          type="text"
-                          key={`prim-name-${name}`}
-                          defaultValue={name}
-                          onBlur={(e) => {
-                            const newName = e.target.value.trim();
-                            if (newName === name) return;
-                            if (
-                              !isValidPrimName(newName) ||
-                              newName in (theme.colors?.primitives || {})
-                            ) {
-                              e.target.value = name;
-                              return;
-                            }
-                            renamePrimitive(name, newName);
-                          }}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter")
-                              (e.currentTarget as HTMLInputElement).blur();
-                          }}
-                          className="font-mono text-xs h-8 px-2 rounded-md border bg-background w-full outline-none focus:ring-1 focus:ring-ring"
-                          placeholder="primitiveName"
-                        />
-                        <label
-                          className="w-8 h-8 rounded-md border border-border flex-shrink-0 cursor-pointer block relative overflow-hidden"
-                          style={{
-                            backgroundColor: hexValid ? hex : "transparent",
-                          }}
-                        >
+                      <div key={name}>
+                        <div className="grid grid-cols-[1fr_2rem_8rem_5.5rem_2rem] items-center gap-2">
                           <input
-                            type="color"
-                            value={hexValid ? hex : "#CCCCCC"}
-                            onChange={(e) => setPrimitive(name, e.target.value)}
-                            className="absolute inset-0 opacity-0 cursor-pointer"
+                            type="text"
+                            key={`prim-name-${name}`}
+                            defaultValue={name}
+                            onBlur={(e) => {
+                              const newName = e.target.value.trim();
+                              if (newName === name) return;
+                              if (
+                                !isValidPrimName(newName) ||
+                                newName in (theme.colors?.primitives || {})
+                              ) {
+                                e.target.value = name;
+                                return;
+                              }
+                              renamePrimitive(name, newName);
+                            }}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter")
+                                (e.currentTarget as HTMLInputElement).blur();
+                            }}
+                            className="font-mono text-xs h-8 px-2 rounded-md border bg-background w-full outline-none focus:ring-1 focus:ring-ring"
+                            placeholder="primitiveName"
                           />
-                        </label>
-                        <Input
-                          value={hex.toUpperCase()}
-                          onChange={(e) => setPrimitive(name, e.target.value)}
-                          className={`font-mono text-xs h-8 ${!hexValid ? "border-destructive" : ""}`}
-                          placeholder="#000000"
-                        />
-                        <select
-                          value={onSurface}
-                          onChange={(e) =>
-                            setPair(name, e.target.value as "light" | "dark")
-                          }
-                          className="h-8 rounded-md border bg-background text-xs px-2 cursor-pointer"
-                        >
-                          <option value="light">on light</option>
-                          <option value="dark">on dark</option>
-                        </select>
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          className="h-8 w-8"
-                          onClick={() => removePrimitive(name)}
-                          aria-label={`Remove ${name}`}
-                        >
-                          <X className="w-3.5 h-3.5 text-muted-foreground" />
-                        </Button>
+                          <label
+                            className="w-8 h-8 rounded-md border border-border flex-shrink-0 cursor-pointer block relative overflow-hidden"
+                            style={{
+                              backgroundColor: hexValid ? hex : "transparent",
+                            }}
+                          >
+                            <input
+                              type="color"
+                              value={hexValid ? hex : "#CCCCCC"}
+                              onChange={(e) => setPrimitive(name, e.target.value)}
+                              disabled={isReadOnly}
+                              className="absolute inset-0 opacity-0 cursor-pointer disabled:cursor-not-allowed"
+                            />
+                          </label>
+                          <Input
+                            value={hex.toUpperCase()}
+                            onChange={(e) => setPrimitive(name, e.target.value)}
+                            readOnly={isReadOnly}
+                            title={isDerived ? `Derived: ${formula}` : undefined}
+                            className={`font-mono text-xs h-8 ${!hexValid ? "border-destructive" : ""} ${isReadOnly ? "bg-muted/40 text-muted-foreground cursor-not-allowed" : ""}`}
+                            placeholder="#000000"
+                          />
+                          <select
+                            value={onSurface}
+                            onChange={(e) =>
+                              setPair(name, e.target.value as "light" | "dark")
+                            }
+                            className="h-8 rounded-md border bg-background text-xs px-2 cursor-pointer"
+                          >
+                            <option value="light">on light</option>
+                            <option value="dark">on dark</option>
+                          </select>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-8 w-8"
+                            onClick={() => removePrimitive(name)}
+                            aria-label={`Remove ${name}`}
+                          >
+                            <X className="w-3.5 h-3.5 text-muted-foreground" />
+                          </Button>
+                        </div>
+                        {isDerived && (
+                          <div className="flex items-center justify-end gap-2 pt-0.5 text-[10px] text-muted-foreground">
+                            <span className="font-mono">{formula}</span>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setOverride && setOverride(!override)
+                              }
+                              className="px-2 py-0.5 rounded border border-border hover:bg-muted transition-colors"
+                              title={
+                                override
+                                  ? "Switching back to derived overwrites the manual value"
+                                  : "Unlock manual hex editing"
+                              }
+                            >
+                              {override ? "Use derived" : "Override"}
+                            </button>
+                          </div>
+                        )}
                       </div>
                     );
                   }
