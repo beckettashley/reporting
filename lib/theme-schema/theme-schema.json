@@ -1,0 +1,228 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://component-demo.local/schema/theme-schema.json",
+  "$comment": "MIRRORED from github.com/beckettashley/component-demo/schema/theme-schema.json as of commit 1b73a46 (2026-05-19). Sync rule: when schema changes in component-demo, update here BEFORE updating UI consumers.",
+  "title": "PageStyle theme schema",
+  "description": "Theme data for a single brand: color tokens, typography roles, brand assets, baseFontSize. Compositional content shape (sections, grids, cells) is not part of this schema — that's template-specific. See companion TypeScript definitions at schema/theme-schema.ts.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "baseFontSize": {
+      "type": "number",
+      "description": "Base font size in pixels. Default 16. Drives all role-size multipliers via rem-based calc().",
+      "minimum": 8,
+      "maximum": 32
+    },
+    "colors": { "$ref": "#/$defs/ColorTokens" },
+    "typography": { "$ref": "#/$defs/TypographyMap" },
+    "brandAssets": { "$ref": "#/$defs/BrandAssets" }
+  },
+  "$defs": {
+    "HexColor": {
+      "type": "string",
+      "pattern": "^#[0-9A-Fa-f]{3}([0-9A-Fa-f]{3}([0-9A-Fa-f]{2})?)?$",
+      "description": "CSS hex color string. 3, 6, or 8 digit form."
+    },
+    "SemanticRoleName": {
+      "type": "string",
+      "description": "Closed v2 semantic role vocabulary. See schema/theme-schema.ts for role descriptions and naming conventions (shadcn-aligned: bare names for surfaces, -Foreground suffix for paired text; descriptive names for text-only extensions).",
+      "enum": [
+        "background",
+        "foreground",
+        "muted",
+        "mutedForeground",
+        "primary",
+        "primaryForeground",
+        "brandSubtle",
+        "brandSubtleForeground",
+        "warning",
+        "warningForeground",
+        "textBrand",
+        "link",
+        "textAlert",
+        "border",
+        "ring",
+        "cta",
+        "ctaForeground",
+        "ctaBorder",
+        "ctaHover"
+      ]
+    },
+    "GradientRoleName": {
+      "type": "string",
+      "enum": ["subtle"]
+    },
+    "ColorPrimitives": {
+      "type": "object",
+      "description": "Brand-named primitive colors. Keys are brand-chosen identifiers (e.g., 'javvyPurple', 'solsticeBurntOrange', 'ink', 'paper').",
+      "minProperties": 1,
+      "patternProperties": {
+        "^[a-zA-Z][a-zA-Z0-9]*$": { "$ref": "#/$defs/HexColor" }
+      },
+      "additionalProperties": false
+    },
+    "SemanticMap": {
+      "type": "object",
+      "description": "Map from semantic role to primitive name. Values must be primitive names declared in ColorPrimitives.",
+      "additionalProperties": false,
+      "properties": {
+        "background": { "type": "string" },
+        "foreground": { "type": "string" },
+        "muted": { "type": "string" },
+        "mutedForeground": { "type": "string" },
+        "primary": { "type": "string" },
+        "primaryForeground": { "type": "string" },
+        "brandSubtle": { "type": "string" },
+        "brandSubtleForeground": { "type": "string" },
+        "warning": { "type": "string" },
+        "warningForeground": { "type": "string" },
+        "textBrand": { "type": "string" },
+        "link": { "type": "string" },
+        "textAlert": { "type": "string" },
+        "border": { "type": "string" },
+        "ring": { "type": "string" },
+        "cta": { "type": "string" },
+        "ctaForeground": { "type": "string" },
+        "ctaBorder": { "type": "string" },
+        "ctaHover": { "type": "string" }
+      }
+    },
+    "PairingMap": {
+      "type": "object",
+      "description": "Per-primitive pair declarations: which surface text inside renders against when that primitive is used as a background.",
+      "patternProperties": {
+        "^[a-zA-Z][a-zA-Z0-9]*$": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["onSurface"],
+          "properties": {
+            "onSurface": { "type": "string", "enum": ["light", "dark"] }
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "GradientPrimitive": {
+      "type": "object",
+      "description": "Gradient role definition. Tint is implicit (consumes brandSubtle role at the declared surface). midStopHex is curation-time output (concrete hex, not a primitive ref). The 25/75 plateau shape is renderer contract.",
+      "additionalProperties": false,
+      "required": ["surface"],
+      "properties": {
+        "surface": {
+          "type": "string",
+          "enum": ["light", "dark"],
+          "description": "Surface the gradient is intended for. Endpoint color is paper for 'light', brand-dark anchor for 'dark'."
+        },
+        "midStopHex": {
+          "type": "string",
+          "pattern": "^#[0-9A-Fa-f]{3}([0-9A-Fa-f]{3}([0-9A-Fa-f]{2})?)?$",
+          "description": "Optional pre-computed mid-stop hex (curation-time derivation output). Concrete CSS hex value, NOT a primitive name. Curation rule: srgb-mix(brandSubtle 70%, surface-endpoint). When omitted, renderer falls back to brandSubtle at 100% across the plateau."
+        }
+      }
+    },
+    "GradientMap": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "subtle": { "$ref": "#/$defs/GradientPrimitive" }
+      }
+    },
+    "ColorTokens": {
+      "type": "object",
+      "description": "Complete color token system: primitives + semantic role mappings + pair definitions + gradient definitions.",
+      "additionalProperties": false,
+      "required": ["primitives", "semantic"],
+      "properties": {
+        "primitives": { "$ref": "#/$defs/ColorPrimitives" },
+        "semantic": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["light"],
+          "properties": {
+            "light": { "$ref": "#/$defs/SemanticMap" },
+            "dark": { "$ref": "#/$defs/SemanticMap" }
+          }
+        },
+        "pairs": { "$ref": "#/$defs/PairingMap" },
+        "gradients": { "$ref": "#/$defs/GradientMap" }
+      }
+    },
+    "TextRoleStyle": {
+      "type": "object",
+      "description": "Per-role text styling. Sizes are template-fixed via rem multipliers — NOT in this interface. color is a semantic role reference, NOT a hex value.",
+      "additionalProperties": false,
+      "properties": {
+        "family": {
+          "type": "string",
+          "description": "CSS font-family value."
+        },
+        "weight": {
+          "type": "number",
+          "description": "Numeric font weight 100-900.",
+          "minimum": 100,
+          "maximum": 900
+        },
+        "color": { "$ref": "#/$defs/SemanticRoleName" },
+        "lineHeight": {
+          "oneOf": [
+            { "type": "number" },
+            { "type": "string" }
+          ]
+        },
+        "letterSpacing": {
+          "type": "string",
+          "description": "CSS letter-spacing, e.g., '-0.025em' or '0.5px'."
+        }
+      }
+    },
+    "MutedRoleStyle": {
+      "type": "object",
+      "description": "Muted role — sparse, only color is overridable.",
+      "additionalProperties": false,
+      "properties": {
+        "color": { "$ref": "#/$defs/SemanticRoleName" }
+      }
+    },
+    "TypographyMap": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "title": { "$ref": "#/$defs/TextRoleStyle" },
+        "h1": { "$ref": "#/$defs/TextRoleStyle" },
+        "h2": { "$ref": "#/$defs/TextRoleStyle" },
+        "h3": { "$ref": "#/$defs/TextRoleStyle" },
+        "h4": { "$ref": "#/$defs/TextRoleStyle" },
+        "h5": { "$ref": "#/$defs/TextRoleStyle" },
+        "h6": { "$ref": "#/$defs/TextRoleStyle" },
+        "body": { "$ref": "#/$defs/TextRoleStyle" },
+        "ui": { "$ref": "#/$defs/TextRoleStyle" },
+        "condensed": { "$ref": "#/$defs/TextRoleStyle" },
+        "accordionQuestion": { "$ref": "#/$defs/TextRoleStyle" },
+        "meta": { "$ref": "#/$defs/TextRoleStyle" },
+        "muted": { "$ref": "#/$defs/MutedRoleStyle" }
+      }
+    },
+    "BrandAssets": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "logo": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "light": {
+              "type": "string",
+              "format": "uri",
+              "description": "URL of logo for light surfaces (dark-foreground asset)."
+            },
+            "dark": {
+              "type": "string",
+              "format": "uri",
+              "description": "URL of logo for dark surfaces (light-foreground asset)."
+            }
+          }
+        }
+      }
+    }
+  }
+}

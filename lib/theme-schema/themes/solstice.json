@@ -1,0 +1,172 @@
+{
+  "$schema": "../theme-schema.json",
+  "$comment": "Solstice — fictional warm/saturated single-color-family brand. Demonstrates schema portability for brands materially different from Javvy (warm vs cool, single-family vs complementary, serif H1 absent). Tint variants (subtle, mid, dark) are synthesized from the primary burnt orange: subtle = paper-lightened to ~93% lightness; mid = primary at ~75% lightness; dark = deep maroon as the dark-surface anchor. This synthesis approach is documented in docs/generator-considerations.md.",
+  "baseFontSize": 16,
+  "colors": {
+    "primitives": {
+      "ink": "#1A1A1A",
+      "inkMuted": "#555555",
+      "graphite": "#666666",
+      "paper": "#FFFFFF",
+      "paperSubtle": "#F4E8D8",
+      "rule": "#E5E7EB",
+      "alert": "#DC2626",
+      "success": "#11B990",
+      "warningSubtle": "#FEF9C3",
+      "solsticeBurntOrange": "#D97A3E",
+      "solsticeMidOrange": "#A85F2F",
+      "solsticeMaroon": "#5C1A1A",
+      "solsticeSubtlePeach": "#FAEBE0",
+      "solsticeAmber": "#FFB347",
+      "solsticeCtaBorder": "#DE9B3D",
+      "solsticeCtaHover": "#FAAF45"
+    },
+    "semantic": {
+      "light": {
+        "background": "paper",
+        "foreground": "ink",
+        "muted": "paperSubtle",
+        "mutedForeground": "graphite",
+        "primary": "solsticeBurntOrange",
+        "primaryForeground": "paper",
+        "brandSubtle": "solsticeSubtlePeach",
+        "brandSubtleForeground": "ink",
+        "warning": "warningSubtle",
+        "warningForeground": "ink",
+        "textBrand": "solsticeBurntOrange",
+        "link": "solsticeBurntOrange",
+        "textAlert": "alert",
+        "border": "rule",
+        "ring": "solsticeBurntOrange",
+        "cta": "solsticeAmber",
+        "ctaForeground": "ink",
+        "ctaBorder": "solsticeCtaBorder",
+        "ctaHover": "solsticeCtaHover"
+      },
+      "dark": {
+        "background": "solsticeMaroon",
+        "foreground": "paper",
+        "muted": "solsticeMidOrange",
+        "mutedForeground": "rule",
+        "primary": "solsticeAmber",
+        "primaryForeground": "ink",
+        "textBrand": "solsticeAmber",
+        "link": "paper",
+        "textAlert": "alert",
+        "border": "rule",
+        "ring": "solsticeAmber",
+        "cta": "solsticeAmber",
+        "ctaForeground": "ink",
+        "ctaBorder": "solsticeCtaBorder",
+        "ctaHover": "solsticeCtaHover"
+      }
+    },
+    "pairs": {
+      "ink": { "onSurface": "dark" },
+      "inkMuted": { "onSurface": "dark" },
+      "graphite": { "onSurface": "dark" },
+      "paper": { "onSurface": "light" },
+      "paperSubtle": { "onSurface": "light" },
+      "rule": { "onSurface": "light" },
+      "alert": { "onSurface": "dark" },
+      "success": { "onSurface": "light" },
+      "warningSubtle": { "onSurface": "light" },
+      "solsticeBurntOrange": { "onSurface": "dark" },
+      "solsticeMidOrange": { "onSurface": "dark" },
+      "solsticeMaroon": { "onSurface": "dark" },
+      "solsticeSubtlePeach": { "onSurface": "light" },
+      "solsticeAmber": { "onSurface": "light" },
+      "solsticeCtaBorder": { "onSurface": "light" },
+      "solsticeCtaHover": { "onSurface": "light" }
+    },
+    "gradients": {
+      "subtle": {
+        "surface": "light",
+        "midStopHex": "#FCF1E9"
+      }
+    }
+  },
+  "typography": {
+    "title": {
+      "family": "'Archivo', sans-serif",
+      "weight": 900,
+      "lineHeight": 1.05,
+      "letterSpacing": "-0.03em"
+    },
+    "h1": {
+      "family": "'Archivo', sans-serif",
+      "weight": 800,
+      "lineHeight": 1.155,
+      "letterSpacing": "-0.025em"
+    },
+    "h2": {
+      "family": "'Archivo', sans-serif",
+      "weight": 900,
+      "lineHeight": 1.2,
+      "letterSpacing": "-0.015em"
+    },
+    "h3": {
+      "family": "'Archivo', sans-serif",
+      "weight": 700,
+      "lineHeight": 1.25,
+      "letterSpacing": "-0.01em"
+    },
+    "h4": {
+      "family": "'Archivo', sans-serif",
+      "weight": 800,
+      "lineHeight": 1.3,
+      "letterSpacing": "-0.005em"
+    },
+    "h5": {
+      "family": "'Archivo', sans-serif",
+      "weight": 700,
+      "lineHeight": 1.4,
+      "letterSpacing": "0"
+    },
+    "h6": {
+      "family": "'Archivo', sans-serif",
+      "weight": 700,
+      "lineHeight": 1.4,
+      "letterSpacing": "0"
+    },
+    "body": {
+      "family": "'Lato', sans-serif",
+      "weight": 400,
+      "lineHeight": 1.6,
+      "letterSpacing": "0"
+    },
+    "ui": {
+      "family": "'Lato', sans-serif",
+      "weight": 700,
+      "lineHeight": 1.4,
+      "letterSpacing": "0.01em"
+    },
+    "condensed": {
+      "family": "'Barlow', sans-serif",
+      "weight": 900,
+      "lineHeight": 1.155,
+      "letterSpacing": "-0.025em"
+    },
+    "accordionQuestion": {
+      "family": "'Lato', sans-serif",
+      "weight": 700,
+      "lineHeight": 1.4,
+      "letterSpacing": "0"
+    },
+    "meta": {
+      "family": "'Lato', sans-serif",
+      "weight": 400,
+      "lineHeight": 1.5,
+      "letterSpacing": "0"
+    },
+    "muted": {
+      "color": "mutedForeground"
+    }
+  },
+  "brandAssets": {
+    "logo": {
+      "light": "https://placeholder.example.com/solstice-logo-light.svg",
+      "dark": "https://placeholder.example.com/solstice-logo-dark.svg"
+    }
+  }
+}

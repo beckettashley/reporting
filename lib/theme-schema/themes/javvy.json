@@ -1,0 +1,171 @@
+{
+  "$schema": "../theme-schema.json",
+  "baseFontSize": 16,
+  "colors": {
+    "primitives": {
+      "ink": "#1A1A1A",
+      "inkMuted": "#555555",
+      "graphite": "#666666",
+      "paper": "#FFFFFF",
+      "paperSubtle": "#F5F5F5",
+      "rule": "#E5E7EB",
+      "alert": "#DC2626",
+      "success": "#11B990",
+      "warningSubtle": "#FEF9C3",
+      "javvyPurple": "#3D348B",
+      "javvyPurpleMid": "#351979",
+      "javvyPurpleDark": "#2A2552",
+      "javvyPurpleSubtle": "#E8E4F7",
+      "javvyYellow": "#FFD61E",
+      "javvyCtaBorder": "#DEBA19",
+      "javvyCtaHover": "#FAD21D"
+    },
+    "semantic": {
+      "light": {
+        "background": "paper",
+        "foreground": "ink",
+        "muted": "paperSubtle",
+        "mutedForeground": "graphite",
+        "primary": "javvyPurple",
+        "primaryForeground": "paper",
+        "brandSubtle": "javvyPurpleSubtle",
+        "brandSubtleForeground": "ink",
+        "warning": "warningSubtle",
+        "warningForeground": "ink",
+        "textBrand": "javvyPurple",
+        "link": "javvyPurple",
+        "textAlert": "alert",
+        "border": "rule",
+        "ring": "javvyPurple",
+        "cta": "javvyYellow",
+        "ctaForeground": "ink",
+        "ctaBorder": "javvyCtaBorder",
+        "ctaHover": "javvyCtaHover"
+      },
+      "dark": {
+        "background": "javvyPurpleDark",
+        "foreground": "paper",
+        "muted": "javvyPurple",
+        "mutedForeground": "rule",
+        "primary": "javvyYellow",
+        "primaryForeground": "ink",
+        "textBrand": "javvyYellow",
+        "link": "paper",
+        "textAlert": "alert",
+        "border": "rule",
+        "ring": "javvyYellow",
+        "cta": "javvyYellow",
+        "ctaForeground": "ink",
+        "ctaBorder": "javvyCtaBorder",
+        "ctaHover": "javvyCtaHover"
+      }
+    },
+    "pairs": {
+      "ink": { "onSurface": "dark" },
+      "inkMuted": { "onSurface": "dark" },
+      "graphite": { "onSurface": "dark" },
+      "paper": { "onSurface": "light" },
+      "paperSubtle": { "onSurface": "light" },
+      "rule": { "onSurface": "light" },
+      "alert": { "onSurface": "dark" },
+      "success": { "onSurface": "light" },
+      "warningSubtle": { "onSurface": "light" },
+      "javvyPurple": { "onSurface": "dark" },
+      "javvyPurpleMid": { "onSurface": "dark" },
+      "javvyPurpleDark": { "onSurface": "dark" },
+      "javvyPurpleSubtle": { "onSurface": "light" },
+      "javvyYellow": { "onSurface": "light" },
+      "javvyCtaBorder": { "onSurface": "light" },
+      "javvyCtaHover": { "onSurface": "light" }
+    },
+    "gradients": {
+      "subtle": {
+        "surface": "light",
+        "midStopHex": "#EFECF9"
+      }
+    }
+  },
+  "typography": {
+    "title": {
+      "family": "'DM Sans', sans-serif",
+      "weight": 900,
+      "lineHeight": 1.05,
+      "letterSpacing": "-0.03em"
+    },
+    "h1": {
+      "family": "'Libre Baskerville', serif",
+      "weight": 700,
+      "lineHeight": 1.155,
+      "letterSpacing": "-0.025em"
+    },
+    "h2": {
+      "family": "'DM Sans', sans-serif",
+      "weight": 900,
+      "lineHeight": 1.2,
+      "letterSpacing": "-0.015em"
+    },
+    "h3": {
+      "family": "'DM Sans', sans-serif",
+      "weight": 600,
+      "lineHeight": 1.25,
+      "letterSpacing": "-0.01em"
+    },
+    "h4": {
+      "family": "'DM Sans', sans-serif",
+      "weight": 800,
+      "lineHeight": 1.3,
+      "letterSpacing": "-0.005em"
+    },
+    "h5": {
+      "family": "'DM Sans', sans-serif",
+      "weight": 600,
+      "lineHeight": 1.4,
+      "letterSpacing": "0"
+    },
+    "h6": {
+      "family": "'DM Sans', sans-serif",
+      "weight": 600,
+      "lineHeight": 1.4,
+      "letterSpacing": "0"
+    },
+    "body": {
+      "family": "'DM Sans', sans-serif",
+      "weight": 500,
+      "lineHeight": 1.6,
+      "letterSpacing": "0"
+    },
+    "ui": {
+      "family": "'Geist', 'Geist Fallback', sans-serif",
+      "weight": 700,
+      "lineHeight": 1.4,
+      "letterSpacing": "0.01em"
+    },
+    "condensed": {
+      "family": "'Barlow', sans-serif",
+      "weight": 900,
+      "lineHeight": 1.155,
+      "letterSpacing": "-0.025em"
+    },
+    "accordionQuestion": {
+      "family": "'DM Sans', sans-serif",
+      "weight": 800,
+      "lineHeight": 1.4,
+      "letterSpacing": "0"
+    },
+    "meta": {
+      "family": "'DM Sans', sans-serif",
+      "weight": 500,
+      "lineHeight": 1.5,
+      "letterSpacing": "0"
+    },
+    "muted": {
+      "color": "mutedForeground"
+    }
+  },
+  "brandAssets": {
+    "logo": {
+      "light": "https://cdn.shopify.com/oxygen-v2/25194/9447/19462/3290292/javvy-logo-blue-yellow-sparkles.svg",
+      "dark": "https://cdn.shopify.com/oxygen-v2/25194/9447/19462/3558695/javvy-logo-white-sparkles.png"
+    }
+  }
+}
