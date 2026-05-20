@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://component-demo.local/schema/theme-schema.json",
-  "$comment": "MIRRORED from github.com/beckettashley/component-demo/schema/theme-schema.json as of commit 1b73a46 (2026-05-19). Sync rule: when schema changes in component-demo, update here BEFORE updating UI consumers.",
+  "$comment": "ADAPTED from github.com/beckettashley/component-demo/schema/theme-schema.json as of commit 1b73a46 (2026-05-19) with local addition of the ctaBorderHover semantic role (cta family). Eventual reconciliation between repos pending — canonical schema needs a parallel PR to add ctaBorderHover. Sync rule: when schema changes in component-demo OR locally, update both sides BEFORE updating UI consumers.",
   "title": "PageStyle theme schema",
   "description": "Theme data for a single brand: color tokens, typography roles, brand assets, baseFontSize. Compositional content shape (sections, grids, cells) is not part of this schema — that's template-specific. See companion TypeScript definitions at schema/theme-schema.ts.",
   "type": "object",
@@ -45,7 +45,8 @@
         "cta",
         "ctaForeground",
         "ctaBorder",
-        "ctaHover"
+        "ctaHover",
+        "ctaBorderHover"
       ]
     },
     "GradientRoleName": {
@@ -84,7 +85,8 @@
         "cta": { "type": "string" },
         "ctaForeground": { "type": "string" },
         "ctaBorder": { "type": "string" },
-        "ctaHover": { "type": "string" }
+        "ctaHover": { "type": "string" },
+        "ctaBorderHover": { "type": "string" }
       }
     },
     "PairingMap": {

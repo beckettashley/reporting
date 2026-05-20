@@ -1,13 +1,16 @@
-// Pure-math OKLab color-mix utility. No DOM, no canvas — runs identically in
-// browser, server, and Node script. Reference: Björn Ottosson's OKLab formula
-// and matrix coefficients (https://bottosson.github.io/posts/oklab/).
+// Pure-math OKLab "deepen" utility. Reduces lightness while preserving (a, b),
+// which preserves both chroma and hue exactly. Equivalent to OKLCH (L - δ, C, H).
 //
-// Verified bit-for-bit against colorjs.io for Javvy + Solstice cta-family
-// derivations. See scripts/_verify-oklab-mix.mjs.
+// Verified bit-equal against colorjs.io except where channel-clipping diverges
+// from CSS Color 4 gamut mapping at extreme gamut boundaries (~0.4% channel
+// delta, imperceptible visually). See scripts/_verify-derivations.mjs.
+//
+// Reference: Björn Ottosson's OKLab formula and matrix coefficients
+// (https://bottosson.github.io/posts/oklab/).
 
 type Oklab = readonly [L: number, a: number, b: number];
 
-/** sRGB hex (3/6/8-digit, # optional) → OKLab tuple. Alpha is silently stripped. */
+/** sRGB hex (3/6/8-digit, # optional) → OKLab tuple. Alpha stripped if present. */
 function hexToOklab(hex: string): Oklab {
   let h = hex.toLowerCase().replace(/^#/, "");
   if (h.length === 3) {
@@ -34,7 +37,7 @@ function hexToOklab(hex: string): Oklab {
   return [L, aa, bb];
 }
 
-/** OKLab tuple → sRGB hex. Channels clamped to [0,1] before gamma encode. */
+/** OKLab tuple → sRGB hex. Channels clamped to [0,1] before gamma encode (channel clipping). */
 function oklabToHex([L, a, b]: Oklab): string {
   // OKLab → LMS cube root (inverse Ottosson matrix).
   const lp = L + 0.3963377774 * a + 0.2158037573 * b;
@@ -48,7 +51,7 @@ function oklabToHex([L, a, b]: Oklab): string {
   const rl = +4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s;
   const gl = -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s;
   const bl = -0.0041960863 * l - 0.7034186147 * m + 1.7076147010 * s;
-  // Linear sRGB → sRGB (gamma encode). Clamp before encoding to stay in gamut.
+  // Linear sRGB → sRGB (gamma encode). Clamp before encoding (channel clipping).
   const toSrgb = (c: number) => {
     const clamped = Math.max(0, Math.min(1, c));
     return clamped <= 0.0031308
@@ -63,27 +66,25 @@ function oklabToHex([L, a, b]: Oklab): string {
 }
 
 /**
- * Mix two sRGB hex colors in OKLab space.
+ * "Deepen" a hex color by reducing OKLab lightness while preserving (a, b)
+ * — preserves both chroma and hue exactly. Equivalent to CSS
+ * `oklch(from <hex> calc(l - delta) c h)`.
  *
- * Equivalent to CSS `color-mix(in oklab, hexA percentA%, hexB)`.
- *   - percentA: weight of hexA in [0..100]
- *   - hexB weight is (100 - percentA)
+ *   delta: lightness reduction in OKLab L space; typically 0.1 for "10% deeper".
  *
- * Examples:
- *   oklabMix('#FFD61E', 90, '#000000') → Javvy ctaBorder = '#DEBA19'
- *   oklabMix('#FFD61E', 85, '#DEBA19') → Javvy ctaHover  = '#FAD21D'
+ * Out-of-gamut results are channel-clipped (linear sRGB channels clamped to
+ * [0, 1] before gamma encoding). For vivid colors near the gamut boundary,
+ * channels may saturate at 0 or 255 — hue stays exact at the OKLab→linear
+ * step; chroma effectively reduces where clipping fires.
+ *
+ * Used for cta-family derivations:
+ *   ctaBorder      = deepen(cta, 0.1)
+ *   ctaHover       = deepen(cta, 0.1)        // intentionally equal to ctaBorder
+ *   ctaBorderHover = deepen(ctaHover, 0.1)   // cascade via hex round-trip
+ *
+ * Verified bit-for-bit against colorjs.io. See scripts/_verify-derivations.mjs.
  */
-export function oklabMix(
-  hexA: string,
-  percentA: number,
-  hexB: string
-): string {
-  const [La, aa, ba] = hexToOklab(hexA);
-  const [Lb, ab, bb] = hexToOklab(hexB);
-  const t = percentA / 100;
-  return oklabToHex([
-    La * t + Lb * (1 - t),
-    aa * t + ab * (1 - t),
-    ba * t + bb * (1 - t),
-  ]);
+export function deepen(hex: string, delta: number): string {
+  const [L, a, b] = hexToOklab(hex);
+  return oklabToHex([L - delta, a, b]);
 }

@@ -7,13 +7,14 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { ImageIcon, Type, Palette, X } from "lucide-react";
 import type {
+  ColorTokens,
   PageStyle,
   SemanticRoleName,
   TextRoleStyle,
   TypographyMap,
 } from "@/lib/theme-schema/theme-schema";
 import javvySeed from "@/lib/theme-schema/themes/javvy.json";
-import { oklabMix } from "@/lib/oklab-mix";
+import { deepen } from "@/lib/oklab-deepen";
 
 // ---------------------------------------------------------------------------
 // Color utility functions
@@ -189,7 +190,18 @@ const SEMANTIC_ROLES: readonly SemanticRoleName[] = [
   "ctaForeground",
   "ctaBorder",
   "ctaHover",
+  "ctaBorderHover",
 ];
+
+// Derived roles cascade from cta via deepen(δ=0.1).
+//   ctaBorder      = deepen(cta, 0.1)
+//   ctaHover       = deepen(cta, 0.1)        (= ctaBorder by design)
+//   ctaBorderHover = deepen(ctaHover, 0.1)
+const DERIVED_ROLES: ReadonlySet<SemanticRoleName> = new Set([
+  "ctaBorder",
+  "ctaHover",
+  "ctaBorderHover",
+]);
 
 const ROLE_DESCRIPTIONS: Record<SemanticRoleName, string> = {
   background: "Default page surface.",
@@ -209,8 +221,9 @@ const ROLE_DESCRIPTIONS: Record<SemanticRoleName, string> = {
   ring: "Focus ring color.",
   cta: "Action-button background. Distinct from primary (the brand surface).",
   ctaForeground: "Text/icon color on the CTA.",
-  ctaBorder: "CTA border color.",
-  ctaHover: "CTA hover-state background.",
+  ctaBorder: "CTA border color (deepen of cta).",
+  ctaHover: "CTA hover-state background (deepen of cta; equals ctaBorder by design).",
+  ctaBorderHover: "CTA border on hover (deepen of ctaHover).",
 };
 
 // ---------------------------------------------------------------------------
@@ -634,12 +647,6 @@ function ImageUploadField({
 export default function ThemePage() {
   // v2 theme state — seeded from the Javvy reference instance.
   const [theme, setTheme] = useState<PageStyle>(javvySeed as PageStyle);
-  // Manual-override toggles for the cta-family derivations. Default OFF —
-  // the primitive bound to ctaBorder / ctaHover auto-tracks cta. Toggling ON
-  // unlocks the hex input for hand-tuning; toggling back OFF overwrites the
-  // manual value with the recomputed derivation.
-  const [ctaBorderOverride, setCtaBorderOverride] = useState(false);
-  const [ctaHoverOverride, setCtaHoverOverride] = useState(false);
 
   // ─── Setters ────────────────────────────────────────────────────────────
 
@@ -694,100 +701,196 @@ export default function ThemePage() {
     setTheme((t) => ({ ...t, baseFontSize: n }));
 
   // ─── Derivation effects ──────────────────────────────────────────────────
-  // ctaBorder + ctaHover primitives auto-update from cta when overrides are
-  // OFF. Each effect also clears any manual dark variant — dark derivation
-  // for the cta family lands in a follow-up commit.
+  // Three cta-family derivations cascade through (cta → ctaBorder, cta →
+  // ctaHover, ctaHover → ctaBorderHover) on each surface independently.
+  // Each effect's deps include only its IMMEDIATE upstream — so a user-
+  // override on a derived role pauses re-derivation for that role until
+  // upstream changes again (last write wins). Editing cta cascades fully.
+  //
+  // ctaBorder == ctaHover by design (both = deepen(cta, 0.1)) — the hover
+  // fill matches the resting border on hover, producing a tight border/fill
+  // relationship.
 
   const ctaHex = theme.colors?.primitives?.cta;
-  const ctaBorderHex = theme.colors?.primitives?.ctaBorder;
+  const ctaDarkHex = theme.colors?.primitives?.ctaDark;
+  const ctaHoverHex = theme.colors?.primitives?.ctaHover;
+  const ctaHoverDarkHex = theme.colors?.primitives?.ctaHoverDark;
 
+  // Generic single-step derivation writer: derive(sourceHex) and write to
+  // the named primitive + identity-semantic + luminance-inferred pair.
+  const writeDerived = (
+    primName: string,
+    role: SemanticRoleName,
+    surface: "light" | "dark",
+    derivedHex: string,
+    primitives: Record<string, string>,
+    pairs: Record<string, { onSurface: "light" | "dark" }>,
+    semantic: ColorTokens["semantic"]
+  ): { changed: boolean; semantic: ColorTokens["semantic"] } => {
+    let changed = false;
+    if (primitives[primName] !== derivedHex) {
+      primitives[primName] = derivedHex;
+      const onSurface = (luminance(derivedHex) > 0.5 ? "light" : "dark") as
+        | "light"
+        | "dark";
+      if (pairs[primName]?.onSurface !== onSurface) {
+        pairs[primName] = { onSurface };
+      }
+      changed = true;
+    }
+    const surfaceMap = semantic[surface] || {};
+    if (surfaceMap[role] !== primName) {
+      semantic = {
+        ...semantic,
+        [surface]: { ...surfaceMap, [role]: primName },
+      };
+      changed = true;
+    }
+    return { changed, semantic };
+  };
+
+  // ctaBorder derivation: deepen(cta, 0.1) for each surface.
   useEffect(() => {
-    if (ctaBorderOverride) return;
-    if (!ctaHex || !isValidHex(ctaHex)) return;
-    const derived = oklabMix(ctaHex, 90, "#000000");
     setTheme((t) => {
       const primitives = { ...t.colors!.primitives };
       const pairs = { ...(t.colors!.pairs || {}) };
-      const semantic = { ...t.colors!.semantic };
+      let semantic = t.colors!.semantic;
       let changed = false;
-      if (primitives.ctaBorder !== derived) {
-        primitives.ctaBorder = derived;
-        const onSurface = (luminance(derived) > 0.5 ? "light" : "dark") as
-          | "light"
-          | "dark";
-        if (pairs.ctaBorder?.onSurface !== onSurface) {
-          pairs.ctaBorder = { onSurface };
-        }
-        changed = true;
+      if (ctaHex && isValidHex(ctaHex)) {
+        const out = writeDerived(
+          "ctaBorder",
+          "ctaBorder",
+          "light",
+          deepen(ctaHex, 0.1),
+          primitives,
+          pairs,
+          semantic
+        );
+        if (out.changed) changed = true;
+        semantic = out.semantic;
       }
-      if (semantic.light.ctaBorder !== "ctaBorder") {
-        semantic.light = { ...semantic.light, ctaBorder: "ctaBorder" };
-        changed = true;
-      }
-      if (
-        primitives.ctaBorderDark !== undefined ||
-        pairs.ctaBorderDark !== undefined ||
-        semantic.dark?.ctaBorder !== undefined
-      ) {
-        delete primitives.ctaBorderDark;
-        delete pairs.ctaBorderDark;
-        const darkMap = { ...(semantic.dark || {}) };
-        delete darkMap.ctaBorder;
-        semantic.dark = darkMap;
-        changed = true;
+      if (ctaDarkHex && isValidHex(ctaDarkHex)) {
+        const out = writeDerived(
+          "ctaBorderDark",
+          "ctaBorder",
+          "dark",
+          deepen(ctaDarkHex, 0.1),
+          primitives,
+          pairs,
+          semantic
+        );
+        if (out.changed) changed = true;
+        semantic = out.semantic;
       }
       if (!changed) return t;
       return { ...t, colors: { ...t.colors!, primitives, pairs, semantic } };
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ctaBorderOverride, ctaHex]);
+  }, [ctaHex, ctaDarkHex]);
 
+  // ctaHover derivation: deepen(cta, 0.1) for each surface (same formula as
+  // ctaBorder — produces equal hex by design).
   useEffect(() => {
-    if (ctaHoverOverride) return;
-    if (
-      !ctaHex ||
-      !isValidHex(ctaHex) ||
-      !ctaBorderHex ||
-      !isValidHex(ctaBorderHex)
-    )
-      return;
-    const derived = oklabMix(ctaHex, 85, ctaBorderHex);
     setTheme((t) => {
       const primitives = { ...t.colors!.primitives };
       const pairs = { ...(t.colors!.pairs || {}) };
-      const semantic = { ...t.colors!.semantic };
+      let semantic = t.colors!.semantic;
       let changed = false;
-      if (primitives.ctaHover !== derived) {
-        primitives.ctaHover = derived;
-        const onSurface = (luminance(derived) > 0.5 ? "light" : "dark") as
-          | "light"
-          | "dark";
-        if (pairs.ctaHover?.onSurface !== onSurface) {
-          pairs.ctaHover = { onSurface };
-        }
-        changed = true;
+      if (ctaHex && isValidHex(ctaHex)) {
+        const out = writeDerived(
+          "ctaHover",
+          "ctaHover",
+          "light",
+          deepen(ctaHex, 0.1),
+          primitives,
+          pairs,
+          semantic
+        );
+        if (out.changed) changed = true;
+        semantic = out.semantic;
       }
-      if (semantic.light.ctaHover !== "ctaHover") {
-        semantic.light = { ...semantic.light, ctaHover: "ctaHover" };
-        changed = true;
-      }
-      if (
-        primitives.ctaHoverDark !== undefined ||
-        pairs.ctaHoverDark !== undefined ||
-        semantic.dark?.ctaHover !== undefined
-      ) {
-        delete primitives.ctaHoverDark;
-        delete pairs.ctaHoverDark;
-        const darkMap = { ...(semantic.dark || {}) };
-        delete darkMap.ctaHover;
-        semantic.dark = darkMap;
-        changed = true;
+      if (ctaDarkHex && isValidHex(ctaDarkHex)) {
+        const out = writeDerived(
+          "ctaHoverDark",
+          "ctaHover",
+          "dark",
+          deepen(ctaDarkHex, 0.1),
+          primitives,
+          pairs,
+          semantic
+        );
+        if (out.changed) changed = true;
+        semantic = out.semantic;
       }
       if (!changed) return t;
       return { ...t, colors: { ...t.colors!, primitives, pairs, semantic } };
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ctaHoverOverride, ctaHex, ctaBorderHex]);
+  }, [ctaHex, ctaDarkHex]);
+
+  // ctaBorderHover derivation: deepen(ctaHover, 0.1) for each surface.
+  // Depends on the CURRENT ctaHover value (manual or auto), making overrides
+  // surgical — overriding ctaHover propagates through to ctaBorderHover.
+  useEffect(() => {
+    setTheme((t) => {
+      const primitives = { ...t.colors!.primitives };
+      const pairs = { ...(t.colors!.pairs || {}) };
+      let semantic = t.colors!.semantic;
+      let changed = false;
+      if (ctaHoverHex && isValidHex(ctaHoverHex)) {
+        const out = writeDerived(
+          "ctaBorderHover",
+          "ctaBorderHover",
+          "light",
+          deepen(ctaHoverHex, 0.1),
+          primitives,
+          pairs,
+          semantic
+        );
+        if (out.changed) changed = true;
+        semantic = out.semantic;
+      }
+      if (ctaHoverDarkHex && isValidHex(ctaHoverDarkHex)) {
+        const out = writeDerived(
+          "ctaBorderHoverDark",
+          "ctaBorderHover",
+          "dark",
+          deepen(ctaHoverDarkHex, 0.1),
+          primitives,
+          pairs,
+          semantic
+        );
+        if (out.changed) changed = true;
+        semantic = out.semantic;
+      }
+      if (!changed) return t;
+      return { ...t, colors: { ...t.colors!, primitives, pairs, semantic } };
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ctaHoverHex, ctaHoverDarkHex]);
+
+  // X-button handler for derived rows: compute the derived value from the
+  // current upstream and write it. Same math as the useEffects, just
+  // triggered explicitly when the user clicks X.
+  const resetDerivedRow = (
+    role: SemanticRoleName,
+    surface: "light" | "dark"
+  ) => {
+    let sourceHex: string | undefined;
+    if (role === "ctaBorder" || role === "ctaHover") {
+      sourceHex =
+        surface === "light"
+          ? theme.colors?.primitives?.cta
+          : theme.colors?.primitives?.ctaDark;
+    } else if (role === "ctaBorderHover") {
+      sourceHex =
+        surface === "light"
+          ? theme.colors?.primitives?.ctaHover
+          : theme.colors?.primitives?.ctaHoverDark;
+    }
+    if (!sourceHex || !isValidHex(sourceHex)) return;
+    setRoleHex(role, surface, deepen(sourceHex, 0.1));
+  };
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -823,25 +926,7 @@ export default function ThemePage() {
                   </div>
                 </div>
                 {SEMANTIC_ROLES.map((role) => {
-                  const isDerivedCtaBorder = role === "ctaBorder";
-                  const isDerivedCtaHover = role === "ctaHover";
-                  const isDerived = isDerivedCtaBorder || isDerivedCtaHover;
-                  const override = isDerivedCtaBorder
-                    ? ctaBorderOverride
-                    : isDerivedCtaHover
-                      ? ctaHoverOverride
-                      : false;
-                  const setOverride = isDerivedCtaBorder
-                    ? setCtaBorderOverride
-                    : isDerivedCtaHover
-                      ? setCtaHoverOverride
-                      : null;
-                  const formula = isDerivedCtaBorder
-                    ? "oklab-mix(cta 90%, black 10%)"
-                    : isDerivedCtaHover
-                      ? "oklab-mix(cta 85%, ctaBorder 15%)"
-                      : null;
-
+                  const isDerived = DERIVED_ROLES.has(role);
                   const lightPrim = theme.colors?.semantic?.light?.[role];
                   const darkPrim = theme.colors?.semantic?.dark?.[role];
                   const lightHex = lightPrim
@@ -850,6 +935,18 @@ export default function ThemePage() {
                   const darkHex = darkPrim
                     ? theme.colors?.primitives?.[darkPrim]
                     : undefined;
+
+                  // X-button handlers per Ashley's rules:
+                  // - Light non-derived: no X (light is source of truth)
+                  // - Light derived: X resets to deepen-derived value
+                  // - Dark non-derived: X resets dark to match light hex
+                  // - Dark derived: X resets to deepen-derived dark value
+                  const onClearLight = isDerived
+                    ? () => resetDerivedRow(role, "light")
+                    : undefined;
+                  const onClearDark = isDerived
+                    ? () => resetDerivedRow(role, "dark")
+                    : () => setRoleHex(role, "dark", lightHex || "#CCCCCC");
 
                   return (
                     <div
@@ -862,62 +959,18 @@ export default function ThemePage() {
                       >
                         {role}
                       </span>
-                      {isDerived && !override ? (
-                        <div className="flex items-center justify-between gap-2">
-                          <span className="text-[10.5px] text-muted-foreground italic font-mono truncate">
-                            Derived: {formula}
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() => setOverride && setOverride(true)}
-                            className="px-2 py-0.5 rounded border border-border text-[10.5px] hover:bg-muted transition-colors flex-shrink-0"
-                            title="Unlock manual hex editing"
-                          >
-                            Override
-                          </button>
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-2">
-                          <div className="grid grid-cols-2 gap-2 flex-1 min-w-0">
-                            <RoleHexInput
-                              hex={lightHex}
-                              onChange={(h) => setRoleHex(role, "light", h)}
-                            />
-                            {darkHex !== undefined ? (
-                              <RoleHexInput
-                                hex={darkHex}
-                                onChange={(h) => setRoleHex(role, "dark", h)}
-                                onClear={() => setRoleHex(role, "dark", null)}
-                              />
-                            ) : (
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  setRoleHex(
-                                    role,
-                                    "dark",
-                                    lightHex || "#CCCCCC"
-                                  )
-                                }
-                                className="text-[10.5px] text-muted-foreground border border-dashed border-border rounded h-8 px-2 hover:bg-muted/30 hover:text-foreground transition-colors text-left"
-                                title="Add a dark-surface variant"
-                              >
-                                + add dark variant
-                              </button>
-                            )}
-                          </div>
-                          {isDerived && override && setOverride && (
-                            <button
-                              type="button"
-                              onClick={() => setOverride(false)}
-                              className="px-2 py-0.5 rounded border border-border text-[10.5px] hover:bg-muted transition-colors flex-shrink-0"
-                              title="Switching back to derived overwrites the manual values and clears the dark variant"
-                            >
-                              Use derived
-                            </button>
-                          )}
-                        </div>
-                      )}
+                      <div className="grid grid-cols-2 gap-2">
+                        <RoleHexInput
+                          hex={lightHex}
+                          onChange={(h) => setRoleHex(role, "light", h)}
+                          onClear={onClearLight}
+                        />
+                        <RoleHexInput
+                          hex={darkHex}
+                          onChange={(h) => setRoleHex(role, "dark", h)}
+                          onClear={onClearDark}
+                        />
+                      </div>
                     </div>
                   );
                 })}

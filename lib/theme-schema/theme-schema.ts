@@ -1,6 +1,9 @@
-// MIRRORED from github.com/beckettashley/component-demo/schema/theme-schema.ts
-// as of commit 1b73a46 (2026-05-19). Sync rule: when schema changes in
-// component-demo, update here BEFORE updating UI consumers.
+// ADAPTED from github.com/beckettashley/component-demo/schema/theme-schema.ts
+// as of commit 1b73a46 (2026-05-19) with local addition of the ctaBorderHover
+// semantic role (cta family). Eventual reconciliation between repos pending —
+// canonical schema needs a parallel PR to add ctaBorderHover. Sync rule: when
+// schema changes in component-demo OR locally, update both sides BEFORE
+// updating UI consumers.
 
 /**
  * Theme schema for headless CMS theme data — engineering handoff package.
@@ -138,7 +141,8 @@ export type SemanticRoleName =
   | 'cta'
   | 'ctaForeground'
   | 'ctaBorder'
-  | 'ctaHover';
+  | 'ctaHover'
+  | 'ctaBorderHover';
 
 /**
  * Map from semantic role name to a primitive name.
