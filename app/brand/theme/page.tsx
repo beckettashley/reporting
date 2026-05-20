@@ -164,6 +164,56 @@ const isValidHex = (hex: string) =>
   /^#[0-9A-Fa-f]{3}([0-9A-Fa-f]{3}([0-9A-Fa-f]{2})?)?$/.test(hex);
 
 // ---------------------------------------------------------------------------
+// Canonical 19-role v2 vocabulary. Mirrors the SemanticRoleName union in
+// lib/theme-schema/theme-schema.ts. The readonly annotation lets TypeScript
+// reject any entry that isn't a SemanticRoleName.
+// ---------------------------------------------------------------------------
+
+const SEMANTIC_ROLES: readonly SemanticRoleName[] = [
+  "background",
+  "foreground",
+  "muted",
+  "mutedForeground",
+  "primary",
+  "primaryForeground",
+  "brandSubtle",
+  "brandSubtleForeground",
+  "warning",
+  "warningForeground",
+  "textBrand",
+  "link",
+  "textAlert",
+  "border",
+  "ring",
+  "cta",
+  "ctaForeground",
+  "ctaBorder",
+  "ctaHover",
+];
+
+const ROLE_DESCRIPTIONS: Record<SemanticRoleName, string> = {
+  background: "Default page surface.",
+  foreground: "Default body text color, paired with background.",
+  muted: "Neutral muted surface — hover states, disabled UI.",
+  mutedForeground: "Text/icon color paired with muted.",
+  primary: "Brand-color surface (accent bands, brand-colored badges).",
+  primaryForeground: "Text/icon color paired with primary.",
+  brandSubtle: "Brand-tinted subtle section wash. Same primitive serves gradients.subtle.",
+  brandSubtleForeground: "Text/icon color paired with brandSubtle.",
+  warning: "Warning-state surface.",
+  warningForeground: "Text/icon color paired with warning.",
+  textBrand: "Brand-tinted text in body content — accents, inline emphasis.",
+  link: "Link text. May share a primitive with textBrand on light; usually flips on dark.",
+  textAlert: "Urgency/emphasis text (countdown timers, limited-time copy).",
+  border: "Default border color.",
+  ring: "Focus ring color.",
+  cta: "Action-button background. Distinct from primary (the brand surface).",
+  ctaForeground: "Text/icon color on the CTA.",
+  ctaBorder: "CTA border color.",
+  ctaHover: "CTA hover-state background.",
+};
+
+// ---------------------------------------------------------------------------
 // Derived color computation. UX-convenience pattern: given an input primitive,
 // derive related values that update in lockstep. Wired up to ctaBorder /
 // ctaHover / midStopHex in a later commit per the generalized pattern.
@@ -535,6 +585,7 @@ function ImageUploadField({
 export default function ThemePage() {
   // v2 theme state — seeded from the Javvy reference instance.
   const [theme, setTheme] = useState<PageStyle>(javvySeed as PageStyle);
+  const [activeRoleTab, setActiveRoleTab] = useState<"light" | "dark">("light");
 
   // ─── Granular setters ───────────────────────────────────────────────────
 
@@ -548,24 +599,29 @@ export default function ThemePage() {
     }));
   };
 
+  // setRole accepts an empty string to clear the role entry — clearing is
+  // distinct from setting an empty primitive name (which would never validate)
+  // and is the only path for "unset / inherit from light" on the dark tab.
   const setRole = (
     surface: "light" | "dark",
     role: SemanticRoleName,
     primitive: string
   ) => {
-    setTheme((t) => ({
-      ...t,
-      colors: {
-        ...t.colors!,
-        semantic: {
-          ...t.colors!.semantic,
-          [surface]: {
-            ...(t.colors!.semantic[surface] || {}),
-            [role]: primitive,
-          },
+    setTheme((t) => {
+      const map = { ...(t.colors!.semantic[surface] || {}) };
+      if (primitive === "") {
+        delete map[role];
+      } else {
+        map[role] = primitive;
+      }
+      return {
+        ...t,
+        colors: {
+          ...t.colors!,
+          semantic: { ...t.colors!.semantic, [surface]: map },
         },
-      },
-    }));
+      };
+    });
   };
 
   const setPair = (primitive: string, onSurface: "light" | "dark") => {
@@ -772,10 +828,75 @@ export default function ThemePage() {
               </CardContent>
             </Card>
             <Card>
-              <CardHeader className="flex flex-row items-center gap-2 pb-4">
-                <Palette className="w-4 h-4 text-muted-foreground" />
-                <CardTitle className="text-base">Semantic Roles</CardTitle>
+              <CardHeader className="flex flex-row items-center justify-between pb-4">
+                <div className="flex items-center gap-2">
+                  <Palette className="w-4 h-4 text-muted-foreground" />
+                  <CardTitle className="text-base">Semantic Roles</CardTitle>
+                </div>
+                <div className="flex gap-0.5 rounded-md border border-border p-0.5">
+                  <button
+                    type="button"
+                    onClick={() => setActiveRoleTab("light")}
+                    className={`px-3 py-1 text-xs rounded transition-colors ${activeRoleTab === "light" ? "bg-muted font-medium" : "hover:bg-muted/50"}`}
+                  >
+                    Light
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveRoleTab("dark")}
+                    className={`px-3 py-1 text-xs rounded transition-colors ${activeRoleTab === "dark" ? "bg-muted font-medium" : "hover:bg-muted/50"}`}
+                  >
+                    Dark
+                  </button>
+                </div>
               </CardHeader>
+              <CardContent className="space-y-1.5">
+                <p className="text-xs text-muted-foreground pb-1">
+                  Maps each of the 19 v2 roles to a primitive.
+                  {activeRoleTab === "dark" && " Empty entries inherit from light."}
+                </p>
+                {SEMANTIC_ROLES.map((role) => {
+                  const ref =
+                    (theme.colors?.semantic?.[activeRoleTab] || {})[role] ??
+                    "";
+                  const isDangling =
+                    ref !== "" && !theme.colors?.primitives?.[ref];
+                  return (
+                    <div
+                      key={role}
+                      className="grid grid-cols-[1fr_11rem] items-start gap-2"
+                    >
+                      <span
+                        title={ROLE_DESCRIPTIONS[role]}
+                        className="text-xs font-mono pt-1.5 cursor-help"
+                      >
+                        {role}
+                      </span>
+                      <div className="flex flex-col gap-0.5">
+                        <select
+                          value={ref}
+                          onChange={(e) => setRole(activeRoleTab, role, e.target.value)}
+                          className={`h-8 rounded-md border bg-background text-xs px-2 cursor-pointer ${isDangling ? "border-destructive" : ""}`}
+                        >
+                          <option value="">— unset —</option>
+                          {Object.keys(theme.colors?.primitives || {}).map(
+                            (name) => (
+                              <option key={name} value={name}>
+                                {name}
+                              </option>
+                            )
+                          )}
+                        </select>
+                        {isDangling && (
+                          <p className="text-[10px] text-destructive">
+                            References undefined primitive: {ref}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </CardContent>
             </Card>
             <Card>
               <CardHeader className="flex flex-row items-center gap-2 pb-4">
