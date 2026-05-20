@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { ImageIcon, Type, Palette, Plus, X } from "lucide-react";
+import { ImageIcon, Type, Palette, X } from "lucide-react";
 import type {
   PageStyle,
   SemanticRoleName,
@@ -160,7 +160,6 @@ const WEIGHT_LABELS: Record<number, string> = {
 // the UI enforces them at edit time so dangling refs surface immediately.
 // ---------------------------------------------------------------------------
 
-const isValidPrimName = (name: string) => /^[a-zA-Z][a-zA-Z0-9]*$/.test(name);
 const isValidHex = (hex: string) =>
   /^#[0-9A-Fa-f]{3}([0-9A-Fa-f]{3}([0-9A-Fa-f]{2})?)?$/.test(hex);
 
@@ -272,6 +271,55 @@ function computeDerivedColors(
     { name: "Positive", value: "#11b990" },
     { name: "Star Rating", value: "#f59e0b" },
   ];
+}
+
+// ---------------------------------------------------------------------------
+// Component: RoleHexInput — compact swatch + hex input used by Semantic Roles
+// rows. Optional onClear renders an X button (only the dark cell uses it).
+// ---------------------------------------------------------------------------
+
+function RoleHexInput({
+  hex,
+  onChange,
+  onClear,
+}: {
+  hex: string | undefined;
+  onChange: (hex: string) => void;
+  onClear?: () => void;
+}) {
+  const hexValid = hex !== undefined && isValidHex(hex);
+  return (
+    <div className="flex items-center gap-1 min-w-0">
+      <label
+        className="w-7 h-7 rounded-md border border-border flex-shrink-0 cursor-pointer block relative overflow-hidden"
+        style={{ backgroundColor: hexValid && hex ? hex : "transparent" }}
+      >
+        <input
+          type="color"
+          value={hexValid && hex ? hex : "#CCCCCC"}
+          onChange={(e) => onChange(e.target.value)}
+          className="absolute inset-0 opacity-0 cursor-pointer"
+        />
+      </label>
+      <Input
+        value={hex ? hex.toUpperCase() : ""}
+        onChange={(e) => onChange(e.target.value)}
+        className={`font-mono text-xs h-7 flex-1 min-w-0 ${hex && !hexValid ? "border-destructive" : ""}`}
+        placeholder="#000000"
+      />
+      {onClear && (
+        <Button
+          size="icon"
+          variant="ghost"
+          className="h-7 w-7 flex-shrink-0"
+          onClick={onClear}
+          aria-label="Clear"
+        >
+          <X className="w-3 h-3 text-muted-foreground" />
+        </Button>
+      )}
+    </div>
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -586,7 +634,6 @@ function ImageUploadField({
 export default function ThemePage() {
   // v2 theme state — seeded from the Javvy reference instance.
   const [theme, setTheme] = useState<PageStyle>(javvySeed as PageStyle);
-  const [activeRoleTab, setActiveRoleTab] = useState<"light" | "dark">("light");
   // Manual-override toggles for the cta-family derivations. Default OFF —
   // the primitive bound to ctaBorder / ctaHover auto-tracks cta. Toggling ON
   // unlocks the hex input for hand-tuning; toggling back OFF overwrites the
@@ -594,51 +641,40 @@ export default function ThemePage() {
   const [ctaBorderOverride, setCtaBorderOverride] = useState(false);
   const [ctaHoverOverride, setCtaHoverOverride] = useState(false);
 
-  // ─── Granular setters ───────────────────────────────────────────────────
+  // ─── Setters ────────────────────────────────────────────────────────────
 
-  const setPrimitive = (name: string, hex: string) => {
-    setTheme((t) => ({
-      ...t,
-      colors: {
-        ...t.colors!,
-        primitives: { ...t.colors!.primitives, [name]: hex },
-      },
-    }));
-  };
-
-  // setRole accepts an empty string to clear the role entry — clearing is
-  // distinct from setting an empty primitive name (which would never validate)
-  // and is the only path for "unset / inherit from light" on the dark tab.
-  const setRole = (
-    surface: "light" | "dark",
+  // Write a hex for a role on the given surface. Closed-vocab + identity:
+  // primitives[role|roleDark] = hex, semantic[surface][role] = canonical name,
+  // pairs[canonical] = luminance-inferred. Passing null/empty clears the
+  // binding (meaningful only for dark — clearing light leaves a role unset).
+  const setRoleHex = (
     role: SemanticRoleName,
-    primitive: string
+    surface: "light" | "dark",
+    hex: string | null
   ) => {
+    const canonical = surface === "light" ? role : `${role}Dark`;
     setTheme((t) => {
-      const map = { ...(t.colors!.semantic[surface] || {}) };
-      if (primitive === "") {
-        delete map[role];
+      const primitives = { ...t.colors!.primitives };
+      const pairs = { ...(t.colors!.pairs || {}) };
+      const semantic = { ...t.colors!.semantic };
+      const surfaceMap = { ...(semantic[surface] || {}) };
+      if (!hex || hex === "") {
+        delete primitives[canonical];
+        delete pairs[canonical];
+        delete surfaceMap[role];
       } else {
-        map[role] = primitive;
+        primitives[canonical] = hex;
+        pairs[canonical] = {
+          onSurface: luminance(hex) > 0.5 ? "light" : "dark",
+        };
+        surfaceMap[role] = canonical;
       }
+      semantic[surface] = surfaceMap;
       return {
         ...t,
-        colors: {
-          ...t.colors!,
-          semantic: { ...t.colors!.semantic, [surface]: map },
-        },
+        colors: { ...t.colors!, primitives, pairs, semantic },
       };
     });
-  };
-
-  const setPair = (primitive: string, onSurface: "light" | "dark") => {
-    setTheme((t) => ({
-      ...t,
-      colors: {
-        ...t.colors!,
-        pairs: { ...(t.colors!.pairs || {}), [primitive]: { onSurface } },
-      },
-    }));
   };
 
   const setTypographyRole = (
@@ -657,107 +693,101 @@ export default function ThemePage() {
   const setBaseFontSize = (n: number) =>
     setTheme((t) => ({ ...t, baseFontSize: n }));
 
-  // Add: derive an unused name like `primitive1`, default hex + light pairing.
-  const addPrimitive = () => {
-    setTheme((t) => {
-      const existing = t.colors!.primitives;
-      let i = 1;
-      let name = `primitive${i}`;
-      while (existing[name] !== undefined) {
-        i++;
-        name = `primitive${i}`;
-      }
-      return {
-        ...t,
-        colors: {
-          ...t.colors!,
-          primitives: { ...existing, [name]: "#CCCCCC" },
-          pairs: { ...(t.colors!.pairs || {}), [name]: { onSurface: "light" } },
-        },
-      };
-    });
-  };
+  // ─── Derivation effects ──────────────────────────────────────────────────
+  // ctaBorder + ctaHover primitives auto-update from cta when overrides are
+  // OFF. Each effect also clears any manual dark variant — dark derivation
+  // for the cta family lands in a follow-up commit.
 
-  const removePrimitive = (name: string) => {
-    setTheme((t) => {
-      const primitives = { ...t.colors!.primitives };
-      delete primitives[name];
-      const pairs = { ...(t.colors!.pairs || {}) };
-      delete pairs[name];
-      return {
-        ...t,
-        colors: { ...t.colors!, primitives, pairs },
-      };
-    });
-  };
+  const ctaHex = theme.colors?.primitives?.cta;
+  const ctaBorderHex = theme.colors?.primitives?.ctaBorder;
 
-  // ─── Derivation tracking ────────────────────────────────────────────────
-  // The primitives currently bound to the cta-family roles (read from the
-  // light surface — v1 limitation: brands with light.cta ≠ dark.cta should
-  // manual-override on dark).
-  const ctaPrim = theme.colors?.semantic?.light?.cta;
-  const ctaBorderPrim = theme.colors?.semantic?.light?.ctaBorder;
-  const ctaHoverPrim = theme.colors?.semantic?.light?.ctaHover;
-  const ctaHex = ctaPrim ? theme.colors?.primitives?.[ctaPrim] : undefined;
-  const ctaBorderHexCurrent = ctaBorderPrim
-    ? theme.colors?.primitives?.[ctaBorderPrim]
-    : undefined;
-
-  // Auto-derive ctaBorder when override is OFF. Guard prevents infinite loop:
-  // re-fires only when an input actually changes the computed value.
   useEffect(() => {
     if (ctaBorderOverride) return;
-    if (!ctaBorderPrim || !ctaHex || !isValidHex(ctaHex)) return;
+    if (!ctaHex || !isValidHex(ctaHex)) return;
     const derived = oklabMix(ctaHex, 90, "#000000");
-    if (theme.colors?.primitives?.[ctaBorderPrim] !== derived) {
-      setPrimitive(ctaBorderPrim, derived);
-    }
+    setTheme((t) => {
+      const primitives = { ...t.colors!.primitives };
+      const pairs = { ...(t.colors!.pairs || {}) };
+      const semantic = { ...t.colors!.semantic };
+      let changed = false;
+      if (primitives.ctaBorder !== derived) {
+        primitives.ctaBorder = derived;
+        const onSurface = (luminance(derived) > 0.5 ? "light" : "dark") as
+          | "light"
+          | "dark";
+        if (pairs.ctaBorder?.onSurface !== onSurface) {
+          pairs.ctaBorder = { onSurface };
+        }
+        changed = true;
+      }
+      if (semantic.light.ctaBorder !== "ctaBorder") {
+        semantic.light = { ...semantic.light, ctaBorder: "ctaBorder" };
+        changed = true;
+      }
+      if (
+        primitives.ctaBorderDark !== undefined ||
+        pairs.ctaBorderDark !== undefined ||
+        semantic.dark?.ctaBorder !== undefined
+      ) {
+        delete primitives.ctaBorderDark;
+        delete pairs.ctaBorderDark;
+        const darkMap = { ...(semantic.dark || {}) };
+        delete darkMap.ctaBorder;
+        semantic.dark = darkMap;
+        changed = true;
+      }
+      if (!changed) return t;
+      return { ...t, colors: { ...t.colors!, primitives, pairs, semantic } };
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ctaBorderOverride, ctaBorderPrim, ctaHex]);
+  }, [ctaBorderOverride, ctaHex]);
 
-  // Auto-derive ctaHover when override is OFF. Depends on cta + ctaBorder.
   useEffect(() => {
     if (ctaHoverOverride) return;
     if (
-      !ctaHoverPrim ||
       !ctaHex ||
-      !ctaBorderHexCurrent ||
       !isValidHex(ctaHex) ||
-      !isValidHex(ctaBorderHexCurrent)
+      !ctaBorderHex ||
+      !isValidHex(ctaBorderHex)
     )
       return;
-    const derived = oklabMix(ctaHex, 85, ctaBorderHexCurrent);
-    if (theme.colors?.primitives?.[ctaHoverPrim] !== derived) {
-      setPrimitive(ctaHoverPrim, derived);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ctaHoverOverride, ctaHoverPrim, ctaHex, ctaBorderHexCurrent]);
-
-  // Rename: order-preserving swap of the key in primitives + pairs. Silently
-  // no-ops on invalid format or name collision; the input's onBlur resets the
-  // DOM in those cases.
-  const renamePrimitive = (oldName: string, newName: string) => {
-    if (oldName === newName || !isValidPrimName(newName)) return;
+    const derived = oklabMix(ctaHex, 85, ctaBorderHex);
     setTheme((t) => {
-      if (newName in t.colors!.primitives) return t;
-      const primitives = Object.fromEntries(
-        Object.entries(t.colors!.primitives).map(([k, v]) => [
-          k === oldName ? newName : k,
-          v,
-        ])
-      );
-      const pairs = Object.fromEntries(
-        Object.entries(t.colors!.pairs || {}).map(([k, v]) => [
-          k === oldName ? newName : k,
-          v,
-        ])
-      );
-      return {
-        ...t,
-        colors: { ...t.colors!, primitives, pairs },
-      };
+      const primitives = { ...t.colors!.primitives };
+      const pairs = { ...(t.colors!.pairs || {}) };
+      const semantic = { ...t.colors!.semantic };
+      let changed = false;
+      if (primitives.ctaHover !== derived) {
+        primitives.ctaHover = derived;
+        const onSurface = (luminance(derived) > 0.5 ? "light" : "dark") as
+          | "light"
+          | "dark";
+        if (pairs.ctaHover?.onSurface !== onSurface) {
+          pairs.ctaHover = { onSurface };
+        }
+        changed = true;
+      }
+      if (semantic.light.ctaHover !== "ctaHover") {
+        semantic.light = { ...semantic.light, ctaHover: "ctaHover" };
+        changed = true;
+      }
+      if (
+        primitives.ctaHoverDark !== undefined ||
+        pairs.ctaHoverDark !== undefined ||
+        semantic.dark?.ctaHover !== undefined
+      ) {
+        delete primitives.ctaHoverDark;
+        delete pairs.ctaHoverDark;
+        const darkMap = { ...(semantic.dark || {}) };
+        delete darkMap.ctaHover;
+        semantic.dark = darkMap;
+        changed = true;
+      }
+      if (!changed) return t;
+      return { ...t, colors: { ...t.colors!, primitives, pairs, semantic } };
     });
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ctaHoverOverride, ctaHex, ctaBorderHex]);
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -776,212 +806,118 @@ export default function ThemePage() {
               </CardHeader>
             </Card>
             <Card>
-              <CardHeader className="flex flex-row items-center justify-between pb-4">
-                <div className="flex items-center gap-2">
-                  <Palette className="w-4 h-4 text-muted-foreground" />
-                  <CardTitle className="text-base">Primitives</CardTitle>
-                  <span className="text-xs text-muted-foreground">
-                    {Object.keys(theme.colors?.primitives || {}).length}
-                  </span>
-                </div>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={addPrimitive}
-                  className="h-8"
-                >
-                  <Plus className="w-3.5 h-3.5 mr-1" /> Add
-                </Button>
+              <CardHeader className="flex flex-row items-center gap-2 pb-4">
+                <Palette className="w-4 h-4 text-muted-foreground" />
+                <CardTitle className="text-base">Semantic Roles</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-2">
-                <p className="text-xs text-muted-foreground pb-1">
-                  Brand-named hex colors. Surface pairing tells the renderer
-                  whether text on this background reads against a light or
-                  dark surface.
-                </p>
-                {Object.entries(theme.colors?.primitives || {}).map(
-                  ([name, hex]) => {
-                    const onSurface =
-                      theme.colors?.pairs?.[name]?.onSurface ?? "light";
-                    const hexValid = isValidHex(hex);
-                    const isDerivedCtaBorder = name === ctaBorderPrim;
-                    const isDerivedCtaHover = name === ctaHoverPrim;
-                    const isDerived = isDerivedCtaBorder || isDerivedCtaHover;
-                    const override = isDerivedCtaBorder
-                      ? ctaBorderOverride
-                      : isDerivedCtaHover
-                        ? ctaHoverOverride
-                        : false;
-                    const setOverride = isDerivedCtaBorder
-                      ? setCtaBorderOverride
-                      : isDerivedCtaHover
-                        ? setCtaHoverOverride
-                        : null;
-                    const formula = isDerivedCtaBorder
-                      ? "oklab-mix(cta 90%, black 10%)"
-                      : isDerivedCtaHover
-                        ? "oklab-mix(cta 85%, ctaBorder 15%)"
-                        : null;
-                    const isReadOnly = isDerived && !override;
-                    return (
-                      <div key={name}>
-                        <div className="grid grid-cols-[1fr_2rem_8rem_5.5rem_2rem] items-center gap-2">
-                          <input
-                            type="text"
-                            key={`prim-name-${name}`}
-                            defaultValue={name}
-                            onBlur={(e) => {
-                              const newName = e.target.value.trim();
-                              if (newName === name) return;
-                              if (
-                                !isValidPrimName(newName) ||
-                                newName in (theme.colors?.primitives || {})
-                              ) {
-                                e.target.value = name;
-                                return;
-                              }
-                              renamePrimitive(name, newName);
-                            }}
-                            onKeyDown={(e) => {
-                              if (e.key === "Enter")
-                                (e.currentTarget as HTMLInputElement).blur();
-                            }}
-                            className="font-mono text-xs h-8 px-2 rounded-md border bg-background w-full outline-none focus:ring-1 focus:ring-ring"
-                            placeholder="primitiveName"
-                          />
-                          <label
-                            className="w-8 h-8 rounded-md border border-border flex-shrink-0 cursor-pointer block relative overflow-hidden"
-                            style={{
-                              backgroundColor: hexValid ? hex : "transparent",
-                            }}
-                          >
-                            <input
-                              type="color"
-                              value={hexValid ? hex : "#CCCCCC"}
-                              onChange={(e) => setPrimitive(name, e.target.value)}
-                              disabled={isReadOnly}
-                              className="absolute inset-0 opacity-0 cursor-pointer disabled:cursor-not-allowed"
-                            />
-                          </label>
-                          <Input
-                            value={hex.toUpperCase()}
-                            onChange={(e) => setPrimitive(name, e.target.value)}
-                            readOnly={isReadOnly}
-                            title={isDerived ? `Derived: ${formula}` : undefined}
-                            className={`font-mono text-xs h-8 ${!hexValid ? "border-destructive" : ""} ${isReadOnly ? "bg-muted/40 text-muted-foreground cursor-not-allowed" : ""}`}
-                            placeholder="#000000"
-                          />
-                          <select
-                            value={onSurface}
-                            onChange={(e) =>
-                              setPair(name, e.target.value as "light" | "dark")
-                            }
-                            className="h-8 rounded-md border bg-background text-xs px-2 cursor-pointer"
-                          >
-                            <option value="light">on light</option>
-                            <option value="dark">on dark</option>
-                          </select>
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            className="h-8 w-8"
-                            onClick={() => removePrimitive(name)}
-                            aria-label={`Remove ${name}`}
-                          >
-                            <X className="w-3.5 h-3.5 text-muted-foreground" />
-                          </Button>
-                        </div>
-                        {isDerived && (
-                          <div className="flex items-center justify-end gap-2 pt-0.5 text-[10px] text-muted-foreground">
-                            <span className="font-mono">{formula}</span>
-                            <button
-                              type="button"
-                              onClick={() =>
-                                setOverride && setOverride(!override)
-                              }
-                              className="px-2 py-0.5 rounded border border-border hover:bg-muted transition-colors"
-                              title={
-                                override
-                                  ? "Switching back to derived overwrites the manual value"
-                                  : "Unlock manual hex editing"
-                              }
-                            >
-                              {override ? "Use derived" : "Override"}
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    );
-                  }
-                )}
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between pb-4">
-                <div className="flex items-center gap-2">
-                  <Palette className="w-4 h-4 text-muted-foreground" />
-                  <CardTitle className="text-base">Semantic Roles</CardTitle>
+              <CardContent className="space-y-1">
+                <div className="grid grid-cols-[8rem_1fr] gap-2 pb-1">
+                  <span></span>
+                  <div className="grid grid-cols-2 gap-2">
+                    <span className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+                      Light
+                    </span>
+                    <span className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+                      Dark
+                    </span>
+                  </div>
                 </div>
-                <div className="flex gap-0.5 rounded-md border border-border p-0.5">
-                  <button
-                    type="button"
-                    onClick={() => setActiveRoleTab("light")}
-                    className={`px-3 py-1 text-xs rounded transition-colors ${activeRoleTab === "light" ? "bg-muted font-medium" : "hover:bg-muted/50"}`}
-                  >
-                    Light
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setActiveRoleTab("dark")}
-                    className={`px-3 py-1 text-xs rounded transition-colors ${activeRoleTab === "dark" ? "bg-muted font-medium" : "hover:bg-muted/50"}`}
-                  >
-                    Dark
-                  </button>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-1.5">
-                <p className="text-xs text-muted-foreground pb-1">
-                  Maps each of the 19 v2 roles to a primitive.
-                  {activeRoleTab === "dark" && " Empty entries inherit from light."}
-                </p>
                 {SEMANTIC_ROLES.map((role) => {
-                  const ref =
-                    (theme.colors?.semantic?.[activeRoleTab] || {})[role] ??
-                    "";
-                  const isDangling =
-                    ref !== "" && !theme.colors?.primitives?.[ref];
+                  const isDerivedCtaBorder = role === "ctaBorder";
+                  const isDerivedCtaHover = role === "ctaHover";
+                  const isDerived = isDerivedCtaBorder || isDerivedCtaHover;
+                  const override = isDerivedCtaBorder
+                    ? ctaBorderOverride
+                    : isDerivedCtaHover
+                      ? ctaHoverOverride
+                      : false;
+                  const setOverride = isDerivedCtaBorder
+                    ? setCtaBorderOverride
+                    : isDerivedCtaHover
+                      ? setCtaHoverOverride
+                      : null;
+                  const formula = isDerivedCtaBorder
+                    ? "oklab-mix(cta 90%, black 10%)"
+                    : isDerivedCtaHover
+                      ? "oklab-mix(cta 85%, ctaBorder 15%)"
+                      : null;
+
+                  const lightPrim = theme.colors?.semantic?.light?.[role];
+                  const darkPrim = theme.colors?.semantic?.dark?.[role];
+                  const lightHex = lightPrim
+                    ? theme.colors?.primitives?.[lightPrim]
+                    : undefined;
+                  const darkHex = darkPrim
+                    ? theme.colors?.primitives?.[darkPrim]
+                    : undefined;
+
                   return (
                     <div
                       key={role}
-                      className="grid grid-cols-[1fr_11rem] items-start gap-2"
+                      className="grid grid-cols-[8rem_1fr] gap-2 items-center py-1"
                     >
                       <span
                         title={ROLE_DESCRIPTIONS[role]}
-                        className="text-xs font-mono pt-1.5 cursor-help"
+                        className="text-xs font-mono cursor-help truncate"
                       >
                         {role}
                       </span>
-                      <div className="flex flex-col gap-0.5">
-                        <select
-                          value={ref}
-                          onChange={(e) => setRole(activeRoleTab, role, e.target.value)}
-                          className={`h-8 rounded-md border bg-background text-xs px-2 cursor-pointer ${isDangling ? "border-destructive" : ""}`}
-                        >
-                          <option value="">— unset —</option>
-                          {Object.keys(theme.colors?.primitives || {}).map(
-                            (name) => (
-                              <option key={name} value={name}>
-                                {name}
-                              </option>
-                            )
+                      {isDerived && !override ? (
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-[10.5px] text-muted-foreground italic font-mono truncate">
+                            Derived: {formula}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => setOverride && setOverride(true)}
+                            className="px-2 py-0.5 rounded border border-border text-[10.5px] hover:bg-muted transition-colors flex-shrink-0"
+                            title="Unlock manual hex editing"
+                          >
+                            Override
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <div className="grid grid-cols-2 gap-2 flex-1 min-w-0">
+                            <RoleHexInput
+                              hex={lightHex}
+                              onChange={(h) => setRoleHex(role, "light", h)}
+                            />
+                            {darkHex !== undefined ? (
+                              <RoleHexInput
+                                hex={darkHex}
+                                onChange={(h) => setRoleHex(role, "dark", h)}
+                                onClear={() => setRoleHex(role, "dark", null)}
+                              />
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setRoleHex(
+                                    role,
+                                    "dark",
+                                    lightHex || "#CCCCCC"
+                                  )
+                                }
+                                className="text-[10.5px] text-muted-foreground border border-dashed border-border rounded h-8 px-2 hover:bg-muted/30 hover:text-foreground transition-colors text-left"
+                                title="Add a dark-surface variant"
+                              >
+                                + add dark variant
+                              </button>
+                            )}
+                          </div>
+                          {isDerived && override && setOverride && (
+                            <button
+                              type="button"
+                              onClick={() => setOverride(false)}
+                              className="px-2 py-0.5 rounded border border-border text-[10.5px] hover:bg-muted transition-colors flex-shrink-0"
+                              title="Switching back to derived overwrites the manual values and clears the dark variant"
+                            >
+                              Use derived
+                            </button>
                           )}
-                        </select>
-                        {isDangling && (
-                          <p className="text-[10px] text-destructive">
-                            References undefined primitive: {ref}
-                          </p>
-                        )}
-                      </div>
+                        </div>
+                      )}
                     </div>
                   );
                 })}
