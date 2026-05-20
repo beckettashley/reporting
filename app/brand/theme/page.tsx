@@ -1,11 +1,17 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import React, { useState } from "react";
+import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
-import { ImageIcon, Type, Palette, Info } from "lucide-react";
+import { ImageIcon, Type, Palette } from "lucide-react";
+import type {
+  PageStyle,
+  SemanticRoleName,
+  TextRoleStyle,
+  TypographyMap,
+} from "@/lib/theme-schema/theme-schema";
+import javvySeed from "@/lib/theme-schema/themes/javvy.json";
 
 // ---------------------------------------------------------------------------
 // Color utility functions
@@ -76,6 +82,40 @@ function lightenHex(hex: string, percent: number): string {
 }
 
 // ---------------------------------------------------------------------------
+// Font weight synthesis guard. Static-font weights must match the family's
+// shipped face set, else the browser synthesizes a degraded weight at paint.
+// Registry expands to cover all 19 FONT_OPTIONS in a later commit.
+// ---------------------------------------------------------------------------
+
+const FONT_SHIPPED_WEIGHTS: Record<string, { static: number[]; variable: boolean }> = {
+  "DM Sans":           { static: [100, 200, 300, 400, 500, 600, 700, 800, 900], variable: true },
+  "Lato":              { static: [100, 300, 400, 700, 900], variable: false },
+  "Archivo":           { static: [100, 200, 300, 400, 500, 600, 700, 800, 900], variable: true },
+  "Libre Baskerville": { static: [400, 700], variable: false },
+  "Barlow":            { static: [100, 200, 300, 400, 500, 600, 700, 800, 900], variable: false },
+  "Geist":             { static: [100, 200, 300, 400, 500, 600, 700, 800, 900], variable: true },
+};
+
+function familyKey(family: string): string {
+  return family.replace(/['"]/g, "").split(",")[0].trim();
+}
+
+function isWeightSupported(family: string, weight: number): {
+  supported: boolean;
+  reason: string;
+} {
+  const key = familyKey(family);
+  const meta = FONT_SHIPPED_WEIGHTS[key];
+  if (!meta) return { supported: true, reason: `unverified font: ${key}` };
+  if (meta.variable) return { supported: true, reason: "variable font" };
+  if (meta.static.includes(weight)) return { supported: true, reason: `shipped at ${weight}` };
+  return {
+    supported: false,
+    reason: `weight ${weight} not shipped for ${key}; available: ${meta.static.join(", ")}`,
+  };
+}
+
+// ---------------------------------------------------------------------------
 // Font options
 // ---------------------------------------------------------------------------
 
@@ -101,8 +141,22 @@ const FONT_OPTIONS = [
   "Ubuntu",
 ];
 
+const WEIGHT_LABELS: Record<number, string> = {
+  100: "Thin",
+  200: "Extra Light",
+  300: "Light",
+  400: "Regular",
+  500: "Medium",
+  600: "Semi Bold",
+  700: "Bold",
+  800: "Extra Bold",
+  900: "Black",
+};
+
 // ---------------------------------------------------------------------------
-// Derived color computation
+// Derived color computation. UX-convenience pattern: given an input primitive,
+// derive related values that update in lockstep. Wired up to ctaBorder /
+// ctaHover / midStopHex in a later commit per the generalized pattern.
 // ---------------------------------------------------------------------------
 
 interface DerivedColor {
@@ -167,15 +221,18 @@ function ColorField({
   label,
   value,
   onChange,
+  helper,
 }: {
   label: string;
   value: string;
   onChange: (v: string) => void;
+  helper?: string;
 }) {
   return (
     <div className="flex items-center gap-3">
       <div className="flex-1">
         <Label className="text-xs font-medium text-muted-foreground">{label}</Label>
+        {helper && <p className="text-[10px] text-muted-foreground">{helper}</p>}
         <div className="flex items-center gap-2 mt-0.5">
           <label
             className="w-8 h-8 rounded-md border border-border flex-shrink-0 cursor-pointer block relative overflow-hidden"
@@ -213,6 +270,10 @@ function FontSelect({
   onColorChange,
   weight,
   onWeightChange,
+  lineHeight,
+  onLineHeightChange,
+  letterSpacing,
+  onLetterSpacingChange,
   customFont,
   onCustomFontUpload,
 }: {
@@ -224,6 +285,10 @@ function FontSelect({
   onColorChange: (v: string) => void;
   weight: string;
   onWeightChange: (v: string) => void;
+  lineHeight: string;
+  onLineHeightChange: (v: string) => void;
+  letterSpacing: string;
+  onLetterSpacingChange: (v: string) => void;
   customFont?: string | null;
   onCustomFontUpload?: (name: string) => void;
 }) {
@@ -260,14 +325,19 @@ function FontSelect({
     <div className="flex flex-col gap-1" ref={dropdownRef}>
       <Label className="text-xs font-medium text-muted-foreground">{label}</Label>
       {description && <p className="text-[10px] text-muted-foreground">{description}</p>}
-      <div className="flex items-center gap-2">
-        <label
-          className="w-8 h-8 rounded border border-border flex-shrink-0 cursor-pointer block relative overflow-hidden"
-          style={{ backgroundColor: color }}
-        >
-          <input type="color" value={color} onChange={(e) => onColorChange(e.target.value)} className="absolute inset-0 opacity-0 cursor-pointer" />
-        </label>
-        <div className="relative flex-1 min-w-0">
+      <div className="flex items-end gap-2">
+        <div className="flex flex-col shrink-0">
+          <Label className="text-[10px] font-medium text-muted-foreground">Color</Label>
+          <label
+            className="w-9 h-9 mt-0.5 rounded border border-border cursor-pointer block relative overflow-hidden"
+            style={{ backgroundColor: color }}
+          >
+            <input type="color" value={color} onChange={(e) => onColorChange(e.target.value)} className="absolute inset-0 opacity-0 cursor-pointer" />
+          </label>
+        </div>
+        <div className="flex flex-col flex-[2_1_0%] min-w-0">
+          <Label className="text-[10px] font-medium text-muted-foreground">Family</Label>
+          <div className="relative mt-0.5">
           <button
             type="button"
             onClick={() => { setOpen(!open); setSearch(""); }}
@@ -316,22 +386,65 @@ function FontSelect({
             </div>
           </div>
         )}
+          </div>
         </div>
-        <select
-          value={weight}
-          onChange={(e) => onWeightChange(e.target.value)}
-          className="w-36 h-9 rounded-md border bg-background text-sm pl-3 pr-8 cursor-pointer"
-        >
-          <option value="200">Extra Light</option>
-          <option value="300">Light</option>
-          <option value="400">Regular</option>
-          <option value="500">Medium</option>
-          <option value="600">Semi Bold</option>
-          <option value="700">Bold</option>
-          <option value="800">Extra Bold</option>
-          <option value="900">Black</option>
-        </select>
+        <div className="flex flex-col flex-1 min-w-0">
+          <Label className="text-[10px] font-medium text-muted-foreground">Weight</Label>
+          <select
+            value={weight}
+            onChange={(e) => onWeightChange(e.target.value)}
+            className="mt-0.5 w-full h-9 rounded-md border bg-background text-sm pl-2 pr-7 cursor-pointer"
+          >
+            {(() => {
+              const meta = FONT_SHIPPED_WEIGHTS[familyKey(value)];
+              const weights = meta && !meta.variable ? meta.static : [100, 200, 300, 400, 500, 600, 700, 800, 900];
+              return weights.map((w) => (
+                <option key={w} value={String(w)}>{WEIGHT_LABELS[w] ?? String(w)}</option>
+              ));
+            })()}
+          </select>
+        </div>
+        <div className="flex flex-col flex-1 min-w-0">
+          <Label className="text-[10px] font-medium text-muted-foreground">Line height</Label>
+          <Input
+            type="number"
+            step="0.05"
+            min="0"
+            value={lineHeight}
+            onChange={(e) => onLineHeightChange(e.target.value)}
+            placeholder="1.4"
+            className="mt-0.5 h-9 w-full text-sm font-mono"
+          />
+        </div>
+        <div className="flex flex-col flex-1 min-w-0">
+          <Label className="text-[10px] font-medium text-muted-foreground">Letter spacing</Label>
+          <div className="relative mt-0.5">
+            <Input
+              type="number"
+              step="0.005"
+              value={letterSpacing.replace(/em$/, "")}
+              onChange={(e) => {
+                const n = e.target.value;
+                onLetterSpacingChange(n === "" || Number(n) === 0 ? "0" : `${n}em`);
+              }}
+              placeholder="0"
+              className="h-9 w-full text-sm font-mono pr-9"
+            />
+            <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">
+              em
+            </span>
+          </div>
+        </div>
       </div>
+      {(() => {
+        const result = isWeightSupported(value, Number(weight));
+        if (result.supported) return null;
+        return (
+          <p className="text-[10px] text-destructive flex items-center gap-1.5 mt-0.5">
+            <span aria-hidden>⚠</span> {result.reason}
+          </p>
+        );
+      })()}
     </div>
   );
 }
@@ -387,7 +500,6 @@ function ImageUploadField({
         />
       </div>
 
-      {/* Preview modal */}
       {modalOpen && preview && (
         <>
           <div className="fixed inset-0 bg-black/40 z-[99998]" onClick={() => setModalOpen(false)} />
@@ -411,92 +523,66 @@ function ImageUploadField({
 // ---------------------------------------------------------------------------
 
 export default function ThemePage() {
-  // Section 4: Images
+  // v2 theme state — seeded from the Javvy reference instance.
+  const [theme, setTheme] = useState<PageStyle>(javvySeed as PageStyle);
 
-  // Section 1: Color Palette — matching PDF reference exactly
-  // Primary
-  const [primary, setPrimary] = useState("#3D348B");
-  const [primaryDark, setPrimaryDark] = useState("#2A2552");
-  // Accents
-  const [accent1, setAccent1] = useState("#E1F3FF");
-  const [accent2, setAccent2] = useState("#FCF3DF");
-  const [accent3, setAccent3] = useState("#F0EBFF");
-  // Buttons
-  const [backgroundPrimary, setBackgroundPrimary] = useState("#FFFFFF");
-  const [buttonPrimary, setButtonPrimary] = useState("#FFD61E");
-  const [buttonPrimaryText, setButtonPrimaryText] = useState("#000000");
-  const [buttonSecondary, setButtonSecondary] = useState("#FFD61E");
-  const [buttonSecondaryText, setButtonSecondaryText] = useState("#000000");
-  // UI Elements
-  const [borderDefault, setBorderDefault] = useState("#cccccc");
-  const [borderSubtle, setBorderSubtle] = useState("#e5e7eb");
-  const [surfaceSubtle, setSurfaceSubtle] = useState("#f0f0f0");
-  const [surfaceInverse, setSurfaceInverse] = useState("#000000");
-  const [negative, setNegative] = useState("#dc2626");
-  const [positive, setPositive] = useState("#11B990");
-  const [starRating, setStarRating] = useState("#F59E0B");
+  // ─── Granular setters ───────────────────────────────────────────────────
 
-
-  // Section 3: Typography
-  // Headings (Title + H1-H6 each with own family + weight + color)
-  interface HeadingConfig { font: string; weight: string; color: string }
-  const [headings, setHeadings] = useState<Record<string, HeadingConfig>>({
-    Title: { font: "Libre Baskerville", weight: "800", color: "#1a1a1a" },
-    H1: { font: "Libre Baskerville", weight: "800", color: "#1a1a1a" },
-    H2: { font: "DM Sans", weight: "900", color: "#1a1a1a" },
-    H3: { font: "DM Sans", weight: "700", color: "#1a1a1a" },
-    H4: { font: "DM Sans", weight: "600", color: "#1a1a1a" },
-    H5: { font: "DM Sans", weight: "600", color: "#1a1a1a" },
-    H6: { font: "DM Sans", weight: "600", color: "#1a1a1a" },
-  });
-  const updateHeading = (level: string, updates: Partial<HeadingConfig>) => {
-    setHeadings((prev) => ({ ...prev, [level]: { ...prev[level], ...updates } }));
+  const setPrimitive = (name: string, hex: string) => {
+    setTheme((t) => ({
+      ...t,
+      colors: {
+        ...t.colors!,
+        primitives: { ...t.colors!.primitives, [name]: hex },
+      },
+    }));
   };
-  // Body / UI / Condensed
-  const [bodyFont, setBodyFont] = useState("DM Sans");
-  const [bodyWeight, setBodyWeight] = useState("500");
-  const [bodyColor, setBodyColor] = useState("#1a1a1a");
-  const [uiFont, setUiFont] = useState("Geist");
-  const [uiWeight, setUiWeight] = useState("700");
-  const [uiColor, setUiColor] = useState("#1a1a1a");
-  const [condensedFont, setCondensedFont] = useState("Barlow");
-  const [condensedWeight, setCondensedWeight] = useState("900");
-  const [condensedColor, setCondensedColor] = useState("#1a1a1a");
-  const [mutedFont, setMutedFont] = useState("DM Sans");
-  const [mutedWeight, setMutedWeight] = useState("500");
-  const [mutedColor, setMutedColor] = useState("#666666");
-  const [baseFontSize, setBaseFontSize] = useState(16);
-  const [customFonts, setCustomFonts] = useState<Record<string, string | null>>({
-    Title: null, H1: null, H2: null, H3: null, H4: null, H5: null, H6: null, body: null, ui: null, condensed: null, muted: null,
-  });
-  // Convenience aliases for preview
-  const displayFont = headings.H1.font;
-  const displayWeight = headings.H1.weight;
-  const displayColor = headings.H1.color;
 
-  const [logo, setLogo] = useState<string | null>(null);
-  const [logoDark, setLogoDark] = useState<string | null>(null);
-  const [favicon, setFavicon] = useState<string | null>(null);
+  const setRole = (
+    surface: "light" | "dark",
+    role: SemanticRoleName,
+    primitive: string
+  ) => {
+    setTheme((t) => ({
+      ...t,
+      colors: {
+        ...t.colors!,
+        semantic: {
+          ...t.colors!.semantic,
+          [surface]: {
+            ...(t.colors!.semantic[surface] || {}),
+            [role]: primitive,
+          },
+        },
+      },
+    }));
+  };
 
-  // Dynamically load Google Fonts for preview
-  React.useEffect(() => {
-    const fonts = [headings.Title.font, displayFont, bodyFont, uiFont, condensedFont, mutedFont].filter((f) => f !== "Custom" && f !== "Geist")
-    if (fonts.length === 0) return
-    const families = fonts.map((f) => f.replace(/ /g, "+") + ":wght@200;300;400;500;600;700;800;900").join("&family=")
-    const href = `https://fonts.googleapis.com/css2?family=${families}&display=swap`
-    const id = "theme-preview-fonts"
-    let link = document.getElementById(id) as HTMLLinkElement | null
-    if (!link) {
-      link = document.createElement("link")
-      link.id = id
-      link.rel = "stylesheet"
-      document.head.appendChild(link)
-    }
-    link.href = href
-  }, [headings.Title.font, displayFont, bodyFont, uiFont, condensedFont, mutedFont])
+  const setPair = (primitive: string, onSurface: "light" | "dark") => {
+    setTheme((t) => ({
+      ...t,
+      colors: {
+        ...t.colors!,
+        pairs: { ...(t.colors!.pairs || {}), [primitive]: { onSurface } },
+      },
+    }));
+  };
 
-  // Scale factor for preview — all sizes proportional to base font size
-  const s = (px: number) => `${(px * baseFontSize / 16).toFixed(1)}px`
+  const setTypographyRole = (
+    role: keyof TypographyMap,
+    partial: Partial<TextRoleStyle>
+  ) => {
+    setTheme((t) => ({
+      ...t,
+      typography: {
+        ...t.typography,
+        [role]: { ...(t.typography?.[role] || {}), ...partial },
+      },
+    }));
+  };
+
+  const setBaseFontSize = (n: number) =>
+    setTheme((t) => ({ ...t, baseFontSize: n }));
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -505,356 +591,48 @@ export default function ThemePage() {
           <h1 className="text-2xl font-semibold text-foreground">Theme</h1>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-6 mb-24">
-          {/* ============================================================= */}
-          {/* LEFT COLUMN: All input sections */}
-          {/* ============================================================= */}
+        <div className="grid lg:grid-cols-[5fr_3fr] gap-6 mb-24">
+          {/* Left column — input cards. Bodies are built in subsequent commits. */}
           <div className="flex flex-col gap-6">
-            {/* ------ Images ------ */}
             <Card>
               <CardHeader className="flex flex-row items-center gap-2 pb-4">
                 <ImageIcon className="w-4 h-4 text-muted-foreground" />
-                <CardTitle className="text-base">Images</CardTitle>
+                <CardTitle className="text-base">Brand Assets</CardTitle>
               </CardHeader>
-              <CardContent className="flex flex-col gap-5">
-                <ImageUploadField label="Logo" preview={logo} onUpload={setLogo} />
-                <ImageUploadField label="Logo Dark Variant" preview={logoDark} onUpload={setLogoDark} />
-                <ImageUploadField label="Favicon" preview={favicon} onUpload={setFavicon} />
-              </CardContent>
             </Card>
-
-            {/* ------ Color Palette ------ */}
             <Card>
               <CardHeader className="flex flex-row items-center gap-2 pb-4">
                 <Palette className="w-4 h-4 text-muted-foreground" />
-                <CardTitle className="text-base">Color Palette</CardTitle>
+                <CardTitle className="text-base">Primitives</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-6">
-                {/* Primary */}
-                <div>
-                  <div className="space-y-2.5">
-                    <ColorField label="Primary" value={primary} onChange={setPrimary} />
-                    <ColorField label="Primary Dark" value={primaryDark} onChange={setPrimaryDark} />
-                  </div>
-                </div>
-
-                {/* Accents */}
-                <div>
-                  <div className="space-y-2.5">
-                    <ColorField label="Accent 1" value={accent1} onChange={setAccent1} />
-                    <ColorField label="Accent 2" value={accent2} onChange={setAccent2} />
-                    <ColorField label="Accent 3" value={accent3} onChange={setAccent3} />
-                  </div>
-                </div>
-
-                {/* Buttons */}
-                <div>
-                  <div className="space-y-2.5">
-                    <ColorField label="Button Primary" value={buttonPrimary} onChange={setButtonPrimary} />
-                    <ColorField label="Button Primary Text" value={buttonPrimaryText} onChange={setButtonPrimaryText} />
-                    <ColorField label="Button Secondary" value={buttonSecondary} onChange={setButtonSecondary} />
-                    <ColorField label="Button Secondary Text" value={buttonSecondaryText} onChange={setButtonSecondaryText} />
-                  </div>
-                </div>
-
-                {/* UI Elements */}
-                <div>
-                  <div className="space-y-2.5">
-                    <ColorField label="Background Primary" value={backgroundPrimary} onChange={setBackgroundPrimary} />
-                    <ColorField label="Border Default" value={borderDefault} onChange={setBorderDefault} />
-                    <ColorField label="Border Subtle" value={borderSubtle} onChange={setBorderSubtle} />
-                    <ColorField label="Surface Subtle" value={surfaceSubtle} onChange={setSurfaceSubtle} />
-                    <ColorField label="Surface Inverse" value={surfaceInverse} onChange={setSurfaceInverse} />
-                    <ColorField label="Negative" value={negative} onChange={setNegative} />
-                    <ColorField label="Positive" value={positive} onChange={setPositive} />
-                    <ColorField label="Star Rating" value={starRating} onChange={setStarRating} />
-                  </div>
-                </div>
-              </CardContent>
             </Card>
-
-
-            {/* ------ Section 3: Typography ------ */}
+            <Card>
+              <CardHeader className="flex flex-row items-center gap-2 pb-4">
+                <Palette className="w-4 h-4 text-muted-foreground" />
+                <CardTitle className="text-base">Semantic Roles</CardTitle>
+              </CardHeader>
+            </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center gap-2 pb-4">
+                <Palette className="w-4 h-4 text-muted-foreground" />
+                <CardTitle className="text-base">Gradient: Subtle</CardTitle>
+              </CardHeader>
+            </Card>
             <Card>
               <CardHeader className="flex flex-row items-center gap-2 pb-4">
                 <Type className="w-4 h-4 text-muted-foreground" />
                 <CardTitle className="text-base">Typography</CardTitle>
               </CardHeader>
-              <CardContent className="flex flex-col gap-2">
-                {/* Headings — Title + H1-H6 */}
-                <div>
-                  <div className="flex flex-col gap-2">
-                    <FontSelect
-                      key="Title"
-                      label="Title"
-                      description=""
-                      value={headings.Title.font}
-                      onChange={(v) => updateHeading("Title", { font: v })}
-                      color={headings.Title.color}
-                      onColorChange={(v) => updateHeading("Title", { color: v })}
-                      weight={headings.Title.weight}
-                      onWeightChange={(v) => updateHeading("Title", { weight: v })}
-                      customFont={customFonts.Title}
-                      onCustomFontUpload={(name) => setCustomFonts((p) => ({ ...p, Title: name }))}
-                    />
-                    {(["H1", "H2", "H3", "H4", "H5", "H6"] as const).map((level) => (
-                      <FontSelect
-                        key={level}
-                        label={`Heading ${level.slice(1)}`}
-                        description=""
-                        value={headings[level].font}
-                        onChange={(v) => updateHeading(level, { font: v })}
-                        color={headings[level].color}
-                        onColorChange={(v) => updateHeading(level, { color: v })}
-                        weight={headings[level].weight}
-                        onWeightChange={(v) => updateHeading(level, { weight: v })}
-                        customFont={customFonts[level]}
-                        onCustomFontUpload={(name) => setCustomFonts((p) => ({ ...p, [level]: name }))}
-                      />
-                    ))}
-                  </div>
-                </div>
-                <FontSelect
-                  label="Regular Font"
-                  description=""
-                  value={bodyFont}
-                  onChange={setBodyFont}
-                  color={bodyColor}
-                  onColorChange={setBodyColor}
-                  weight={bodyWeight}
-                  onWeightChange={setBodyWeight}
-                  customFont={customFonts.body}
-                  onCustomFontUpload={(name) => setCustomFonts((p) => ({ ...p, body: name }))}
-                />
-                <FontSelect
-                  label="UI Font"
-                  description=""
-                  value={uiFont}
-                  onChange={setUiFont}
-                  color={uiColor}
-                  onColorChange={setUiColor}
-                  weight={uiWeight}
-                  onWeightChange={setUiWeight}
-                  customFont={customFonts.ui}
-                  onCustomFontUpload={(name) => setCustomFonts((p) => ({ ...p, ui: name }))}
-                />
-                <FontSelect
-                  label="Condensed Font"
-                  description=""
-                  value={condensedFont}
-                  onChange={setCondensedFont}
-                  color={condensedColor}
-                  onColorChange={setCondensedColor}
-                  weight={condensedWeight}
-                  onWeightChange={setCondensedWeight}
-                  customFont={customFonts.condensed}
-                  onCustomFontUpload={(name) => setCustomFonts((p) => ({ ...p, condensed: name }))}
-                />
-                <FontSelect
-                  label="Muted Font"
-                  description=""
-                  value={mutedFont}
-                  onChange={setMutedFont}
-                  color={mutedColor}
-                  onColorChange={setMutedColor}
-                  weight={mutedWeight}
-                  onWeightChange={setMutedWeight}
-                  customFont={customFonts.muted}
-                  onCustomFontUpload={(name) => setCustomFonts((p) => ({ ...p, muted: name }))}
-                />
-                <div className="flex flex-col gap-1.5">
-                  <Label className="text-sm font-medium">Base Font Size</Label>
-                  <p className="text-xs text-muted-foreground">
-                    Scales the entire type ladder proportionally
-                  </p>
-                  <div className="flex items-center gap-2">
-                    <Input
-                      type="number"
-                      min={10}
-                      max={24}
-                      value={baseFontSize}
-                      onChange={(e) =>
-                        setBaseFontSize(Number(e.target.value) || 16)
-                      }
-                      className="h-9 w-24 font-mono"
-                    />
-                    <span className="text-sm text-muted-foreground">px</span>
-                  </div>
-                </div>
-              </CardContent>
             </Card>
-
           </div>
 
-          {/* ============================================================= */}
-          {/* RIGHT COLUMN: Sticky preview panel */}
-          {/* ============================================================= */}
+          {/* Right column — sticky preview. Cascade rebuild lives in a later commit. */}
           <div className="lg:sticky lg:top-8 lg:self-start flex flex-col gap-6">
-            {/* ------ Mini page mockup ------ */}
             <Card>
               <CardHeader className="pb-4">
                 <CardTitle className="text-base">Preview</CardTitle>
               </CardHeader>
-              <CardContent className="p-4">
-                <div className="rounded-lg overflow-hidden shadow-xl mx-auto border-2" style={{ backgroundColor: backgroundPrimary, color: bodyColor, fontFamily: bodyFont, fontSize: `${baseFontSize}px`, maxWidth: "320px", borderColor: borderDefault }}>
-
-                  {/* 1a. Urgency banner — primary dark + condensed */}
-                  <div className="text-center uppercase tracking-wider" style={{ backgroundColor: primaryDark, color: contrastText(primaryDark), fontFamily: condensedFont, fontWeight: 900, fontSize: s(12), letterSpacing: "0.04em", padding: "6px 12px" }}>
-                    ⚡ Spring sale — up to 58% off today
-                  </div>
-
-                  {/* 1b. Secondary banner — primary */}
-                  <div className="text-center" style={{ backgroundColor: primary, color: contrastText(primary), fontFamily: uiFont, fontWeight: 600, fontSize: s(11), letterSpacing: "0.02em", padding: "5px 12px" }}>
-                    Free shipping on orders over $40
-                  </div>
-
-                  {/* 2. Navbar — logo auto-switches based on bg contrast */}
-                  <div className="flex items-center justify-between px-4 py-2.5" style={{ borderBottom: `1px solid ${borderSubtle}` }}>
-                    {logo ? (
-                      <img
-                        src={luminance(backgroundPrimary) < 0.45 ? (logoDark || logo) : logo}
-                        alt="Logo"
-                        className="h-5 max-w-[80px] object-contain"
-                        style={luminance(backgroundPrimary) < 0.45 && !logoDark ? { filter: "brightness(0) invert(1)" } : undefined}
-                      />
-                    ) : (
-                      <div className="flex items-center gap-1.5">
-                        <div className="w-5 h-5 rounded bg-muted flex items-center justify-center"><ImageIcon className="w-3 h-3 text-muted-foreground" /></div>
-                        <span className="text-xs text-muted-foreground" style={{ fontFamily: uiFont }}>Logo</span>
-                      </div>
-                    )}
-                    <svg className="w-5 h-5" style={{ color: bodyColor }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
-                  </div>
-
-                  {/* 3. Hero — image + display + body + bullets + CTA */}
-                  <div className="p-4 flex flex-col gap-3" style={{ backgroundColor: backgroundPrimary }}>
-                    {/* Product image placeholder */}
-                    <div className="w-full aspect-square rounded-lg flex items-center justify-center" style={{ backgroundColor: "#f0f0f0" }}>
-                      <ImageIcon className="w-8 h-8 text-gray-400" />
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <div className="flex items-center gap-0.5">
-                        {[1,2,3,4,5].map((s) => (
-                          <svg key={s} width="14" height="14" viewBox="0 0 24 24" fill={starRating} stroke="none"><path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z" /></svg>
-                        ))}
-                      </div>
-                      <span style={{ fontSize: s(12), fontFamily: bodyFont, color: bodyColor }}>18,623 reviews</span>
-                    </div>
-                    <h2 style={{ fontFamily: displayFont, fontSize: s(22), lineHeight: 1.15, fontWeight: displayWeight, letterSpacing: "-0.4px", margin: 0, color: displayColor }}>
-                      Better mornings, brewed for you.
-                    </h2>
-                    <p style={{ fontFamily: bodyFont, fontSize: s(14), lineHeight: 1.5, fontWeight: bodyWeight, margin: 0, color: bodyColor }}>
-                      The smoother, smarter way to start your day — packed with what your body actually needs.
-                    </p>
-                    <hr style={{ border: "none", borderTop: `1px solid ${borderSubtle}`, margin: 0 }} />
-                    <ul className="flex flex-col gap-2" style={{ fontSize: s(14), fontFamily: bodyFont, fontWeight: bodyWeight }}>
-                      {["Real ingredients, no shortcuts", "Loved by 18,000+ customers", "30-day money-back guarantee"].map((b) => (
-                        <li key={b} className="flex items-center gap-2">
-                          <span className="w-[18px] h-[18px] rounded-full flex items-center justify-center text-[11px] font-bold shrink-0" style={{ backgroundColor: primary, color: contrastText(primary), fontFamily: uiFont }}>✓</span>
-                          {b}
-                        </li>
-                      ))}
-                    </ul>
-                    <button className="w-full rounded-lg border-0 cursor-pointer shadow-sm" style={{ backgroundColor: buttonPrimary, color: contrastText(buttonPrimary), fontFamily: uiFont, fontWeight: uiWeight, fontSize: "14px", letterSpacing: "0.04em", textAlign: "center" as const, padding: "12px" }}>
-                      BUTTON PRIMARY →
-                    </button>
-                  </div>
-
-                  {/* 4. Placeholder section 1 — accent 1 */}
-                  <div className="p-4 flex flex-col gap-3" style={{ background: `linear-gradient(180deg, #ffffff 0%, #ffffff 5%, ${accent1} 50%, #ffffff 95%, #ffffff 100%)` }}>
-                    <div style={{ fontFamily: headings.Title.font, fontWeight: headings.Title.weight, fontSize: s(28), lineHeight: 1.1, letterSpacing: "-0.5px", color: headings.Title.color }}>Title</div>
-                    <div style={{ fontFamily: headings.H1.font, fontWeight: headings.H1.weight, fontSize: s(22), lineHeight: 1.15, letterSpacing: "-0.4px", color: headings.H1.color }}>Heading 1</div>
-                    <div style={{ fontFamily: headings.H2.font, fontWeight: headings.H2.weight, fontSize: s(18), lineHeight: 1.2, color: headings.H2.color }}>Heading 2</div>
-                    <p style={{ fontFamily: bodyFont, fontWeight: bodyWeight, fontSize: s(14), lineHeight: 1.5, margin: 0, color: bodyColor, opacity: 0.8 }}>
-                      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-                    </p>
-                    <div className="w-full aspect-video rounded-md relative overflow-hidden" style={{ backgroundColor: "#f0f0f0" }}>
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <ImageIcon className="w-6 h-6 text-gray-400" />
-                      </div>
-                      <div className="absolute bottom-0 left-0 right-0 px-3 py-1.5" style={{ backgroundColor: primary, color: contrastText(primary), fontFamily: uiFont, fontSize: s(10), fontWeight: 600 }}>
-                        Image caption
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* 5. Placeholder section 2 — accent 2 (clone of section 1) */}
-                  <div className="p-4 flex flex-col gap-3" style={{ background: `linear-gradient(180deg, #ffffff 0%, #ffffff 5%, ${accent2} 50%, #ffffff 95%, #ffffff 100%)` }}>
-                    <div style={{ fontFamily: headings.Title.font, fontWeight: headings.Title.weight, fontSize: s(28), lineHeight: 1.1, letterSpacing: "-0.5px", color: headings.Title.color }}>Title</div>
-                    <div style={{ fontFamily: headings.H1.font, fontWeight: headings.H1.weight, fontSize: s(22), lineHeight: 1.15, letterSpacing: "-0.4px", color: headings.H1.color }}>Heading 1</div>
-                    <div style={{ fontFamily: headings.H2.font, fontWeight: headings.H2.weight, fontSize: s(18), lineHeight: 1.2, color: headings.H2.color }}>Heading 2</div>
-                    <p style={{ fontFamily: bodyFont, fontWeight: bodyWeight, fontSize: s(14), lineHeight: 1.5, margin: 0, color: bodyColor, opacity: 0.8 }}>
-                      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-                    </p>
-                    <div className="w-full aspect-video rounded-md relative overflow-hidden" style={{ backgroundColor: "#f0f0f0" }}>
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <ImageIcon className="w-6 h-6 text-gray-400" />
-                      </div>
-                      <div className="absolute bottom-0 left-0 right-0 px-3 py-1.5" style={{ backgroundColor: primary, color: contrastText(primary), fontFamily: uiFont, fontSize: s(10), fontWeight: 600 }}>
-                        Image caption
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* CTA section — button secondary */}
-                  <div className="px-4 py-3" style={{ backgroundColor: "#ffffff" }}>
-                    <button className="w-full rounded-lg border-0 cursor-pointer shadow-sm" style={{ backgroundColor: buttonSecondary, color: contrastText(buttonSecondary), fontFamily: uiFont, fontWeight: uiWeight, fontSize: "14px", letterSpacing: "0.04em", textAlign: "center" as const, padding: "14px" }}>
-                      BUTTON SECONDARY →
-                    </button>
-                  </div>
-
-                  {/* 6. Placeholder section 3 — accent 3, all heading levels */}
-                  <div className="p-4 flex flex-col gap-2" style={{ background: `linear-gradient(180deg, #ffffff 0%, #ffffff 5%, ${accent3} 50%, #ffffff 95%, #ffffff 100%)` }}>
-                    <div style={{ fontFamily: headings.Title.font, fontWeight: headings.Title.weight, fontSize: s(28), lineHeight: 1.1, letterSpacing: "-0.5px", color: headings.Title.color }}>Title</div>
-                    <div style={{ fontFamily: headings.H1.font, fontWeight: headings.H1.weight, fontSize: s(22), lineHeight: 1.15, letterSpacing: "-0.4px", color: headings.H1.color }}>Heading 1</div>
-                    <div style={{ fontFamily: headings.H2.font, fontWeight: headings.H2.weight, fontSize: s(18), lineHeight: 1.2, color: headings.H2.color }}>Heading 2</div>
-                    <div style={{ fontFamily: headings.H3.font, fontWeight: headings.H3.weight, fontSize: s(16), lineHeight: 1.25, color: headings.H3.color }}>Heading 3</div>
-                    <div style={{ fontFamily: headings.H4.font, fontWeight: headings.H4.weight, fontSize: s(14), lineHeight: 1.3, color: headings.H4.color }}>Heading 4</div>
-                    <div style={{ fontFamily: headings.H5.font, fontWeight: headings.H5.weight, fontSize: s(13), lineHeight: 1.3, color: headings.H5.color }}>Heading 5</div>
-                    <div style={{ fontFamily: headings.H6.font, fontWeight: headings.H6.weight, fontSize: s(12), lineHeight: 1.3, color: headings.H6.color }}>Heading 6</div>
-                    <p style={{ fontFamily: bodyFont, fontWeight: bodyWeight, fontSize: s(14), lineHeight: 1.5, margin: 0, color: bodyColor, opacity: 0.8 }}>
-                      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.
-                    </p>
-                    <p style={{ fontFamily: mutedFont, fontWeight: mutedWeight, fontSize: s(11), lineHeight: 1.4, margin: 0, color: mutedColor }}>
-                      — Sarah K., verified customer · March 2026
-                    </p>
-                    <div className="w-full aspect-video rounded-md relative overflow-hidden" style={{ backgroundColor: "#f0f0f0" }}>
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <ImageIcon className="w-6 h-6 text-gray-400" />
-                      </div>
-                      <div className="absolute bottom-0 left-0 right-0 px-3 py-1.5" style={{ backgroundColor: primary, color: contrastText(primary), fontFamily: uiFont, fontSize: s(10), fontWeight: 600 }}>
-                        Image caption
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* 8. Footer — primary dark + inverse text */}
-                  <div className="flex flex-col gap-2.5 p-4" style={{ backgroundColor: primaryDark, color: contrastText(primaryDark) }}>
-                    {logo ? (
-                      <img
-                        src={luminance(primaryDark) < 0.45 ? (logoDark || logo) : logo}
-                        alt="Logo"
-                        className="h-5 max-w-[90px] object-contain self-start"
-                        style={luminance(primaryDark) < 0.45 && !logoDark ? { filter: "brightness(0) invert(1)" } : undefined}
-                      />
-                    ) : (
-                      <div className="flex items-center gap-1.5">
-                        <div className="w-5 h-5 rounded flex items-center justify-center" style={{ backgroundColor: "rgba(255,255,255,0.15)" }}><ImageIcon className="w-3 h-3" style={{ color: "rgba(255,255,255,0.5)" }} /></div>
-                        <span className="text-xs opacity-75" style={{ fontFamily: uiFont }}>Logo</span>
-                      </div>
-                    )}
-                    <div className="flex gap-3.5 uppercase" style={{ fontFamily: uiFont, fontSize: s(11), fontWeight: 600, letterSpacing: "0.04em" }}>
-                      <span>Privacy</span><span>Terms</span><span>Contact</span>
-                    </div>
-                    <div style={{ fontFamily: bodyFont, fontSize: s(11), opacity: 0.75 }}>
-                      © 2026 — All rights reserved.
-                    </div>
-                  </div>
-
-                </div>
-              </CardContent>
             </Card>
-
           </div>
         </div>
       </div>
