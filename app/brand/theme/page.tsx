@@ -1,10 +1,11 @@
 "use client";
 
 import React, { useState } from "react";
-import { Card, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ImageIcon, Type, Palette } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { ImageIcon, Type, Palette, Plus, X } from "lucide-react";
 import type {
   PageStyle,
   SemanticRoleName,
@@ -152,6 +153,15 @@ const WEIGHT_LABELS: Record<number, string> = {
   800: "Extra Bold",
   900: "Black",
 };
+
+// ---------------------------------------------------------------------------
+// v2 validators. The JSON Schema enforces these patterns at emission time;
+// the UI enforces them at edit time so dangling refs surface immediately.
+// ---------------------------------------------------------------------------
+
+const isValidPrimName = (name: string) => /^[a-zA-Z][a-zA-Z0-9]*$/.test(name);
+const isValidHex = (hex: string) =>
+  /^#[0-9A-Fa-f]{3}([0-9A-Fa-f]{3}([0-9A-Fa-f]{2})?)?$/.test(hex);
 
 // ---------------------------------------------------------------------------
 // Derived color computation. UX-convenience pattern: given an input primitive,
@@ -584,6 +594,66 @@ export default function ThemePage() {
   const setBaseFontSize = (n: number) =>
     setTheme((t) => ({ ...t, baseFontSize: n }));
 
+  // Add: derive an unused name like `primitive1`, default hex + light pairing.
+  const addPrimitive = () => {
+    setTheme((t) => {
+      const existing = t.colors!.primitives;
+      let i = 1;
+      let name = `primitive${i}`;
+      while (existing[name] !== undefined) {
+        i++;
+        name = `primitive${i}`;
+      }
+      return {
+        ...t,
+        colors: {
+          ...t.colors!,
+          primitives: { ...existing, [name]: "#CCCCCC" },
+          pairs: { ...(t.colors!.pairs || {}), [name]: { onSurface: "light" } },
+        },
+      };
+    });
+  };
+
+  const removePrimitive = (name: string) => {
+    setTheme((t) => {
+      const primitives = { ...t.colors!.primitives };
+      delete primitives[name];
+      const pairs = { ...(t.colors!.pairs || {}) };
+      delete pairs[name];
+      return {
+        ...t,
+        colors: { ...t.colors!, primitives, pairs },
+      };
+    });
+  };
+
+  // Rename: order-preserving swap of the key in primitives + pairs. Silently
+  // no-ops on invalid format or name collision; the input's onBlur resets the
+  // DOM in those cases.
+  const renamePrimitive = (oldName: string, newName: string) => {
+    if (oldName === newName || !isValidPrimName(newName)) return;
+    setTheme((t) => {
+      if (newName in t.colors!.primitives) return t;
+      const primitives = Object.fromEntries(
+        Object.entries(t.colors!.primitives).map(([k, v]) => [
+          k === oldName ? newName : k,
+          v,
+        ])
+      );
+      const pairs = Object.fromEntries(
+        Object.entries(t.colors!.pairs || {}).map(([k, v]) => [
+          k === oldName ? newName : k,
+          v,
+        ])
+      );
+      return {
+        ...t,
+        colors: { ...t.colors!, primitives, pairs },
+      };
+    });
+  };
+
   return (
     <div className="flex flex-col min-h-screen">
       <div className="flex-1 p-6 lg:p-8">
@@ -601,10 +671,105 @@ export default function ThemePage() {
               </CardHeader>
             </Card>
             <Card>
-              <CardHeader className="flex flex-row items-center gap-2 pb-4">
-                <Palette className="w-4 h-4 text-muted-foreground" />
-                <CardTitle className="text-base">Primitives</CardTitle>
+              <CardHeader className="flex flex-row items-center justify-between pb-4">
+                <div className="flex items-center gap-2">
+                  <Palette className="w-4 h-4 text-muted-foreground" />
+                  <CardTitle className="text-base">Primitives</CardTitle>
+                  <span className="text-xs text-muted-foreground">
+                    {Object.keys(theme.colors?.primitives || {}).length}
+                  </span>
+                </div>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={addPrimitive}
+                  className="h-8"
+                >
+                  <Plus className="w-3.5 h-3.5 mr-1" /> Add
+                </Button>
               </CardHeader>
+              <CardContent className="space-y-2">
+                <p className="text-xs text-muted-foreground pb-1">
+                  Brand-named hex colors. Surface pairing tells the renderer
+                  whether text on this background reads against a light or
+                  dark surface.
+                </p>
+                {Object.entries(theme.colors?.primitives || {}).map(
+                  ([name, hex]) => {
+                    const onSurface =
+                      theme.colors?.pairs?.[name]?.onSurface ?? "light";
+                    const hexValid = isValidHex(hex);
+                    return (
+                      <div
+                        key={name}
+                        className="grid grid-cols-[1fr_2rem_8rem_5.5rem_2rem] items-center gap-2"
+                      >
+                        <input
+                          type="text"
+                          key={`prim-name-${name}`}
+                          defaultValue={name}
+                          onBlur={(e) => {
+                            const newName = e.target.value.trim();
+                            if (newName === name) return;
+                            if (
+                              !isValidPrimName(newName) ||
+                              newName in (theme.colors?.primitives || {})
+                            ) {
+                              e.target.value = name;
+                              return;
+                            }
+                            renamePrimitive(name, newName);
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter")
+                              (e.currentTarget as HTMLInputElement).blur();
+                          }}
+                          className="font-mono text-xs h-8 px-2 rounded-md border bg-background w-full outline-none focus:ring-1 focus:ring-ring"
+                          placeholder="primitiveName"
+                        />
+                        <label
+                          className="w-8 h-8 rounded-md border border-border flex-shrink-0 cursor-pointer block relative overflow-hidden"
+                          style={{
+                            backgroundColor: hexValid ? hex : "transparent",
+                          }}
+                        >
+                          <input
+                            type="color"
+                            value={hexValid ? hex : "#CCCCCC"}
+                            onChange={(e) => setPrimitive(name, e.target.value)}
+                            className="absolute inset-0 opacity-0 cursor-pointer"
+                          />
+                        </label>
+                        <Input
+                          value={hex.toUpperCase()}
+                          onChange={(e) => setPrimitive(name, e.target.value)}
+                          className={`font-mono text-xs h-8 ${!hexValid ? "border-destructive" : ""}`}
+                          placeholder="#000000"
+                        />
+                        <select
+                          value={onSurface}
+                          onChange={(e) =>
+                            setPair(name, e.target.value as "light" | "dark")
+                          }
+                          className="h-8 rounded-md border bg-background text-xs px-2 cursor-pointer"
+                        >
+                          <option value="light">on light</option>
+                          <option value="dark">on dark</option>
+                        </select>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-8 w-8"
+                          onClick={() => removePrimitive(name)}
+                          aria-label={`Remove ${name}`}
+                        >
+                          <X className="w-3.5 h-3.5 text-muted-foreground" />
+                        </Button>
+                      </div>
+                    );
+                  }
+                )}
+              </CardContent>
             </Card>
             <Card>
               <CardHeader className="flex flex-row items-center gap-2 pb-4">
