@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,7 +15,6 @@ import type {
 } from "@/lib/theme-schema/theme-schema";
 import javvySeed from "@/lib/theme-schema/themes/javvy.json";
 import { deepen } from "@/lib/oklab-deepen";
-import { srgbMix } from "@/lib/srgb-mix";
 
 // ---------------------------------------------------------------------------
 // Color utility functions
@@ -672,6 +671,11 @@ function ImageUploadField({
 export default function ThemePage() {
   // v2 theme state — seeded from the Javvy reference instance.
   const [theme, setTheme] = useState<PageStyle>(javvySeed as PageStyle);
+  // Snapshot of the initial theme — used by X-button reset on every cell.
+  // Non-derived cells revert to their initial JSON value; derived cells
+  // recompute from current upstream via resetDerivedRow. When future
+  // preset/import work loads a different theme, re-capture this snapshot.
+  const initialThemeRef = useRef<PageStyle>(javvySeed as PageStyle);
 
   // ─── Setters ────────────────────────────────────────────────────────────
 
@@ -741,13 +745,16 @@ export default function ThemePage() {
   const ctaHoverHex = theme.colors?.primitives?.ctaHover;
   const ctaHoverDarkHex = theme.colors?.primitives?.ctaHoverDark;
 
-  // Gradient midStopHex derivation inputs — both surfaces compute
-  // independently; useEffects below maintain gradients.subtle.midStopHex
-  // (light) and gradients.subtle.midStopHexDark (dark).
-  const brandSubtleHex = theme.colors?.primitives?.brandSubtle;
-  const brandSubtleDarkHex = theme.colors?.primitives?.brandSubtleDark;
-  const backgroundHex = theme.colors?.primitives?.background;
-  const backgroundDarkHex = theme.colors?.primitives?.backgroundDark;
+  // backgroundAlternate — stored in gradients.subtle.midStopHex /
+  // midStopHexDark for canonical schema compatibility. Treated as a
+  // non-derived role in the UI: editable per surface, decoupled from
+  // brandSubtle. The renderer's gradient treatment is downstream of
+  // authoring; the brand author picks a color, render technique handles
+  // the rest.
+  const backgroundAlternateHex =
+    theme.colors?.gradients?.subtle?.midStopHex;
+  const backgroundAlternateDarkHex =
+    theme.colors?.gradients?.subtle?.midStopHexDark;
 
   // Generic single-step derivation writer: derive(sourceHex) and write to
   // the named primitive + identity-semantic + luminance-inferred pair.
@@ -925,74 +932,49 @@ export default function ThemePage() {
     setRoleHex(role, surface, deepen(sourceHex, 0.1));
   };
 
-  // ─── Background gradient midStopHex derivation ──────────────────────────
-  // Two independent derivations — one per surface. Each writes to its own
-  // storage slot in gradients.subtle (midStopHex for light, midStopHexDark
-  // for dark, the latter is a local schema extension pending a parallel PR
-  // in component-demo).
-  //
-  // Deps include only the upstream primitives — NOT the role's own value —
-  // so user manual overrides persist until the upstream changes (cta family
-  // pattern). Surface field is no longer user-facing under the unified-row
-  // model; stays in JSON as inert "light" default for canonical compatibility.
+  // ─── backgroundAlternate setter ─────────────────────────────────────────
+  // Writes to gradients.subtle.midStopHex (light) or .midStopHexDark (dark).
+  // Treated as a non-derived role: editable per surface, decoupled from
+  // brandSubtle. Default values seed once at theme creation via srgbMix
+  // (currently shipped in Javvy/Solstice JSON; one-time seeding will land
+  // when preset/import work is built).
 
-  // Light midStopHex derivation
-  useEffect(() => {
-    if (
-      !brandSubtleHex ||
-      !backgroundHex ||
-      !isValidHex(brandSubtleHex) ||
-      !isValidHex(backgroundHex)
-    )
-      return;
-    const derived = srgbMix(brandSubtleHex, 70, backgroundHex);
+  // Look up the initial hex for a (role, surface) from the captured
+  // initialThemeRef. Used by X-button reset on non-derived cells.
+  const getInitialHex = (
+    role: SemanticRoleName,
+    surface: "light" | "dark"
+  ): string | undefined => {
+    const initial = initialThemeRef.current;
+    const primName = initial.colors?.semantic?.[surface]?.[role];
+    return primName ? initial.colors?.primitives?.[primName] : undefined;
+  };
+
+  const setBackgroundAlternate = (
+    surface: "light" | "dark",
+    hex: string | null
+  ) => {
     setTheme((t) => {
-      if (t.colors?.gradients?.subtle?.midStopHex === derived) return t;
+      const current = t.colors!.gradients?.subtle || { surface: "light" };
+      const next = { ...current };
+      if (hex === null || hex === "") {
+        if (surface === "dark") delete next.midStopHexDark;
+        // Light has no X-clear path (light is source of truth), so no
+        // light-clear branch here.
+      } else if (surface === "light") {
+        next.midStopHex = hex;
+      } else {
+        next.midStopHexDark = hex;
+      }
       return {
         ...t,
         colors: {
           ...t.colors!,
-          gradients: {
-            ...t.colors!.gradients,
-            subtle: {
-              ...(t.colors!.gradients?.subtle || { surface: "light" }),
-              midStopHex: derived,
-            },
-          },
+          gradients: { ...t.colors!.gradients, subtle: next },
         },
       };
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [brandSubtleHex, backgroundHex]);
-
-  // Dark midStopHex derivation
-  useEffect(() => {
-    if (
-      !brandSubtleDarkHex ||
-      !backgroundDarkHex ||
-      !isValidHex(brandSubtleDarkHex) ||
-      !isValidHex(backgroundDarkHex)
-    )
-      return;
-    const derived = srgbMix(brandSubtleDarkHex, 70, backgroundDarkHex);
-    setTheme((t) => {
-      if (t.colors?.gradients?.subtle?.midStopHexDark === derived) return t;
-      return {
-        ...t,
-        colors: {
-          ...t.colors!,
-          gradients: {
-            ...t.colors!.gradients,
-            subtle: {
-              ...(t.colors!.gradients?.subtle || { surface: "light" }),
-              midStopHexDark: derived,
-            },
-          },
-        },
-      };
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [brandSubtleDarkHex, backgroundDarkHex]);
+  };
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -1038,17 +1020,29 @@ export default function ThemePage() {
                     ? theme.colors?.primitives?.[darkPrim]
                     : undefined;
 
-                  // X-button handlers per Ashley's rules:
-                  // - Light non-derived: no X (light is source of truth)
-                  // - Light derived: X resets to deepen-derived value
-                  // - Dark non-derived: X resets dark to match light hex
-                  // - Dark derived: X resets to deepen-derived dark value
+                  // X-button handlers — uniform rule: every cell has an X
+                  // that reverts to the cell's "default" value.
+                  // - Non-derived: revert to initial JSON value at theme load
+                  //   (captured in initialThemeRef; preserves intentional
+                  //   light/dark divergence)
+                  // - Derived: re-run derivation formula against current
+                  //   upstream
                   const onClearLight = isDerived
                     ? () => resetDerivedRow(role, "light")
-                    : undefined;
+                    : () =>
+                        setRoleHex(
+                          role,
+                          "light",
+                          getInitialHex(role, "light") || "#CCCCCC"
+                        );
                   const onClearDark = isDerived
                     ? () => resetDerivedRow(role, "dark")
-                    : () => setRoleHex(role, "dark", lightHex || "#CCCCCC");
+                    : () =>
+                        setRoleHex(
+                          role,
+                          "dark",
+                          getInitialHex(role, "dark") || "#CCCCCC"
+                        );
 
                   return (
                     <div
@@ -1076,6 +1070,46 @@ export default function ThemePage() {
                     </div>
                   );
                 })}
+                {/* backgroundAlternate — non-derived role-equivalent row.
+                    Data binds to gradients.subtle.midStopHex (light) and
+                    .midStopHexDark (dark) for canonical schema compatibility,
+                    but behaves like any other non-derived role: light is
+                    source of truth (no X), dark X resets to match light. */}
+                <div
+                  key="backgroundAlternate"
+                  className="grid grid-cols-[8rem_1fr] gap-2 items-center py-1"
+                >
+                  <span
+                    title="Alternate section background color. Used for sections that should diverge from the default background."
+                    className="text-xs font-mono cursor-help truncate"
+                  >
+                    backgroundAlternate
+                  </span>
+                  <div className="grid grid-cols-2 gap-2">
+                    <RoleHexInput
+                      hex={backgroundAlternateHex}
+                      onChange={(h) => setBackgroundAlternate("light", h)}
+                      onClear={() =>
+                        setBackgroundAlternate(
+                          "light",
+                          initialThemeRef.current.colors?.gradients?.subtle
+                            ?.midStopHex || "#CCCCCC"
+                        )
+                      }
+                    />
+                    <RoleHexInput
+                      hex={backgroundAlternateDarkHex}
+                      onChange={(h) => setBackgroundAlternate("dark", h)}
+                      onClear={() =>
+                        setBackgroundAlternate(
+                          "dark",
+                          initialThemeRef.current.colors?.gradients?.subtle
+                            ?.midStopHexDark || "#CCCCCC"
+                        )
+                      }
+                    />
+                  </div>
+                </div>
               </CardContent>
             </Card>
             <Card>
