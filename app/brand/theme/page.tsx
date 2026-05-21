@@ -232,7 +232,7 @@ const ROLE_DESCRIPTIONS: Record<SemanticRoleName, string> = {
   foreground: "Default body text color, paired with background.",
   muted: "Neutral muted surface — hover states, disabled UI.",
   mutedForeground: "Text/icon color paired with muted.",
-  primary: "Brand-color surface (accent bands, brand-colored badges).",
+  primary: "Brand-color surface (cardHeader bands, accent cells). Carries dual semantic per P15 — action emphasis (flips across surfaces) and brand-surface accent (wants to stay). Brands where action ≠ brand-surface (e.g., Javvy: action=yellow, surface=purple) may need primitive refs for accent cells on dark.",
   primaryForeground: "Text/icon color paired with primary.",
   brandSubtle: "Brand-tinted subtle section wash. Same primitive serves gradients.subtle.",
   brandSubtleForeground: "Text/icon color paired with brandSubtle.",
@@ -1044,29 +1044,52 @@ export default function ThemePage() {
                           getInitialHex(role, "dark") || "#CCCCCC"
                         );
 
+                  // P17 inline warning — dark.foreground should be a
+                  // paper-class primitive (very light off-white or pure
+                  // white). Below the threshold, text on brand-surface
+                  // backgrounds (where dark cascade activates) may render
+                  // with off-spec contrast. Luminance > 0.85 marks the
+                  // paper-class cutoff (off-whites and pure white pass;
+                  // mid-light grays and below trigger).
+                  const isP17Warning =
+                    role === "foreground" &&
+                    darkHex !== undefined &&
+                    isValidHex(darkHex) &&
+                    luminance(darkHex) <= 0.85;
+
                   return (
-                    <div
-                      key={role}
-                      className="grid grid-cols-[8rem_1fr] gap-2 items-center py-1"
-                    >
-                      <span
-                        title={ROLE_DESCRIPTIONS[role]}
-                        className="text-xs font-mono cursor-help truncate"
-                      >
-                        {role}
-                      </span>
-                      <div className="grid grid-cols-2 gap-2">
-                        <RoleHexInput
-                          hex={lightHex}
-                          onChange={(h) => setRoleHex(role, "light", h)}
-                          onClear={onClearLight}
-                        />
-                        <RoleHexInput
-                          hex={darkHex}
-                          onChange={(h) => setRoleHex(role, "dark", h)}
-                          onClear={onClearDark}
-                        />
+                    <div key={role}>
+                      <div className="grid grid-cols-[8rem_1fr] gap-2 items-center py-1">
+                        <span
+                          title={ROLE_DESCRIPTIONS[role]}
+                          className="text-xs font-mono cursor-help truncate"
+                        >
+                          {role}
+                        </span>
+                        <div className="grid grid-cols-2 gap-2">
+                          <RoleHexInput
+                            hex={lightHex}
+                            onChange={(h) => setRoleHex(role, "light", h)}
+                            onClear={onClearLight}
+                          />
+                          <RoleHexInput
+                            hex={darkHex}
+                            onChange={(h) => setRoleHex(role, "dark", h)}
+                            onClear={onClearDark}
+                          />
+                        </div>
                       </div>
+                      {isP17Warning && (
+                        <p className="text-[10px] text-destructive flex items-start gap-1.5 pl-[8.5rem] pb-1">
+                          <span aria-hidden>⚠</span>
+                          <span>
+                            dark.foreground should be a paper-class primitive
+                            (very light off-white or white) per P17. Off-spec
+                            values may cause text on brand-surface backgrounds
+                            to render with poor contrast.
+                          </span>
+                        </p>
+                      )}
                     </div>
                   );
                 })}
