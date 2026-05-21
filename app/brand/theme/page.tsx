@@ -88,16 +88,40 @@ function lightenHex(hex: string, percent: number): string {
 // ---------------------------------------------------------------------------
 // Font weight synthesis guard. Static-font weights must match the family's
 // shipped face set, else the browser synthesizes a degraded weight at paint.
-// Registry expands to cover all 19 FONT_OPTIONS in a later commit.
+//
+// Registry covers all 19 fonts in FONT_OPTIONS plus Archivo (used by the
+// Solstice seed even though Solstice's family isn't currently in the picker
+// dropdown). Data sourced from Google Fonts' shipped weight sets per family
+// — variable fonts mark the full 100-900 range available; static fonts list
+// only the discrete weights that ship as separate face files. When the user
+// picks an unshipped weight on a static font, isWeightSupported surfaces an
+// inline warning per role.
+//
+// Future commit may swap this hardcoded catalogue for the Google Fonts
+// Developer API at edit time. Not in scope here.
 // ---------------------------------------------------------------------------
 
 const FONT_SHIPPED_WEIGHTS: Record<string, { static: number[]; variable: boolean }> = {
-  "DM Sans":           { static: [100, 200, 300, 400, 500, 600, 700, 800, 900], variable: true },
-  "Lato":              { static: [100, 300, 400, 700, 900], variable: false },
   "Archivo":           { static: [100, 200, 300, 400, 500, 600, 700, 800, 900], variable: true },
-  "Libre Baskerville": { static: [400, 700], variable: false },
   "Barlow":            { static: [100, 200, 300, 400, 500, 600, 700, 800, 900], variable: false },
+  "Bebas Neue":        { static: [400], variable: false },
+  "Crimson Text":      { static: [400, 600, 700], variable: false },
+  "DM Sans":           { static: [100, 200, 300, 400, 500, 600, 700, 800, 900], variable: true },
   "Geist":             { static: [100, 200, 300, 400, 500, 600, 700, 800, 900], variable: true },
+  "Inter":             { static: [100, 200, 300, 400, 500, 600, 700, 800, 900], variable: true },
+  "Lato":              { static: [100, 300, 400, 700, 900], variable: false },
+  "Libre Baskerville": { static: [400, 700], variable: false },
+  "Merriweather":      { static: [300, 400, 700, 900], variable: false },
+  "Montserrat":        { static: [100, 200, 300, 400, 500, 600, 700, 800, 900], variable: true },
+  "Nunito":            { static: [200, 300, 400, 500, 600, 700, 800, 900], variable: true },
+  "Open Sans":         { static: [300, 400, 500, 600, 700, 800], variable: true },
+  "Oswald":            { static: [200, 300, 400, 500, 600, 700], variable: true },
+  "Playfair Display":  { static: [400, 500, 600, 700, 800, 900], variable: true },
+  "Poppins":           { static: [100, 200, 300, 400, 500, 600, 700, 800, 900], variable: false },
+  "PT Sans":           { static: [400, 700], variable: false },
+  "Raleway":           { static: [100, 200, 300, 400, 500, 600, 700, 800, 900], variable: true },
+  "Roboto":            { static: [100, 300, 400, 500, 700, 900], variable: true },
+  "Ubuntu":            { static: [300, 400, 500, 700], variable: false },
 };
 
 function familyKey(family: string): string {
