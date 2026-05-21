@@ -1,9 +1,11 @@
 // ADAPTED from github.com/beckettashley/component-demo/schema/theme-schema.ts
-// as of commit 1b73a46 (2026-05-19) with local addition of the ctaBorderHover
-// semantic role (cta family). Eventual reconciliation between repos pending —
-// canonical schema needs a parallel PR to add ctaBorderHover. Sync rule: when
-// schema changes in component-demo OR locally, update both sides BEFORE
-// updating UI consumers.
+// as of commit 1b73a46 (2026-05-19) with local additions:
+//   (1) ctaBorderHover semantic role (cta family)
+//   (2) midStopHexDark field on GradientPrimitive (dark-surface counterpart
+//       to midStopHex, mirrors the role/roleDark pattern used elsewhere)
+// Eventual reconciliation between repos pending — canonical schema needs
+// parallel PRs to add both. Sync rule: when schema changes in component-demo
+// OR locally, update both sides BEFORE updating UI consumers.
 
 /**
  * Theme schema for headless CMS theme data — engineering handoff package.
@@ -207,6 +209,14 @@ export interface GradientPrimitive {
    * (original v1 default before curation-time derivation).
    */
   midStopHex?: string;
+  /**
+   * LOCAL EXTENSION (not in canonical schema yet). Dark-surface counterpart
+   * to midStopHex. Same derivation rule applied to dark primitives:
+   *   midStopHexDark = srgb-mix(brandSubtleDark 70%, backgroundDark 30%)
+   * Mirrors the role/roleDark naming pattern used elsewhere in the schema.
+   * Parallel component-demo PR pending.
+   */
+  midStopHexDark?: string;
 }
 
 /**

@@ -15,6 +15,7 @@ import type {
 } from "@/lib/theme-schema/theme-schema";
 import javvySeed from "@/lib/theme-schema/themes/javvy.json";
 import { deepen } from "@/lib/oklab-deepen";
+import { srgbMix } from "@/lib/srgb-mix";
 
 // ---------------------------------------------------------------------------
 // Color utility functions
@@ -716,6 +717,14 @@ export default function ThemePage() {
   const ctaHoverHex = theme.colors?.primitives?.ctaHover;
   const ctaHoverDarkHex = theme.colors?.primitives?.ctaHoverDark;
 
+  // Gradient midStopHex derivation inputs — both surfaces compute
+  // independently; useEffects below maintain gradients.subtle.midStopHex
+  // (light) and gradients.subtle.midStopHexDark (dark).
+  const brandSubtleHex = theme.colors?.primitives?.brandSubtle;
+  const brandSubtleDarkHex = theme.colors?.primitives?.brandSubtleDark;
+  const backgroundHex = theme.colors?.primitives?.background;
+  const backgroundDarkHex = theme.colors?.primitives?.backgroundDark;
+
   // Generic single-step derivation writer: derive(sourceHex) and write to
   // the named primitive + identity-semantic + luminance-inferred pair.
   const writeDerived = (
@@ -892,6 +901,75 @@ export default function ThemePage() {
     setRoleHex(role, surface, deepen(sourceHex, 0.1));
   };
 
+  // ─── Background gradient midStopHex derivation ──────────────────────────
+  // Two independent derivations — one per surface. Each writes to its own
+  // storage slot in gradients.subtle (midStopHex for light, midStopHexDark
+  // for dark, the latter is a local schema extension pending a parallel PR
+  // in component-demo).
+  //
+  // Deps include only the upstream primitives — NOT the role's own value —
+  // so user manual overrides persist until the upstream changes (cta family
+  // pattern). Surface field is no longer user-facing under the unified-row
+  // model; stays in JSON as inert "light" default for canonical compatibility.
+
+  // Light midStopHex derivation
+  useEffect(() => {
+    if (
+      !brandSubtleHex ||
+      !backgroundHex ||
+      !isValidHex(brandSubtleHex) ||
+      !isValidHex(backgroundHex)
+    )
+      return;
+    const derived = srgbMix(brandSubtleHex, 70, backgroundHex);
+    setTheme((t) => {
+      if (t.colors?.gradients?.subtle?.midStopHex === derived) return t;
+      return {
+        ...t,
+        colors: {
+          ...t.colors!,
+          gradients: {
+            ...t.colors!.gradients,
+            subtle: {
+              ...(t.colors!.gradients?.subtle || { surface: "light" }),
+              midStopHex: derived,
+            },
+          },
+        },
+      };
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [brandSubtleHex, backgroundHex]);
+
+  // Dark midStopHex derivation
+  useEffect(() => {
+    if (
+      !brandSubtleDarkHex ||
+      !backgroundDarkHex ||
+      !isValidHex(brandSubtleDarkHex) ||
+      !isValidHex(backgroundDarkHex)
+    )
+      return;
+    const derived = srgbMix(brandSubtleDarkHex, 70, backgroundDarkHex);
+    setTheme((t) => {
+      if (t.colors?.gradients?.subtle?.midStopHexDark === derived) return t;
+      return {
+        ...t,
+        colors: {
+          ...t.colors!,
+          gradients: {
+            ...t.colors!.gradients,
+            subtle: {
+              ...(t.colors!.gradients?.subtle || { surface: "light" }),
+              midStopHexDark: derived,
+            },
+          },
+        },
+      };
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [brandSubtleDarkHex, backgroundDarkHex]);
+
   return (
     <div className="flex flex-col min-h-screen">
       <div className="flex-1 p-6 lg:p-8">
@@ -975,12 +1053,6 @@ export default function ThemePage() {
                   );
                 })}
               </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center gap-2 pb-4">
-                <Palette className="w-4 h-4 text-muted-foreground" />
-                <CardTitle className="text-base">Gradient: Subtle</CardTitle>
-              </CardHeader>
             </Card>
             <Card>
               <CardHeader className="flex flex-row items-center gap-2 pb-4">

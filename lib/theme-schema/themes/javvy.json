@@ -136,7 +136,8 @@
     "gradients": {
       "subtle": {
         "surface": "light",
-        "midStopHex": "#EFECF9"
+        "midStopHex": "#EFECF9",
+        "midStopHexDark": "#AFABC5"
       }
     }
   },

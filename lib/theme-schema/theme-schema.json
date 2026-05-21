@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://component-demo.local/schema/theme-schema.json",
-  "$comment": "ADAPTED from github.com/beckettashley/component-demo/schema/theme-schema.json as of commit 1b73a46 (2026-05-19) with local addition of the ctaBorderHover semantic role (cta family). Eventual reconciliation between repos pending — canonical schema needs a parallel PR to add ctaBorderHover. Sync rule: when schema changes in component-demo OR locally, update both sides BEFORE updating UI consumers.",
+  "$comment": "ADAPTED from github.com/beckettashley/component-demo/schema/theme-schema.json as of commit 1b73a46 (2026-05-19) with local additions: (1) ctaBorderHover semantic role (cta family); (2) midStopHexDark field on GradientPrimitive (dark-surface counterpart to midStopHex). Eventual reconciliation between repos pending — canonical schema needs parallel PRs. Sync rule: when schema changes in component-demo OR locally, update both sides BEFORE updating UI consumers.",
   "title": "PageStyle theme schema",
   "description": "Theme data for a single brand: color tokens, typography roles, brand assets, baseFontSize. Compositional content shape (sections, grids, cells) is not part of this schema — that's template-specific. See companion TypeScript definitions at schema/theme-schema.ts.",
   "type": "object",
@@ -119,6 +119,11 @@
           "type": "string",
           "pattern": "^#[0-9A-Fa-f]{3}([0-9A-Fa-f]{3}([0-9A-Fa-f]{2})?)?$",
           "description": "Optional pre-computed mid-stop hex (curation-time derivation output). Concrete CSS hex value, NOT a primitive name. Curation rule: srgb-mix(brandSubtle 70%, surface-endpoint). When omitted, renderer falls back to brandSubtle at 100% across the plateau."
+        },
+        "midStopHexDark": {
+          "type": "string",
+          "pattern": "^#[0-9A-Fa-f]{3}([0-9A-Fa-f]{3}([0-9A-Fa-f]{2})?)?$",
+          "description": "LOCAL EXTENSION (not in canonical schema yet). Dark-surface counterpart to midStopHex: srgb-mix(brandSubtleDark 70%, backgroundDark 30%). Mirrors the role/roleDark pattern."
         }
       }
     },
