@@ -15,6 +15,7 @@ import type {
 } from "@/lib/theme-schema/theme-schema";
 import javvySeed from "@/lib/theme-schema/themes/javvy.json";
 import { deepen } from "@/lib/oklab-deepen";
+import { hexToOklch } from "@/lib/hex-to-oklch";
 
 // ---------------------------------------------------------------------------
 // Color utility functions
@@ -665,6 +666,192 @@ function ImageUploadField({
 }
 
 // ---------------------------------------------------------------------------
+// Component: PreviewSurface — renders a 150px-wide preview tile against one
+// surface (light or dark). Mirrors the production renderer's emission:
+//   - Primitives emit as `--c-{name}: oklch(L C H)` via hexToOklch
+//   - Roles emit as `--{role}: var(--c-{primitiveName})` per the surface's
+//     semantic map (no [data-surface="dark"] cascade needed — each pane
+//     fixes its surface)
+//   - Section bgs use `var(--c-{primitive})` directly (Step 6.5 cascade fix),
+//     not `var(--{role})`. Text and borders use role vars.
+//   - Subtle gradient uses the surface's midStopHex / midStopHexDark
+//     from gradients.subtle.
+// Production parity is by construction: same hexToOklch port, same emission
+// pattern. Re-renders on every theme change (compute is microseconds).
+// ---------------------------------------------------------------------------
+
+function PreviewSurface({
+  theme,
+  surface,
+}: {
+  theme: PageStyle;
+  surface: "light" | "dark";
+}) {
+  const primitives = theme.colors?.primitives || {};
+  const semantic = theme.colors?.semantic?.[surface] || {};
+
+  const primOklch = (primName: string | undefined): string => {
+    if (!primName) return "transparent";
+    const hex = primitives[primName];
+    return hex && isValidHex(hex) ? hexToOklch(hex) : "transparent";
+  };
+
+  // CSS variables — primitive vars (--c-name) plus role vars (--role)
+  // resolving to primitives at this surface.
+  const cssVars: Record<string, string> = {};
+  for (const role of SEMANTIC_ROLES) {
+    const primName = semantic[role];
+    if (!primName) continue;
+    cssVars[`--c-${primName}`] = primOklch(primName);
+    cssVars[`--${role}`] = `var(--c-${primName})`;
+  }
+
+  // Step 6.5: bg uses primitive var directly (immune to cascade rebinding).
+  const bgPrim = (role: SemanticRoleName): string => {
+    const primName = semantic[role];
+    return primName ? `var(--c-${primName})` : "transparent";
+  };
+
+  const midStop =
+    surface === "light"
+      ? theme.colors?.gradients?.subtle?.midStopHex
+      : theme.colors?.gradients?.subtle?.midStopHexDark;
+  const midStopOklch =
+    midStop && isValidHex(midStop) ? hexToOklch(midStop) : "transparent";
+
+  const wrapperStyle = {
+    ...cssVars,
+    backgroundColor: bgPrim("background"),
+    color: "var(--foreground)",
+    width: "150px",
+  } as React.CSSProperties;
+
+  return (
+    <div
+      style={wrapperStyle}
+      className="rounded border border-border overflow-hidden text-[9px] font-sans flex flex-col flex-shrink-0"
+    >
+      <div
+        className="px-2 py-1 text-[8px] uppercase tracking-wide font-semibold"
+        style={{
+          background: bgPrim("muted"),
+          color: "var(--mutedForeground)",
+        }}
+      >
+        {surface} surface
+      </div>
+
+      <div
+        className="p-2 flex flex-col gap-1"
+        style={{ background: bgPrim("background") }}
+      >
+        <h3
+          style={{
+            color: "var(--textBrand)",
+            fontWeight: 700,
+            fontSize: "11px",
+            margin: 0,
+            lineHeight: 1.2,
+          }}
+        >
+          Brand Heading
+        </h3>
+        <p style={{ margin: 0, lineHeight: 1.4 }}>Lorem ipsum dolor sit.</p>
+      </div>
+
+      <div
+        className="px-2 py-1.5"
+        style={{
+          background: bgPrim("primary"),
+          color: "var(--primaryForeground)",
+        }}
+      >
+        <span style={{ fontWeight: 700 }}>Primary surface</span>
+      </div>
+
+      <div
+        className="px-2 py-1.5"
+        style={{
+          background: bgPrim("brandSubtle"),
+          color: "var(--brandSubtleForeground)",
+        }}
+      >
+        Brand subtle wash
+      </div>
+
+      <div
+        className="px-2 py-1.5"
+        style={{
+          background: bgPrim("warning"),
+          color: "var(--warningForeground)",
+        }}
+      >
+        Warning
+      </div>
+
+      <div
+        className="p-2 flex flex-col gap-1"
+        style={{ background: bgPrim("background") }}
+      >
+        <button
+          style={{
+            background: bgPrim("cta"),
+            color: "var(--ctaForeground)",
+            border: "1px solid var(--ctaBorder)",
+            padding: "4px 8px",
+            borderRadius: 3,
+            fontSize: "9px",
+            fontWeight: 700,
+            width: "100%",
+          }}
+        >
+          CTA Button
+        </button>
+        <button
+          style={{
+            background: bgPrim("ctaHover"),
+            color: "var(--ctaForeground)",
+            border: "1px solid var(--ctaBorderHover)",
+            padding: "4px 8px",
+            borderRadius: 3,
+            fontSize: "9px",
+            fontWeight: 700,
+            width: "100%",
+          }}
+        >
+          Hover state
+        </button>
+      </div>
+
+      <div
+        className="px-2 py-2 text-center"
+        style={{
+          background: `linear-gradient(to bottom, ${bgPrim("background")} 0%, ${midStopOklch} 25%, ${midStopOklch} 75%, ${bgPrim("background")} 100%)`,
+          color: "var(--foreground)",
+        }}
+      >
+        Gradient
+      </div>
+
+      <div
+        className="px-2 py-1.5 text-[8px] flex items-center gap-1.5"
+        style={{ background: bgPrim("muted"), color: "var(--mutedForeground)" }}
+      >
+        <span>Footer</span>
+        <span aria-hidden>·</span>
+        <a href="#" style={{ color: "var(--link)" }}>
+          link
+        </a>
+        <span aria-hidden>·</span>
+        <span style={{ color: "var(--textAlert)", fontWeight: 700 }}>
+          alert
+        </span>
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Main page
 // ---------------------------------------------------------------------------
 
@@ -998,7 +1185,7 @@ export default function ThemePage() {
                 <CardTitle className="text-base">Semantic Roles</CardTitle>
               </CardHeader>
               <CardContent className="space-y-1">
-                <div className="grid grid-cols-[8rem_1fr] gap-2 pb-1">
+                <div className="grid grid-cols-[12rem_1fr] gap-2 pb-1">
                   <span></span>
                   <div className="grid grid-cols-2 gap-2">
                     <span className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
@@ -1059,7 +1246,7 @@ export default function ThemePage() {
 
                   return (
                     <div key={role}>
-                      <div className="grid grid-cols-[8rem_1fr] gap-2 items-center py-1">
+                      <div className="grid grid-cols-[12rem_1fr] gap-2 items-center py-1">
                         <span
                           title={ROLE_DESCRIPTIONS[role]}
                           className="text-xs font-mono cursor-help truncate"
@@ -1080,7 +1267,7 @@ export default function ThemePage() {
                         </div>
                       </div>
                       {isP17Warning && (
-                        <p className="text-[10px] text-destructive flex items-start gap-1.5 pl-[8.5rem] pb-1">
+                        <p className="text-[10px] text-destructive flex items-start gap-1.5 pl-[12.5rem] pb-1">
                           <span aria-hidden>⚠</span>
                           <span>
                             dark.foreground should be a paper-class primitive
@@ -1100,7 +1287,7 @@ export default function ThemePage() {
                     source of truth (no X), dark X resets to match light. */}
                 <div
                   key="backgroundAlternate"
-                  className="grid grid-cols-[8rem_1fr] gap-2 items-center py-1"
+                  className="grid grid-cols-[12rem_1fr] gap-2 items-center py-1"
                 >
                   <span
                     title="Alternate section background color. Used for sections that should diverge from the default background."
@@ -1143,12 +1330,18 @@ export default function ThemePage() {
             </Card>
           </div>
 
-          {/* Right column — sticky preview. Cascade rebuild lives in a later commit. */}
+          {/* Right column — sticky preview, side-by-side light + dark. */}
           <div className="lg:sticky lg:top-8 lg:self-start flex flex-col gap-6">
             <Card>
               <CardHeader className="pb-4">
                 <CardTitle className="text-base">Preview</CardTitle>
               </CardHeader>
+              <CardContent>
+                <div className="flex justify-center gap-2">
+                  <PreviewSurface theme={theme} surface="light" />
+                  <PreviewSurface theme={theme} surface="dark" />
+                </div>
+              </CardContent>
             </Card>
           </div>
         </div>
