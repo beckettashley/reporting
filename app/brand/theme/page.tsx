@@ -5,7 +5,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { ImageIcon, Type, Palette, X } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { ImageIcon, Type, Palette, X, Download } from "lucide-react";
 import type {
   ColorTokens,
   PageStyle,
@@ -14,8 +21,23 @@ import type {
   TypographyMap,
 } from "@/lib/theme-schema/theme-schema";
 import javvySeed from "@/lib/theme-schema/themes/javvy.json";
+import solsticeSeed from "@/lib/theme-schema/themes/solstice.json";
 import { deepen } from "@/lib/oklab-deepen";
 import { hexToOklch } from "@/lib/hex-to-oklch";
+
+// ---------------------------------------------------------------------------
+// Preset registry — themes the brand author can load as a starting point.
+// ---------------------------------------------------------------------------
+
+const PRESETS = {
+  javvy: javvySeed as PageStyle,
+  solstice: solsticeSeed as PageStyle,
+} as const;
+type PresetName = keyof typeof PRESETS;
+const PRESET_LABELS: Record<PresetName, string> = {
+  javvy: "Javvy",
+  solstice: "Solstice",
+};
 
 // ---------------------------------------------------------------------------
 // Color utility functions
@@ -309,6 +331,78 @@ function computeDerivedColors(
     { name: "Positive", value: "#11b990" },
     { name: "Star Rating", value: "#f59e0b" },
   ];
+}
+
+// ---------------------------------------------------------------------------
+// validateThemeForExport — defense-in-depth check before JSON export.
+//
+// The vendored JSON Schema is intentionally permissive (ColorPrimitives takes
+// any pattern-matched key; SemanticMap values are plain strings). Path A is
+// stricter: closed vocab, identity-mapped semantic, both gradient midStops
+// present. By construction the UI never violates these invariants, but this
+// validator catches manual JSON edits or future bulk-import paths.
+// ---------------------------------------------------------------------------
+
+function validateThemeForExport(t: PageStyle): {
+  valid: boolean;
+  errors: string[];
+} {
+  const errors: string[] = [];
+  const primitives = (t.colors?.primitives ?? {}) as Record<string, string>;
+  const semLight = (t.colors?.semantic?.light ?? {}) as Record<string, string>;
+  const semDark = (t.colors?.semantic?.dark ?? {}) as Record<string, string>;
+  const primNames = new Set(Object.keys(primitives));
+  const ALLOWED = new Set<string>([
+    ...SEMANTIC_ROLES,
+    ...SEMANTIC_ROLES.map((r) => `${r}Dark`),
+  ]);
+
+  // 1. All hex values valid
+  for (const [name, hex] of Object.entries(primitives)) {
+    if (!isValidHex(hex))
+      errors.push(`primitives.${name}: invalid hex "${hex}"`);
+  }
+  // 2. All 20 light + 20 dark primitives present
+  for (const role of SEMANTIC_ROLES) {
+    if (!primNames.has(role)) errors.push(`primitives.${role}: missing`);
+    if (!primNames.has(`${role}Dark`))
+      errors.push(`primitives.${role}Dark: missing`);
+  }
+  // 3. No primitive names outside closed vocab
+  for (const name of primNames) {
+    if (!ALLOWED.has(name))
+      errors.push(`primitives.${name}: not in closed vocabulary`);
+  }
+  // 4. semantic.light and semantic.dark identity-map all 20 roles
+  for (const role of SEMANTIC_ROLES) {
+    if (semLight[role] !== role)
+      errors.push(
+        `semantic.light.${role}: must be "${role}" (got "${semLight[role] ?? "missing"}")`
+      );
+    const darkExpected = `${role}Dark`;
+    if (semDark[role] !== darkExpected)
+      errors.push(
+        `semantic.dark.${role}: must be "${darkExpected}" (got "${semDark[role] ?? "missing"}")`
+      );
+  }
+  // 5. All semantic refs resolve to existing primitives
+  for (const [role, ref] of Object.entries(semLight))
+    if (!primNames.has(ref))
+      errors.push(`semantic.light.${role} → "${ref}": dangling primitive ref`);
+  for (const [role, ref] of Object.entries(semDark))
+    if (!primNames.has(ref))
+      errors.push(`semantic.dark.${role} → "${ref}": dangling primitive ref`);
+  // 6. Gradient midStops present + valid
+  const mLight = t.colors?.gradients?.subtle?.midStopHex;
+  const mDark = t.colors?.gradients?.subtle?.midStopHexDark;
+  if (!mLight) errors.push("gradients.subtle.midStopHex: missing");
+  else if (!isValidHex(mLight))
+    errors.push(`gradients.subtle.midStopHex: invalid hex "${mLight}"`);
+  if (!mDark) errors.push("gradients.subtle.midStopHexDark: missing");
+  else if (!isValidHex(mDark))
+    errors.push(`gradients.subtle.midStopHexDark: invalid hex "${mDark}"`);
+
+  return { valid: errors.length === 0, errors };
 }
 
 // ---------------------------------------------------------------------------
@@ -858,11 +952,51 @@ function PreviewSurface({
 export default function ThemePage() {
   // v2 theme state — seeded from the Javvy reference instance.
   const [theme, setTheme] = useState<PageStyle>(javvySeed as PageStyle);
+  // Active preset — drives the preset menu's current value and the export
+  // filename. Updated by loadPreset; never derived from theme content.
+  const [activePreset, setActivePreset] = useState<PresetName>("javvy");
   // Snapshot of the initial theme — used by X-button reset on every cell.
   // Non-derived cells revert to their initial JSON value; derived cells
-  // recompute from current upstream via resetDerivedRow. When future
-  // preset/import work loads a different theme, re-capture this snapshot.
+  // recompute from current upstream via resetDerivedRow. loadPreset
+  // re-captures this snapshot so X-reset tracks the active preset.
   const initialThemeRef = useRef<PageStyle>(javvySeed as PageStyle);
+
+  // ─── Preset switching + Export ──────────────────────────────────────────
+
+  // Load a preset by name. Immediate replace, no confirmation — selecting
+  // the current preset reloads the seed (intentional reset affordance).
+  const loadPreset = (name: PresetName) => {
+    const seed = PRESETS[name];
+    setTheme(seed);
+    initialThemeRef.current = seed;
+    setActivePreset(name);
+  };
+
+  // Validate the current theme and download as JSON. On validation failure,
+  // alert the brand author with the first 5 errors and skip the download.
+  const handleExport = () => {
+    const result = validateThemeForExport(theme);
+    if (!result.valid) {
+      const preview = result.errors.slice(0, 5).join("\n");
+      const more =
+        result.errors.length > 5
+          ? `\n…and ${result.errors.length - 5} more`
+          : "";
+      alert(`Cannot export — validation failed:\n\n${preview}${more}`);
+      return;
+    }
+    const blob = new Blob([JSON.stringify(theme, null, 2)], {
+      type: "application/json",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `theme-${activePreset}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
 
   // ─── Setters ────────────────────────────────────────────────────────────
 
@@ -1166,8 +1300,26 @@ export default function ThemePage() {
   return (
     <div className="flex flex-col min-h-screen">
       <div className="flex-1 p-6 lg:p-8">
-        <div className="mb-8">
+        <div className="mb-8 flex items-center justify-between gap-4">
           <h1 className="text-2xl font-semibold text-foreground">Theme</h1>
+          <div className="flex items-center gap-2">
+            <Select value={activePreset} onValueChange={(v) => loadPreset(v as PresetName)}>
+              <SelectTrigger className="w-[180px]" aria-label="Preset">
+                <SelectValue placeholder="Preset" />
+              </SelectTrigger>
+              <SelectContent>
+                {(Object.keys(PRESETS) as PresetName[]).map((name) => (
+                  <SelectItem key={name} value={name}>
+                    {PRESET_LABELS[name]}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button variant="outline" onClick={handleExport} className="gap-1.5">
+              <Download className="w-4 h-4" />
+              Export JSON
+            </Button>
+          </div>
         </div>
 
         <div className="grid lg:grid-cols-[5fr_3fr] gap-6 mb-24">
