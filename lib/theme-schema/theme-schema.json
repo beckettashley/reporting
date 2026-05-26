@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://component-demo.local/schema/theme-schema.json",
-  "$comment": "ADAPTED from github.com/beckettashley/component-demo/schema/theme-schema.json as of commit 1b73a46 (2026-05-19) with local additions: (1) ctaBorderHover semantic role (cta family); (2) midStopHexDark field on GradientPrimitive (dark-surface counterpart to midStopHex). Eventual reconciliation between repos pending — canonical schema needs parallel PRs. Sync rule: when schema changes in component-demo OR locally, update both sides BEFORE updating UI consumers.",
+  "$comment": "ADAPTED from github.com/beckettashley/component-demo/schema/theme-schema.json as of commit cb43d51 (A2 cleanup, ee6095c..cb43d51 on main). Local additions still pending parallel canonical PRs: (1) ctaBorderHover semantic role (cta family); (2) midStopHexDark field on GradientPrimitive (dark-surface counterpart to midStopHex). Canonical sync history: 1b73a46 initial vendor; cb43d51 trimmed TypographyMap from 13 roles to 10 (h5, h6, condensed removed). Sync rule: when schema changes in component-demo OR locally, update both sides BEFORE updating UI consumers.",
   "title": "PageStyle theme schema",
   "description": "Theme data for a single brand: color tokens, typography roles, brand assets, baseFontSize. Compositional content shape (sections, grids, cells) is not part of this schema — that's template-specific. See companion TypeScript definitions at schema/theme-schema.ts.",
   "type": "object",
@@ -199,11 +199,8 @@
         "h2": { "$ref": "#/$defs/TextRoleStyle" },
         "h3": { "$ref": "#/$defs/TextRoleStyle" },
         "h4": { "$ref": "#/$defs/TextRoleStyle" },
-        "h5": { "$ref": "#/$defs/TextRoleStyle" },
-        "h6": { "$ref": "#/$defs/TextRoleStyle" },
         "body": { "$ref": "#/$defs/TextRoleStyle" },
         "ui": { "$ref": "#/$defs/TextRoleStyle" },
-        "condensed": { "$ref": "#/$defs/TextRoleStyle" },
         "accordionQuestion": { "$ref": "#/$defs/TextRoleStyle" },
         "meta": { "$ref": "#/$defs/TextRoleStyle" },
         "muted": { "$ref": "#/$defs/MutedRoleStyle" }

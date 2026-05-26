@@ -1,6 +1,6 @@
 {
   "$schema": "../theme-schema.json",
-  "$comment": "ADAPTED from beckettashley/component-demo @ 1b73a46 with local primitive rename to use semantic role names. Eventual reconciliation between repos pending.",
+  "$comment": "ADAPTED from beckettashley/component-demo @ cb43d51 (A2 cleanup, 10 typography roles after h5/h6/condensed removal) with local primitive rename to use semantic role names. Eventual reconciliation between repos pending.",
   "baseFontSize": 16,
   "colors": {
     "primitives": {
@@ -172,18 +172,6 @@
       "lineHeight": 1.3,
       "letterSpacing": "-0.005em"
     },
-    "h5": {
-      "family": "'DM Sans', sans-serif",
-      "weight": 600,
-      "lineHeight": 1.4,
-      "letterSpacing": "0"
-    },
-    "h6": {
-      "family": "'DM Sans', sans-serif",
-      "weight": 600,
-      "lineHeight": 1.4,
-      "letterSpacing": "0"
-    },
     "body": {
       "family": "'DM Sans', sans-serif",
       "weight": 500,
@@ -195,12 +183,6 @@
       "weight": 700,
       "lineHeight": 1.4,
       "letterSpacing": "0.01em"
-    },
-    "condensed": {
-      "family": "'Barlow', sans-serif",
-      "weight": 900,
-      "lineHeight": 1.155,
-      "letterSpacing": "-0.025em"
     },
     "accordionQuestion": {
       "family": "'DM Sans', sans-serif",

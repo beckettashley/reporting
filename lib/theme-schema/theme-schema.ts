@@ -1,11 +1,16 @@
 // ADAPTED from github.com/beckettashley/component-demo/schema/theme-schema.ts
-// as of commit 1b73a46 (2026-05-19) with local additions:
+// as of commit cb43d51 (A2 cleanup, ee6095c..cb43d51 on main). Local additions
+// (still pending parallel canonical PRs):
 //   (1) ctaBorderHover semantic role (cta family)
 //   (2) midStopHexDark field on GradientPrimitive (dark-surface counterpart
 //       to midStopHex, mirrors the role/roleDark pattern used elsewhere)
-// Eventual reconciliation between repos pending — canonical schema needs
-// parallel PRs to add both. Sync rule: when schema changes in component-demo
-// OR locally, update both sides BEFORE updating UI consumers.
+// Canonical sync history:
+//   - 1b73a46 (2026-05-19) — initial vendor
+//   - cb43d51 (A2 cleanup) — TypographyMap trimmed from 13 roles to 10
+//     (h5, h6, condensed removed; title/h1–h4/body/ui/accordionQuestion/
+//     meta/muted remain)
+// Sync rule: when schema changes in component-demo OR locally, update both
+// sides BEFORE updating UI consumers.
 
 /**
  * Theme schema for headless CMS theme data — engineering handoff package.
@@ -314,11 +319,8 @@ export interface MutedRoleStyle {
  *   - `h2`           Section secondary heading
  *   - `h3`           Subsection heading
  *   - `h4`           Card/icon-label heading (compact)
- *   - `h5`, `h6`     Smaller hierarchy slots
  *   - `body`         Long-form prose
  *   - `ui`           Interactive labels (CTA button text, etc.)
- *   - `condensed`    Display-condensed register (typically for
- *                    promotional callouts, e.g., Barlow)
  *   - `accordionQuestion`  Accordion question heading — semantic
  *                          register distinct from H4 (accordion
  *                          questions read differently from card
@@ -338,11 +340,8 @@ export interface TypographyMap {
   h2?: TextRoleStyle;
   h3?: TextRoleStyle;
   h4?: TextRoleStyle;
-  h5?: TextRoleStyle;
-  h6?: TextRoleStyle;
   body?: TextRoleStyle;
   ui?: TextRoleStyle;
-  condensed?: TextRoleStyle;
   accordionQuestion?: TextRoleStyle;
   meta?: TextRoleStyle;
   muted?: MutedRoleStyle;
