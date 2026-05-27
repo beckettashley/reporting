@@ -1,14 +1,16 @@
 // ADAPTED from github.com/beckettashley/component-demo/schema/theme-schema.ts
-// as of commit cb43d51 (A2 cleanup, ee6095c..cb43d51 on main). Local additions
-// (still pending parallel canonical PRs):
+// as of commit 2fbc394 (A3 cleanup). Local additions (still pending parallel
+// canonical PRs):
 //   (1) ctaBorderHover semantic role (cta family)
 //   (2) midStopHexDark field on GradientPrimitive (dark-surface counterpart
 //       to midStopHex, mirrors the role/roleDark pattern used elsewhere)
 // Canonical sync history:
 //   - 1b73a46 (2026-05-19) — initial vendor
 //   - cb43d51 (A2 cleanup) — TypographyMap trimmed from 13 roles to 10
-//     (h5, h6, condensed removed; title/h1–h4/body/ui/accordionQuestion/
-//     meta/muted remain)
+//     (h5, h6, condensed removed)
+//   - 2fbc394 (A3 cleanup) — TypographyMap trimmed from 10 roles to 9
+//     (accordionQuestion removed; h4 becomes canonical home for accordion
+//     triggers). Remaining roles: title, h1–h4, body, ui, meta, muted.
 // Sync rule: when schema changes in component-demo OR locally, update both
 // sides BEFORE updating UI consumers.
 
@@ -318,13 +320,12 @@ export interface MutedRoleStyle {
  *   - `h1`           Section primary heading (editorial register)
  *   - `h2`           Section secondary heading
  *   - `h3`           Subsection heading
- *   - `h4`           Card/icon-label heading (compact)
+ *   - `h4`           Card/icon-label heading (compact). Also the canonical
+ *                    home for accordion-trigger headings (previously had a
+ *                    dedicated `accordionQuestion` role, removed in A3
+ *                    cleanup — accordion triggers use h4 going forward).
  *   - `body`         Long-form prose
  *   - `ui`           Interactive labels (CTA button text, etc.)
- *   - `accordionQuestion`  Accordion question heading — semantic
- *                          register distinct from H4 (accordion
- *                          questions read differently from card
- *                          headings, even at the same size)
  *   - `meta`         Fine-print prose register — footer attribution,
  *                    disclaimers, captions. Mixed-case, distinct from
  *                    text-label (uppercase UI register) and body
@@ -342,7 +343,6 @@ export interface TypographyMap {
   h4?: TextRoleStyle;
   body?: TextRoleStyle;
   ui?: TextRoleStyle;
-  accordionQuestion?: TextRoleStyle;
   meta?: TextRoleStyle;
   muted?: MutedRoleStyle;
 }

@@ -1,6 +1,6 @@
 {
   "$schema": "../theme-schema.json",
-  "$comment": "ADAPTED from beckettashley/component-demo @ cb43d51 (A2 cleanup, 10 typography roles after h5/h6/condensed removal) with local primitive rename to use semantic role names. Eventual reconciliation between repos pending.",
+  "$comment": "ADAPTED from beckettashley/component-demo @ 2fbc394 (A3 cleanup, 9 typography roles after accordionQuestion removal — h4 is canonical home for accordion triggers) with local primitive rename to use semantic role names. Eventual reconciliation between repos pending.",
   "baseFontSize": 16,
   "colors": {
     "primitives": {
@@ -183,12 +183,6 @@
       "weight": 700,
       "lineHeight": 1.4,
       "letterSpacing": "0.01em"
-    },
-    "accordionQuestion": {
-      "family": "'DM Sans', sans-serif",
-      "weight": 800,
-      "lineHeight": 1.4,
-      "letterSpacing": "0"
     },
     "meta": {
       "family": "'DM Sans', sans-serif",
