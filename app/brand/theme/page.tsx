@@ -204,12 +204,77 @@ const WEIGHT_LABELS: Record<number, string> = {
 };
 
 // ---------------------------------------------------------------------------
+// Google Fonts dynamic loader. Lazy-loads a font's CSS stylesheet by injecting
+// a <link> into document.head on first use. Subsequent calls for the same
+// family are no-ops (deduped via loadedGoogleFonts).
+//
+// URL pattern chosen per FONT_SHIPPED_WEIGHTS:
+//   - Variable fonts ship a single file covering 100..900 → wght@100..900
+//   - Static-weight fonts → wght@{weight1};{weight2};…
+//
+// Generic family keywords (sans-serif, serif, monospace) and unregistered
+// names are skipped. SSR-safe via the typeof document guard.
+// ---------------------------------------------------------------------------
+
+const loadedGoogleFonts = new Set<string>();
+
+function loadGoogleFont(family: string): void {
+  if (typeof document === "undefined") return;
+  if (!family) return;
+
+  // Extract the primary family name from a CSS font-family stack:
+  //   "'DM Sans', sans-serif"  → "DM Sans"
+  //   "'Geist', 'Geist Fallback', sans-serif" → "Geist"
+  const match = family.match(/^\s*['"]?([^'",]+?)['"]?\s*(?:,|$)/);
+  if (!match) return;
+  const fontName = match[1].trim();
+
+  if (loadedGoogleFonts.has(fontName)) return;
+  if (
+    fontName === "sans-serif" ||
+    fontName === "serif" ||
+    fontName === "monospace" ||
+    fontName === "Custom"
+  )
+    return;
+  if (!(fontName in FONT_SHIPPED_WEIGHTS)) return;
+
+  const spec = FONT_SHIPPED_WEIGHTS[fontName];
+  const familyParam = fontName.replace(/ /g, "+");
+  const weightParam = spec.variable
+    ? "wght@100..900"
+    : `wght@${spec.static.join(";")}`;
+  const href = `https://fonts.googleapis.com/css2?family=${familyParam}:${weightParam}&display=swap`;
+
+  const link = document.createElement("link");
+  link.rel = "stylesheet";
+  link.href = href;
+  link.setAttribute("data-font", fontName);
+  document.head.appendChild(link);
+
+  loadedGoogleFonts.add(fontName);
+}
+
+// ---------------------------------------------------------------------------
 // v2 validators. The JSON Schema enforces these patterns at emission time;
 // the UI enforces them at edit time so dangling refs surface immediately.
 // ---------------------------------------------------------------------------
 
 const isValidHex = (hex: string) =>
   /^#[0-9A-Fa-f]{3}([0-9A-Fa-f]{3}([0-9A-Fa-f]{2})?)?$/.test(hex);
+
+// Per Q5 (typography phase): integer in [100, 900]. Schema permits any
+// integer in range; variable fonts may render legitimate non-multiples
+// (350, 425, 550, etc.). The editor UI defaults to multiples-of-100 for
+// UX, but the validator does NOT require it.
+const isValidWeight = (n: unknown): boolean =>
+  typeof n === "number" && Number.isInteger(n) && n >= 100 && n <= 900;
+
+// Accepts "0", "normal", or a signed numeric value with em/px/rem unit
+// (e.g., "-0.025em", "0.5px", "0.01rem"). Unitless non-zero is invalid
+// per CSS spec.
+const isValidLetterSpacing = (s: unknown): boolean =>
+  typeof s === "string" && /^(normal|0|-?\d*\.?\d+(em|px|rem))$/.test(s);
 
 // ---------------------------------------------------------------------------
 // Canonical 19-role v2 vocabulary. Mirrors the SemanticRoleName union in
@@ -271,6 +336,59 @@ const ROLE_DESCRIPTIONS: Record<SemanticRoleName, string> = {
   ctaBorder: "CTA border color (deepen of cta).",
   ctaHover: "CTA hover-state background (deepen of cta; equals ctaBorder by design).",
   ctaBorderHover: "CTA border on hover (deepen of ctaHover).",
+};
+
+// ---------------------------------------------------------------------------
+// Typography vocabulary. Mirrors TypographyMap in theme-schema.ts, sans the
+// `muted` role: muted carries only a color reference (MutedRoleStyle), not a
+// full TextRoleStyle, so the Typography editor surfaces it separately via a
+// footer note pointing back to the Semantic Roles card.
+//
+// Single source of truth: TYPOGRAPHY_ROLES is the array, TypographyRoleName
+// the derived literal union. `satisfies` keeps both honest against the
+// schema's TypographyMap keys.
+// ---------------------------------------------------------------------------
+
+const TYPOGRAPHY_ROLES = [
+  "title",
+  "h1",
+  "h2",
+  "h3",
+  "h4",
+  "body",
+  "ui",
+  "meta",
+] as const satisfies readonly (keyof TypographyMap)[];
+
+type TypographyRoleName = (typeof TYPOGRAPHY_ROLES)[number];
+
+const TYPOGRAPHY_ROLE_DESCRIPTIONS: Record<TypographyRoleName, string> = {
+  title: "Page-level display heading (above-the-fold).",
+  h1: "Section primary heading (editorial register).",
+  h2: "Section secondary heading.",
+  h3: "Subsection heading.",
+  h4: "Card/icon-label heading (compact). Also canonical home for accordion-trigger headings since the A3 cleanup.",
+  body: "Long-form prose.",
+  ui: "Interactive labels (CTA button text, etc.).",
+  meta: "Fine-print prose register — footer attribution, disclaimers, captions.",
+};
+
+// Per-row inline preview content. Sample text rendered at a representative
+// size for the role so the brand author can judge family/weight/lineHeight
+// choices without leaving the Typography card. Sizes here are preview-only —
+// the production renderer uses --fs-{role} multipliers off baseFontSize.
+const TYPOGRAPHY_SAMPLES: Record<
+  TypographyRoleName,
+  { text: string; size: string }
+> = {
+  title: { text: "Page Title", size: "40px" },
+  h1: { text: "Heading 1", size: "32px" },
+  h2: { text: "Heading 2", size: "26px" },
+  h3: { text: "Heading 3", size: "20px" },
+  h4: { text: "Heading 4", size: "17px" },
+  body: { text: "Body text — long-form prose for reading.", size: "16px" },
+  ui: { text: "Button Label", size: "14px" },
+  meta: { text: "Footer attribution, fine-print disclaimer.", size: "12px" },
 };
 
 // ---------------------------------------------------------------------------
