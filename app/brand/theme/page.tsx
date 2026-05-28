@@ -869,6 +869,15 @@ function TypographyRoleRow({
     return () => document.removeEventListener("mousedown", handleClick);
   }, [open]);
 
+  // Lazy-load the Google Font stylesheet whenever the family changes.
+  // loadGoogleFont is dedup-safe (loadedGoogleFonts Set), so calls for an
+  // already-loaded family are no-ops. Generics ("sans-serif", etc.) and the
+  // "Custom" sentinel are skipped inside the helper. FOUT is visible briefly
+  // on first load — acceptable for an authoring surface.
+  React.useEffect(() => {
+    loadGoogleFont(family);
+  }, [family]);
+
   const allFonts = customFont ? ["Custom", ...FONT_OPTIONS] : FONT_OPTIONS;
   const filtered = search
     ? allFonts.filter((f) => f.toLowerCase().includes(search.toLowerCase()))
@@ -2056,6 +2065,44 @@ export default function ThemePage() {
                 <div className="flex justify-center gap-2">
                   <PreviewSurface theme={theme} surface="light" />
                   <PreviewSurface theme={theme} surface="dark" />
+                </div>
+
+                {/* Typography preview — one sample line per role at the
+                    role's actual size, rendered with the role's live config
+                    (family/weight/lineHeight/letterSpacing). Updates on every
+                    keystroke in the Typography card. Sample text comes from
+                    TYPOGRAPHY_SAMPLES. */}
+                <div className="mt-5 pt-4 border-t">
+                  <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground mb-3">
+                    Typography
+                  </p>
+                  <div className="flex flex-col gap-1.5 overflow-hidden">
+                    {TYPOGRAPHY_ROLES.map((role) => {
+                      const cfg = theme.typography?.[role] ?? {};
+                      return (
+                        <p
+                          key={role}
+                          style={{
+                            fontFamily: cfg.family,
+                            fontWeight: cfg.weight,
+                            lineHeight:
+                              typeof cfg.lineHeight === "number"
+                                ? cfg.lineHeight
+                                : 1.4,
+                            letterSpacing:
+                              typeof cfg.letterSpacing === "string"
+                                ? cfg.letterSpacing
+                                : "0",
+                            fontSize: TYPOGRAPHY_SAMPLES[role].size,
+                            margin: 0,
+                          }}
+                          className="text-foreground truncate"
+                        >
+                          {TYPOGRAPHY_SAMPLES[role].text}
+                        </p>
+                      );
+                    })}
+                  </div>
                 </div>
               </CardContent>
             </Card>
