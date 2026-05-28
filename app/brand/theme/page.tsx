@@ -520,6 +520,64 @@ function validateThemeForExport(t: PageStyle): {
   else if (!isValidHex(mDark))
     errors.push(`gradients.subtle.midStopHexDark: invalid hex "${mDark}"`);
 
+  // 7. All 9 typography roles present (8 TextRoleStyle + muted)
+  const typography = (t.typography ?? {}) as Record<string, unknown>;
+  for (const role of TYPOGRAPHY_ROLES) {
+    if (!(role in typography))
+      errors.push(`typography.${role}: missing`);
+  }
+  if (!("muted" in typography))
+    errors.push("typography.muted: missing");
+
+  // 8. Each TextRoleStyle role has family/weight/lineHeight/letterSpacing
+  //    all valid. Rule 7 already flagged a missing role; rule 8 only
+  //    inspects roles that are present.
+  for (const role of TYPOGRAPHY_ROLES) {
+    const cfg = typography[role] as Record<string, unknown> | undefined;
+    if (!cfg) continue;
+
+    if (typeof cfg.family !== "string" || cfg.family.trim() === "")
+      errors.push(`typography.${role}.family: must be a non-empty string`);
+
+    if (!isValidWeight(cfg.weight))
+      errors.push(
+        `typography.${role}.weight: must be an integer in [100, 900] (got ${JSON.stringify(cfg.weight)})`
+      );
+
+    if (cfg.lineHeight === undefined) {
+      errors.push(`typography.${role}.lineHeight: missing`);
+    } else if (typeof cfg.lineHeight === "number") {
+      if (!(cfg.lineHeight > 0))
+        errors.push(
+          `typography.${role}.lineHeight: must be > 0 (got ${cfg.lineHeight})`
+        );
+    } else if (cfg.lineHeight !== "normal") {
+      errors.push(
+        `typography.${role}.lineHeight: must be a positive number or "normal" (got ${JSON.stringify(cfg.lineHeight)})`
+      );
+    }
+
+    if (!isValidLetterSpacing(cfg.letterSpacing))
+      errors.push(
+        `typography.${role}.letterSpacing: must be "0", "normal", or signed numeric+em|px|rem (got ${JSON.stringify(cfg.letterSpacing)})`
+      );
+  }
+
+  // 9. muted role has a valid SemanticRoleName color reference
+  const muted = typography.muted as Record<string, unknown> | undefined;
+  if (muted) {
+    if (muted.color === undefined) {
+      errors.push("typography.muted.color: missing");
+    } else if (
+      typeof muted.color !== "string" ||
+      !SEMANTIC_ROLES.includes(muted.color as SemanticRoleName)
+    ) {
+      errors.push(
+        `typography.muted.color → ${JSON.stringify(muted.color)}: not a valid SemanticRoleName`
+      );
+    }
+  }
+
   return { valid: errors.length === 0, errors };
 }
 
