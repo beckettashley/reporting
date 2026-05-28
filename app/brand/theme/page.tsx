@@ -12,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ImageIcon, Type, Palette, X, Download } from "lucide-react";
+import { ImageIcon, Type, Palette, RotateCcw, Download } from "lucide-react";
 import type {
   ColorTokens,
   PageStyle,
@@ -565,7 +565,7 @@ function RoleHexInput({
           onClick={onClear}
           aria-label="Clear"
         >
-          <X className="w-3 h-3 text-muted-foreground" />
+          <RotateCcw className="w-3 h-3 text-muted-foreground" />
         </Button>
       )}
     </div>
@@ -804,6 +804,301 @@ function FontSelect({
           </p>
         );
       })()}
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Component: TypographyRoleRow — single role row in the Typography card.
+//
+// Renders a 5-column grid row: [12rem label] + [family dropdown, weight
+// select, lineHeight input, letterSpacing input]. Each control cell carries
+// its own X-reset button mirroring the Semantic Roles pattern. Inline
+// synthesis warning surfaces below the row when the chosen weight isn't
+// shipped for the chosen family (uses module-scope isWeightSupported).
+//
+// Color is intentionally NOT exposed per-role — typography colors come
+// from the semantic cascade. Per-role color overrides aren't authored
+// from this surface.
+// ---------------------------------------------------------------------------
+
+function TypographyRoleRow({
+  role,
+  family,
+  weight,
+  lineHeight,
+  letterSpacing,
+  onFamilyChange,
+  onWeightChange,
+  onLineHeightChange,
+  onLetterSpacingChange,
+  onClearFamily,
+  onClearWeight,
+  onClearLineHeight,
+  onClearLetterSpacing,
+  customFont,
+  onCustomFontUpload,
+}: {
+  role: TypographyRoleName;
+  family: string;
+  weight: number;
+  lineHeight: number;
+  letterSpacing: string;
+  onFamilyChange: (v: string) => void;
+  onWeightChange: (n: number) => void;
+  onLineHeightChange: (n: number) => void;
+  onLetterSpacingChange: (s: string) => void;
+  onClearFamily: () => void;
+  onClearWeight: () => void;
+  onClearLineHeight: () => void;
+  onClearLetterSpacing: () => void;
+  customFont?: string | null;
+  onCustomFontUpload?: (name: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  const dropdownRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    if (!open) return;
+    function handleClick(e: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node))
+        setOpen(false);
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [open]);
+
+  const allFonts = customFont ? ["Custom", ...FONT_OPTIONS] : FONT_OPTIONS;
+  const filtered = search
+    ? allFonts.filter((f) => f.toLowerCase().includes(search.toLowerCase()))
+    : allFonts;
+
+  const handleCustomUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const name = file.name.replace(/\.[^.]+$/, "");
+    onCustomFontUpload?.(name);
+    onFamilyChange("Custom");
+    setOpen(false);
+  };
+
+  // Strip CSS quotes/stack for display ("'DM Sans', sans-serif" → "DM Sans").
+  // The select stores the raw family-stack string; display normalizes it.
+  const familyDisplay =
+    family === "Custom" && customFont
+      ? `Custom (${customFont})`
+      : familyKey(family);
+
+  // Weight options are font-aware:
+  //   - Variable font  → all 9 standard weights (100..900 interpolable)
+  //   - Static font    → only shipped weights from FONT_SHIPPED_WEIGHTS
+  //   - Unknown font   → all 9 (defensive fallback for custom uploads)
+  // The current weight is always included even when unsupported, so the
+  // select can render the brand author's choice rather than silently
+  // mutating state. When unsupported, the synthesis warning surfaces below
+  // the row to explain why.
+  const STANDARD_WEIGHTS = [100, 200, 300, 400, 500, 600, 700, 800, 900];
+  const familyMeta = FONT_SHIPPED_WEIGHTS[familyKey(family)];
+  const baseWeightOptions =
+    !familyMeta || familyMeta.variable ? STANDARD_WEIGHTS : familyMeta.static;
+  const weightOptions = baseWeightOptions.includes(weight)
+    ? baseWeightOptions
+    : [...baseWeightOptions, weight].sort((a, b) => a - b);
+
+  const synthCheck = isWeightSupported(family, weight);
+
+  // Letter-spacing numeric (em-stripped) for the type="number" input.
+  // "0" displays as 0; "-0.025em" displays as -0.025.
+  const lsNumericDisplay = letterSpacing.replace(/em$/, "");
+
+  return (
+    <div>
+      <div className="grid grid-cols-[12rem_1fr] gap-2 items-center py-1">
+        <span
+          title={TYPOGRAPHY_ROLE_DESCRIPTIONS[role]}
+          className="text-xs font-mono cursor-help truncate"
+        >
+          {role}
+        </span>
+        <div className="grid grid-cols-[1fr_10rem_6.5rem_7rem] gap-1.5">
+          {/* Family */}
+          <div className="flex items-center gap-1 min-w-0">
+            <div className="relative flex-1 min-w-0" ref={dropdownRef}>
+              <button
+                type="button"
+                onClick={() => {
+                  setOpen(!open);
+                  setSearch("");
+                }}
+                className="w-full flex items-center justify-between pl-2 pr-2 py-1 rounded-md border text-sm h-8 bg-background hover:bg-muted text-left"
+              >
+                <span className="truncate">{familyDisplay}</span>
+                <svg
+                  className="w-3.5 h-3.5 text-muted-foreground shrink-0 ml-1"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d={open ? "M18 15l-6-6-6 6" : "M6 9l6 6 6-6"}
+                  />
+                </svg>
+              </button>
+              {open && (
+                <div
+                  className="absolute left-0 right-0 top-full mt-1 bg-background border rounded-lg shadow-lg overflow-hidden"
+                  style={{ zIndex: 99999 }}
+                >
+                  <div className="px-2 pt-2 pb-1">
+                    <input
+                      type="text"
+                      placeholder="Search fonts..."
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                      className="w-full text-sm px-2.5 py-1.5 rounded-md border bg-background outline-none focus:ring-1 focus:ring-ring"
+                      autoFocus
+                    />
+                  </div>
+                  <div className="max-h-64 overflow-y-auto py-1">
+                    {filtered.map((font) => (
+                      <button
+                        key={font}
+                        type="button"
+                        onClick={() => {
+                          // Wrap as a CSS font-family stack so production
+                          // emission gets a clean "'Family', sans-serif"
+                          // (matches seed shape).
+                          onFamilyChange(
+                            font === "Custom"
+                              ? "Custom"
+                              : `'${font}', sans-serif`
+                          );
+                          setOpen(false);
+                        }}
+                        className={`w-full text-left px-3 py-2 text-sm transition-colors hover:bg-muted ${
+                          familyKey(family) === font ? "bg-muted font-medium" : ""
+                        }`}
+                      >
+                        {font === "Custom" && customFont
+                          ? `Custom (${customFont})`
+                          : font}
+                      </button>
+                    ))}
+                    {filtered.length === 0 && (
+                      <p className="px-3 py-2 text-sm text-muted-foreground">
+                        No fonts match
+                      </p>
+                    )}
+                  </div>
+                  <div className="border-t px-3 py-2">
+                    <label className="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer hover:text-foreground transition-colors">
+                      <input
+                        type="file"
+                        accept=".woff,.woff2,.ttf,.otf"
+                        onChange={handleCustomUpload}
+                        className="hidden"
+                      />
+                      Upload custom font...
+                    </label>
+                  </div>
+                </div>
+              )}
+            </div>
+            <Button
+              size="icon"
+              variant="ghost"
+              className="h-7 w-7 flex-shrink-0"
+              onClick={onClearFamily}
+              aria-label={`Reset ${role} family`}
+            >
+              <RotateCcw className="w-3 h-3 text-muted-foreground" />
+            </Button>
+          </div>
+
+          {/* Weight */}
+          <div className="flex items-center gap-1 min-w-0">
+            <select
+              value={weight}
+              onChange={(e) => onWeightChange(Number(e.target.value))}
+              className="flex-1 min-w-0 h-8 rounded-md border bg-background text-sm pl-2 pr-7 cursor-pointer"
+            >
+              {weightOptions.map((w) => (
+                <option key={w} value={w}>
+                  {WEIGHT_LABELS[w] ?? String(w)}
+                </option>
+              ))}
+            </select>
+            <Button
+              size="icon"
+              variant="ghost"
+              className="h-7 w-7 flex-shrink-0"
+              onClick={onClearWeight}
+              aria-label={`Reset ${role} weight`}
+            >
+              <RotateCcw className="w-3 h-3 text-muted-foreground" />
+            </Button>
+          </div>
+
+          {/* Line height — overlay X so the input claims the full cell
+              width and decimal values like "1.155" render without clipping. */}
+          <div className="relative min-w-0">
+            <Input
+              type="number"
+              step="0.05"
+              min="0"
+              value={lineHeight}
+              onChange={(e) => onLineHeightChange(Number(e.target.value))}
+              className="h-8 w-full text-sm font-mono pr-7"
+            />
+            <Button
+              size="icon"
+              variant="ghost"
+              className="absolute top-1/2 right-0.5 -translate-y-1/2 h-6 w-6"
+              onClick={onClearLineHeight}
+              aria-label={`Reset ${role} lineHeight`}
+            >
+              <RotateCcw className="w-3 h-3 text-muted-foreground" />
+            </Button>
+          </div>
+
+          {/* Letter spacing — overlay X so values like "-0.025" render
+              without clipping. em-string conversion stays transparent: read
+              strips "em" for display; write appends "em" unless value is 0. */}
+          <div className="relative min-w-0">
+            <Input
+              type="number"
+              step="0.005"
+              value={lsNumericDisplay}
+              onChange={(e) => {
+                const n = e.target.value;
+                onLetterSpacingChange(
+                  n === "" || Number(n) === 0 ? "0" : `${n}em`
+                );
+              }}
+              className="h-8 w-full text-sm font-mono pr-7"
+            />
+            <Button
+              size="icon"
+              variant="ghost"
+              className="absolute top-1/2 right-0.5 -translate-y-1/2 h-6 w-6"
+              onClick={onClearLetterSpacing}
+              aria-label={`Reset ${role} letterSpacing`}
+            >
+              <RotateCcw className="w-3 h-3 text-muted-foreground" />
+            </Button>
+          </div>
+        </div>
+      </div>
+      {!synthCheck.supported && (
+        <p className="text-[10px] text-destructive flex items-start gap-1.5 pl-[12.5rem] pb-1">
+          <span aria-hidden>⚠</span>
+          <span>{synthCheck.reason}</span>
+        </p>
+      )}
     </div>
   );
 }
@@ -1078,6 +1373,11 @@ export default function ThemePage() {
   // recompute from current upstream via resetDerivedRow. loadPreset
   // re-captures this snapshot so X-reset tracks the active preset.
   const initialThemeRef = useRef<PageStyle>(javvySeed as PageStyle);
+  // Per-role custom font uploads. Not part of the exported theme (FontSelect
+  // surfaces them as a "Custom (name)" option); cleared on preset switch.
+  const [customFonts, setCustomFonts] = useState<
+    Partial<Record<TypographyRoleName, string>>
+  >({});
 
   // ─── Preset switching + Export ──────────────────────────────────────────
 
@@ -1088,7 +1388,40 @@ export default function ThemePage() {
     setTheme(seed);
     initialThemeRef.current = seed;
     setActivePreset(name);
+    setCustomFonts({});
   };
+
+  // Typography field setters. Generic over TextRoleStyle keys so we can
+  // write any of family/weight/lineHeight/letterSpacing through a single
+  // path. Immutable update preserves the rest of the role's config and
+  // the rest of the typography map.
+  function setTypographyField<K extends keyof TextRoleStyle>(
+    role: TypographyRoleName,
+    field: K,
+    value: TextRoleStyle[K]
+  ): void {
+    setTheme((t) => ({
+      ...t,
+      typography: {
+        ...t.typography,
+        [role]: {
+          ...t.typography?.[role],
+          [field]: value,
+        },
+      },
+    }));
+  }
+
+  // X-reset for a typography field. Reverts to the value captured in
+  // initialThemeRef at preset-load time. By construction (seed
+  // completeness), the initial value is always defined.
+  function resetTypographyField<K extends keyof TextRoleStyle>(
+    role: TypographyRoleName,
+    field: K
+  ): void {
+    const initial = initialThemeRef.current.typography?.[role]?.[field];
+    setTypographyField(role, field, initial as TextRoleStyle[K]);
+  }
 
   // Validate the current theme and download as JSON. On validation failure,
   // alert the brand author with the first 5 errors and skip the download.
@@ -1597,6 +1930,119 @@ export default function ThemePage() {
                 <Type className="w-4 h-4 text-muted-foreground" />
                 <CardTitle className="text-base">Typography</CardTitle>
               </CardHeader>
+              <CardContent className="space-y-1">
+                {/* Base font size — page-level scale anchor. Schema permits
+                    any number; the editor surfaces a sensible 14–20 range.
+                    Out-of-range values require a manual JSON edit. */}
+                <div className="flex items-center gap-3 pb-3 mb-2 border-b">
+                  <Label className="text-xs font-medium text-foreground">
+                    Base Font Size
+                  </Label>
+                  <div className="flex items-center gap-1">
+                    <Input
+                      type="number"
+                      min={14}
+                      max={20}
+                      step={1}
+                      value={theme.baseFontSize ?? 16}
+                      onChange={(e) => setBaseFontSize(Number(e.target.value))}
+                      className="h-8 w-20 text-sm font-mono"
+                    />
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-7 w-7 flex-shrink-0"
+                      onClick={() =>
+                        setBaseFontSize(
+                          initialThemeRef.current.baseFontSize ?? 16
+                        )
+                      }
+                      aria-label="Reset base font size"
+                    >
+                      <RotateCcw className="w-3 h-3 text-muted-foreground" />
+                    </Button>
+                  </div>
+                  <span className="text-[10px] text-muted-foreground">
+                    px · scales typography proportionally
+                  </span>
+                </div>
+
+                {/* Column headers */}
+                <div className="grid grid-cols-[12rem_1fr] gap-2 pb-1">
+                  <span></span>
+                  <div className="grid grid-cols-[1fr_10rem_6.5rem_7rem] gap-1.5">
+                    <span className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+                      Family
+                    </span>
+                    <span className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+                      Weight
+                    </span>
+                    <span className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+                      Line Height
+                    </span>
+                    <span className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+                      Letter Spacing
+                    </span>
+                  </div>
+                </div>
+
+                {TYPOGRAPHY_ROLES.map((role) => {
+                  const cfg = theme.typography?.[role] ?? {};
+                  return (
+                    <TypographyRoleRow
+                      key={role}
+                      role={role}
+                      family={cfg.family ?? ""}
+                      weight={cfg.weight ?? 400}
+                      lineHeight={
+                        typeof cfg.lineHeight === "number" ? cfg.lineHeight : 1.4
+                      }
+                      letterSpacing={
+                        typeof cfg.letterSpacing === "string"
+                          ? cfg.letterSpacing
+                          : "0"
+                      }
+                      onFamilyChange={(v) =>
+                        setTypographyField(role, "family", v)
+                      }
+                      onWeightChange={(n) =>
+                        setTypographyField(role, "weight", n)
+                      }
+                      onLineHeightChange={(n) =>
+                        setTypographyField(role, "lineHeight", n)
+                      }
+                      onLetterSpacingChange={(s) =>
+                        setTypographyField(role, "letterSpacing", s)
+                      }
+                      onClearFamily={() => resetTypographyField(role, "family")}
+                      onClearWeight={() => resetTypographyField(role, "weight")}
+                      onClearLineHeight={() =>
+                        resetTypographyField(role, "lineHeight")
+                      }
+                      onClearLetterSpacing={() =>
+                        resetTypographyField(role, "letterSpacing")
+                      }
+                      customFont={customFonts[role] ?? null}
+                      onCustomFontUpload={(name) =>
+                        setCustomFonts((cf) => ({ ...cf, [role]: name }))
+                      }
+                    />
+                  );
+                })}
+
+                {/* muted role — color reference, not a typography config */}
+                <p className="pt-3 mt-2 border-t text-[11px] text-muted-foreground leading-relaxed">
+                  The{" "}
+                  <code className="font-mono text-[11px] px-1 py-0.5 rounded bg-muted">
+                    muted
+                  </code>{" "}
+                  typography role inherits its color from the{" "}
+                  <code className="font-mono text-[11px] px-1 py-0.5 rounded bg-muted">
+                    mutedForeground
+                  </code>{" "}
+                  semantic role — edit it in the Semantic Roles card above.
+                </p>
+              </CardContent>
             </Card>
           </div>
 
