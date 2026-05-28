@@ -373,22 +373,26 @@ const TYPOGRAPHY_ROLE_DESCRIPTIONS: Record<TypographyRoleName, string> = {
   meta: "Fine-print prose register — footer attribution, disclaimers, captions.",
 };
 
-// Per-row inline preview content. Sample text rendered at a representative
-// size for the role so the brand author can judge family/weight/lineHeight
-// choices without leaving the Typography card. Sizes here are preview-only —
-// the production renderer uses --fs-{role} multipliers off baseFontSize.
+// Per-role preview content. Each role declares (a) sample text and (b) a
+// size multiplier off baseFontSize — matching how the production renderer
+// resolves --fs-{role} (= baseFontSize × scale-factor). Render-time:
+//   fontSize = multiplier × (theme.baseFontSize ?? 16)
+// so editing Base Font Size scales every preview sample proportionally.
+// Multipliers are calibrated against a canonical baseFontSize of 16:
+// (40, 32, 26, 20, 17, 16, 14, 12)px → (2.5, 2.0, 1.625, 1.25, 1.0625, 1.0,
+// 0.875, 0.75). Preview-only — production CSS owns the canonical scale.
 const TYPOGRAPHY_SAMPLES: Record<
   TypographyRoleName,
-  { text: string; size: string }
+  { text: string; multiplier: number }
 > = {
-  title: { text: "Page Title", size: "40px" },
-  h1: { text: "Heading 1", size: "32px" },
-  h2: { text: "Heading 2", size: "26px" },
-  h3: { text: "Heading 3", size: "20px" },
-  h4: { text: "Heading 4", size: "17px" },
-  body: { text: "Body text — long-form prose for reading.", size: "16px" },
-  ui: { text: "Button Label", size: "14px" },
-  meta: { text: "Footer attribution, fine-print disclaimer.", size: "12px" },
+  title: { text: "Page Title", multiplier: 2.5 },
+  h1: { text: "Heading 1", multiplier: 2.0 },
+  h2: { text: "Heading 2", multiplier: 1.625 },
+  h3: { text: "Heading 3", multiplier: 1.25 },
+  h4: { text: "Heading 4", multiplier: 1.0625 },
+  body: { text: "Body text — long-form prose for reading.", multiplier: 1.0 },
+  ui: { text: "Button Label", multiplier: 0.875 },
+  meta: { text: "Footer attribution, fine-print disclaimer.", multiplier: 0.75 },
 };
 
 // ---------------------------------------------------------------------------
@@ -2125,11 +2129,12 @@ export default function ThemePage() {
                   <PreviewSurface theme={theme} surface="dark" />
                 </div>
 
-                {/* Typography preview — one sample line per role at the
-                    role's actual size, rendered with the role's live config
-                    (family/weight/lineHeight/letterSpacing). Updates on every
-                    keystroke in the Typography card. Sample text comes from
-                    TYPOGRAPHY_SAMPLES. */}
+                {/* Typography preview — one sample line per role. fontSize
+                    derives from the role's multiplier × theme.baseFontSize so
+                    Base Font Size edits scale every sample proportionally,
+                    mirroring component-demo's --fs-{role} resolution rule.
+                    Other config (family/weight/lineHeight/letterSpacing) is
+                    pass-through. Updates on every keystroke in the editor. */}
                 <div className="mt-5 pt-4 border-t">
                   <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground mb-3">
                     Typography
@@ -2137,6 +2142,7 @@ export default function ThemePage() {
                   <div className="flex flex-col gap-1.5 overflow-hidden">
                     {TYPOGRAPHY_ROLES.map((role) => {
                       const cfg = theme.typography?.[role] ?? {};
+                      const baseFs = theme.baseFontSize ?? 16;
                       return (
                         <p
                           key={role}
@@ -2151,7 +2157,7 @@ export default function ThemePage() {
                               typeof cfg.letterSpacing === "string"
                                 ? cfg.letterSpacing
                                 : "0",
-                            fontSize: TYPOGRAPHY_SAMPLES[role].size,
+                            fontSize: `${TYPOGRAPHY_SAMPLES[role].multiplier * baseFs}px`,
                             margin: 0,
                           }}
                           className="text-foreground truncate"
