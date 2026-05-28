@@ -616,7 +616,7 @@ function RoleHexInput({
       <Input
         value={hex ? hex.toUpperCase() : ""}
         onChange={(e) => onChange(e.target.value)}
-        className={`font-mono text-xs h-7 flex-1 min-w-0 ${hex && !hexValid ? "border-destructive" : ""}`}
+        className={`text-xs tabular-nums h-7 flex-1 min-w-0 ${hex && !hexValid ? "border-destructive" : ""}`}
         placeholder="#000000"
       />
       {onClear && (
@@ -653,7 +653,7 @@ function ColorField({
     <div className="flex items-center gap-3">
       <div className="flex-1">
         <Label className="text-xs font-medium text-muted-foreground">{label}</Label>
-        {helper && <p className="text-[10px] text-muted-foreground">{helper}</p>}
+        {helper && <p className="text-xs text-muted-foreground">{helper}</p>}
         <div className="flex items-center gap-2 mt-0.5">
           <label
             className="w-8 h-8 rounded-md border border-border flex-shrink-0 cursor-pointer block relative overflow-hidden"
@@ -669,7 +669,7 @@ function ColorField({
           <Input
             value={value.toUpperCase()}
             onChange={(e) => onChange(e.target.value)}
-            className="font-mono text-sm h-8"
+            className="text-sm tabular-nums h-8"
             placeholder="#000000"
           />
         </div>
@@ -796,7 +796,7 @@ function TypographyRoleRow({
       <div className="grid grid-cols-[12rem_1fr] gap-2 items-center py-1">
         <span
           title={TYPOGRAPHY_ROLE_DESCRIPTIONS[role]}
-          className="text-xs font-mono cursor-help truncate"
+          className="text-xs cursor-help truncate"
         >
           {role}
         </span>
@@ -931,7 +931,7 @@ function TypographyRoleRow({
               min="0"
               value={lineHeight}
               onChange={(e) => onLineHeightChange(Number(e.target.value))}
-              className="h-8 w-full text-sm font-mono pr-7"
+              className="h-8 w-full text-sm tabular-nums pr-7"
             />
             <Button
               size="icon"
@@ -958,7 +958,7 @@ function TypographyRoleRow({
                   n === "" || Number(n) === 0 ? "0" : `${n}em`
                 );
               }}
-              className="h-8 w-full text-sm font-mono pr-7"
+              className="h-8 w-full text-sm tabular-nums pr-7"
             />
             <Button
               size="icon"
@@ -1012,7 +1012,7 @@ function ImageUploadField({
   return (
     <div className="flex-1">
       <Label className="text-xs font-medium text-muted-foreground">{label}</Label>
-      {helper && <p className="text-[10px] text-muted-foreground mt-0.5">{helper}</p>}
+      {helper && <p className="text-xs text-muted-foreground mt-0.5">{helper}</p>}
       <div className="flex items-center gap-2 mt-1">
         <button
           type="button"
@@ -1632,7 +1632,7 @@ export default function ThemePage() {
     <div className="flex flex-col min-h-screen">
       <div className="flex-1 p-6 lg:p-8">
         <div className="mb-8 flex items-center justify-between gap-4">
-          <h1 className="text-2xl font-semibold text-foreground">Theme</h1>
+          <h1 className="text-xl font-semibold text-foreground">Theme</h1>
           <div className="flex items-center gap-2">
             <Select value={activePreset} onValueChange={(v) => loadPreset(v as PresetName)}>
               <SelectTrigger className="w-[180px]" aria-label="Preset">
@@ -1671,10 +1671,10 @@ export default function ThemePage() {
                 <div className="grid grid-cols-[12rem_1fr] gap-2 pb-1">
                   <span></span>
                   <div className="grid grid-cols-2 gap-2">
-                    <span className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+                    <span className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
                       Light
                     </span>
-                    <span className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+                    <span className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
                       Dark
                     </span>
                   </div>
@@ -1732,7 +1732,7 @@ export default function ThemePage() {
                       <div className="grid grid-cols-[12rem_1fr] gap-2 items-center py-1">
                         <span
                           title={ROLE_DESCRIPTIONS[role]}
-                          className="text-xs font-mono cursor-help truncate"
+                          className="text-xs cursor-help truncate"
                         >
                           {role}
                         </span>
@@ -1774,7 +1774,7 @@ export default function ThemePage() {
                 >
                   <span
                     title="Alternate section background color. Used for sections that should diverge from the default background."
-                    className="text-xs font-mono cursor-help truncate"
+                    className="text-xs cursor-help truncate"
                   >
                     backgroundAlternate
                   </span>
@@ -1826,7 +1826,7 @@ export default function ThemePage() {
                       step={1}
                       value={theme.baseFontSize ?? 16}
                       onChange={(e) => setBaseFontSize(Number(e.target.value))}
-                      className="h-8 w-20 text-sm font-mono"
+                      className="h-8 w-20 text-sm tabular-nums"
                     />
                     <Button
                       size="icon"
@@ -1842,7 +1842,7 @@ export default function ThemePage() {
                       <RotateCcw className="w-3 h-3 text-muted-foreground" />
                     </Button>
                   </div>
-                  <span className="text-[10px] text-muted-foreground">
+                  <span className="text-xs text-muted-foreground">
                     px · scales typography proportionally
                   </span>
                 </div>
@@ -1851,16 +1851,16 @@ export default function ThemePage() {
                 <div className="grid grid-cols-[12rem_1fr] gap-2 pb-1">
                   <span></span>
                   <div className="grid grid-cols-[1fr_10rem_6.5rem_7rem] gap-1.5">
-                    <span className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+                    <span className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
                       Family
                     </span>
-                    <span className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+                    <span className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
                       Weight
                     </span>
-                    <span className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+                    <span className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
                       Line Height
                     </span>
-                    <span className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+                    <span className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
                       Letter Spacing
                     </span>
                   </div>
@@ -1911,13 +1911,13 @@ export default function ThemePage() {
                 })}
 
                 {/* muted role — color reference, not a typography config */}
-                <p className="pt-3 mt-2 border-t text-[11px] text-muted-foreground leading-relaxed">
+                <p className="pt-3 mt-2 border-t text-xs text-muted-foreground leading-relaxed">
                   The{" "}
-                  <code className="font-mono text-[11px] px-1 py-0.5 rounded bg-muted">
+                  <code className="font-mono text-xs px-1 py-0.5 rounded bg-muted">
                     muted
                   </code>{" "}
                   typography role inherits its color from the{" "}
-                  <code className="font-mono text-[11px] px-1 py-0.5 rounded bg-muted">
+                  <code className="font-mono text-xs px-1 py-0.5 rounded bg-muted">
                     mutedForeground
                   </code>{" "}
                   semantic role — edit it in the Semantic Roles card above.
@@ -1945,7 +1945,7 @@ export default function ThemePage() {
                     Other config (family/weight/lineHeight/letterSpacing) is
                     pass-through. Updates on every keystroke in the editor. */}
                 <div className="mt-5 pt-4 border-t">
-                  <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground mb-3">
+                  <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground mb-3">
                     Typography
                   </p>
                   <div className="flex flex-col gap-1.5 overflow-hidden">
