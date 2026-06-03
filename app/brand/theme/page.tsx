@@ -1306,7 +1306,7 @@ function PreviewSurface({
       {/* Footer — primary band */}
       <div className="flex flex-col items-center gap-1 p-2 text-center" style={{ background: bgPrim("primary"), color: "var(--primaryForeground)" }}>
         {footerLogo ? (
-          <img src={footerLogo} alt="logo" className="h-5 max-w-[96px] object-contain" />
+          <img src={footerLogo} alt="logo" className="h-4 max-w-[84px] object-contain" />
         ) : (
           <span style={{ ...typo("ui"), fontWeight: 700 }}>Brand</span>
         )}
