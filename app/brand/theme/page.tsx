@@ -12,7 +12,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ImageIcon, Type, Palette, RotateCcw, Download } from "lucide-react";
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from "@/components/ui/tooltip";
+import { ImageIcon, Type, Palette, RotateCcw, Download, Check } from "lucide-react";
 import type {
   ColorTokens,
   PageStyle,
@@ -317,27 +322,27 @@ const DERIVED_ROLES: ReadonlySet<SemanticRoleName> = new Set([
 ]);
 
 const ROLE_DESCRIPTIONS: Record<SemanticRoleName, string> = {
-  background: "Default page surface.",
-  foreground: "Default body text color, paired with background.",
-  muted: "Neutral muted surface — hover states, disabled UI.",
-  mutedForeground: "Text/icon color paired with muted.",
-  primary: "Brand-color surface (cardHeader bands, accent cells). Carries dual semantic per P15 — action emphasis (flips across surfaces) and brand-surface accent (wants to stay). Brands where action ≠ brand-surface (e.g., Javvy: action=yellow, surface=purple) may need primitive refs for accent cells on dark.",
-  primaryForeground: "Text/icon color paired with primary.",
-  brandSubtle: "Brand-tinted subtle section wash. Same primitive serves gradients.subtle.",
-  brandSubtleForeground: "Text/icon color paired with brandSubtle.",
-  warning: "Warning-state surface.",
-  warningForeground: "Text/icon color paired with warning.",
-  textBrand: "Brand-tinted text in body content — accents, inline emphasis.",
-  link: "Link text. May share a primitive with textBrand on light; usually flips on dark.",
-  textAlert: "Urgency/emphasis text (countdown timers, limited-time copy).",
-  border: "Default border color.",
-  ring: "Focus ring color.",
-  cta: "Action-button background. Distinct from primary (the brand surface).",
-  ctaForeground: "Text/icon color on the CTA.",
-  ctaBorder: "CTA border color (deepen of cta).",
-  ctaHover: "CTA hover-state background (deepen of cta; equals ctaBorder by design).",
-  ctaHoverForeground: "Text/icon color on the CTA hover surface (pairs with ctaHover; defaults to ctaForeground, overridable).",
-  ctaBorderHover: "CTA border on hover (deepen of ctaHover).",
+  background: "The main background color of your page.",
+  foreground: "The main color for body text.",
+  muted: "A soft, neutral background for low-key areas like disabled buttons.",
+  mutedForeground: "Text color used on muted backgrounds.",
+  primary: "Your main brand color, used for accents and highlighted sections.",
+  primaryForeground: "Text and icons shown on top of your brand color.",
+  brandSubtle: "A light tint of your brand color for gentle section backgrounds.",
+  brandSubtleForeground: "Text color used on the subtle brand tint.",
+  warning: "Background color for warning messages.",
+  warningForeground: "Text color used on warning backgrounds.",
+  textBrand: "Your brand color used to emphasize words within text.",
+  link: "The color of clickable links.",
+  textAlert: "Bold text color for urgency, like sales or countdowns.",
+  border: "Color of lines and dividers between content.",
+  ring: "The highlight shown around a field when it's selected.",
+  cta: "Background color of your main action buttons.",
+  ctaForeground: "Text color on your action buttons.",
+  ctaBorder: "Border color around your action buttons.",
+  ctaHover: "Button background color when someone hovers over it.",
+  ctaHoverForeground: "Button text color when someone hovers over it.",
+  ctaBorderHover: "Button border color when someone hovers over it.",
 };
 
 // ---------------------------------------------------------------------------
@@ -365,14 +370,14 @@ const TYPOGRAPHY_ROLES = [
 type TypographyRoleName = (typeof TYPOGRAPHY_ROLES)[number];
 
 const TYPOGRAPHY_ROLE_DESCRIPTIONS: Record<TypographyRoleName, string> = {
-  title: "Page-level display heading (above-the-fold).",
-  h1: "Section primary heading (editorial register).",
-  h2: "Section secondary heading.",
-  h3: "Subsection heading.",
-  h4: "Card/icon-label heading (compact). Also canonical home for accordion-trigger headings since the A3 cleanup.",
-  body: "Long-form prose.",
-  ui: "Interactive labels (CTA button text, etc.).",
-  meta: "Fine-print prose register — footer attribution, disclaimers, captions.",
+  title: "The largest headline, usually at the top of the page.",
+  h1: "Main section heading.",
+  h2: "Secondary heading within a section.",
+  h3: "Smaller subheading.",
+  h4: "Small heading for cards and labels.",
+  body: "Regular paragraph text.",
+  ui: "Text on buttons and labels.",
+  meta: "Small print — captions, footnotes, and disclaimers.",
 };
 
 // Per-role preview content. Each role declares (a) sample text and (b) a
@@ -796,12 +801,14 @@ function TypographyRoleRow({
   return (
     <div>
       <div className="grid grid-cols-[12rem_1fr] gap-2 items-center py-1">
-        <span
-          title={TYPOGRAPHY_ROLE_DESCRIPTIONS[role]}
-          className="text-xs cursor-help truncate"
-        >
-          {role}
-        </span>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <span className="text-xs cursor-help truncate">{role}</span>
+          </TooltipTrigger>
+          <TooltipContent side="top" align="start" className="max-w-[17rem] text-wrap text-left leading-snug">
+            {TYPOGRAPHY_ROLE_DESCRIPTIONS[role]}
+          </TooltipContent>
+        </Tooltip>
         <div className="grid grid-cols-[1fr_10rem_6.5rem_7rem] gap-1.5">
           {/* Family */}
           <div className="flex items-center gap-1 min-w-0">
@@ -1211,7 +1218,7 @@ function PreviewSurface({
         style={{ background: bgPrim("background"), borderBottom: "1px solid var(--border)" }}
       >
         {navLogo ? (
-          <img src={navLogo} alt="logo" className="h-2.5 max-w-[48px] object-contain" />
+          <img src={navLogo} alt="logo" className="h-4 max-w-[84px] object-contain" />
         ) : (
           <span style={{ ...typo("ui"), color: "var(--textBrand)", fontWeight: 700 }}>Logo</span>
         )}
@@ -1246,9 +1253,9 @@ function PreviewSurface({
             <li key={b} className="flex items-center gap-1" style={typo("body")}>
               <span
                 className="flex items-center justify-center rounded-full shrink-0"
-                style={{ width: 8, height: 8, fontSize: 6, background: bgPrim("brandSubtle"), color: "var(--textBrand)" }}
+                style={{ width: 8, height: 8, background: bgPrim("primary") }}
               >
-                ✓
+                <Check strokeWidth={3.5} style={{ width: 6, height: 6, color: "var(--primaryForeground)" }} />
               </span>
               {b}
             </li>
@@ -1297,9 +1304,9 @@ function PreviewSurface({
       </div>
 
       {/* Footer — primary band */}
-      <div className="flex flex-col gap-1 p-2" style={{ background: bgPrim("primary"), color: "var(--primaryForeground)" }}>
+      <div className="flex flex-col items-center gap-1 p-2 text-center" style={{ background: bgPrim("primary"), color: "var(--primaryForeground)" }}>
         {footerLogo ? (
-          <img src={footerLogo} alt="logo" className="h-2.5 max-w-[54px] object-contain" />
+          <img src={footerLogo} alt="logo" className="h-5 max-w-[96px] object-contain" />
         ) : (
           <span style={{ ...typo("ui"), fontWeight: 700 }}>Brand</span>
         )}
@@ -1848,12 +1855,20 @@ export default function ThemePage() {
                   return (
                     <div key={role}>
                       <div className="grid grid-cols-[12rem_1fr] gap-2 items-center py-1">
-                        <span
-                          title={ROLE_DESCRIPTIONS[role]}
-                          className="text-xs cursor-help truncate"
-                        >
-                          {role}
-                        </span>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span className="text-xs cursor-help truncate">
+                              {role}
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent
+                            side="top"
+                            align="start"
+                            className="max-w-[17rem] text-wrap text-left leading-snug"
+                          >
+                            {ROLE_DESCRIPTIONS[role]}
+                          </TooltipContent>
+                        </Tooltip>
                         <div className="grid grid-cols-2 gap-2">
                           <RoleHexInput
                             hex={lightHex}
@@ -1890,12 +1905,21 @@ export default function ThemePage() {
                   key="backgroundAlternate"
                   className="grid grid-cols-[12rem_1fr] gap-2 items-center py-1"
                 >
-                  <span
-                    title="Alternate section background color. Used for sections that should diverge from the default background."
-                    className="text-xs cursor-help truncate"
-                  >
-                    backgroundAlternate
-                  </span>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span className="text-xs cursor-help truncate">
+                        backgroundAlternate
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent
+                      side="top"
+                      align="start"
+                      className="max-w-[17rem] text-wrap text-left leading-snug"
+                    >
+                      A second background color for sections you want to
+                      stand out from the rest of the page.
+                    </TooltipContent>
+                  </Tooltip>
                   <div className="grid grid-cols-2 gap-2">
                     <RoleHexInput
                       hex={backgroundAlternateHex}
