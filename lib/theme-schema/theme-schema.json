@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://component-demo.local/schema/theme-schema.json",
-  "$comment": "ADAPTED from github.com/beckettashley/component-demo/schema/theme-schema.json as of commit 2fbc394 (A3 cleanup). Local additions still pending parallel canonical PRs: (1) ctaBorderHover semantic role (cta family); (2) midStopHexDark field on GradientPrimitive (dark-surface counterpart to midStopHex). Canonical sync history: 1b73a46 initial vendor; cb43d51 (A2) trimmed TypographyMap from 13 roles to 10 (h5, h6, condensed removed); 2fbc394 (A3) trimmed from 10 to 9 (accordionQuestion removed; h4 is canonical home for accordion triggers). Sync rule: when schema changes in component-demo OR locally, update both sides BEFORE updating UI consumers.",
+  "$comment": "ADAPTED from github.com/beckettashley/component-demo/schema/theme-schema.json as of commit 2fbc394 (A3 cleanup). Local additions still pending parallel canonical PRs: (1) ctaBorderHover semantic role (cta family); (2) midStopHexDark field on GradientPrimitive (dark-surface counterpart to midStopHex); (3) brandAssets.favicon (surface-agnostic favicon URL/data-URL); (4) ctaHoverForeground semantic role (cta family; text on the hover surface). Canonical sync history: 1b73a46 initial vendor; cb43d51 (A2) trimmed TypographyMap from 13 roles to 10 (h5, h6, condensed removed); 2fbc394 (A3) trimmed from 10 to 9 (accordionQuestion removed; h4 is canonical home for accordion triggers). Sync rule: when schema changes in component-demo OR locally, update both sides BEFORE updating UI consumers.",
   "title": "PageStyle theme schema",
   "description": "Theme data for a single brand: color tokens, typography roles, brand assets, baseFontSize. Compositional content shape (sections, grids, cells) is not part of this schema — that's template-specific. See companion TypeScript definitions at schema/theme-schema.ts.",
   "type": "object",
@@ -46,6 +46,7 @@
         "ctaForeground",
         "ctaBorder",
         "ctaHover",
+        "ctaHoverForeground",
         "ctaBorderHover"
       ]
     },
@@ -86,6 +87,7 @@
         "ctaForeground": { "type": "string" },
         "ctaBorder": { "type": "string" },
         "ctaHover": { "type": "string" },
+        "ctaHoverForeground": { "type": "string" },
         "ctaBorderHover": { "type": "string" }
       }
     },
@@ -224,6 +226,10 @@
               "description": "URL of logo for dark surfaces (light-foreground asset)."
             }
           }
+        },
+        "favicon": {
+          "type": "string",
+          "description": "LOCAL EXTENSION (not in canonical schema yet). Favicon asset — URL or data-URL. Surface-agnostic (one per brand). Parallel component-demo PR pending."
         }
       }
     }

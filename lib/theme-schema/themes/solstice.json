@@ -42,6 +42,8 @@
       "ctaBorderDark": "#DD9319",
       "ctaHover": "#DD9319",
       "ctaHoverDark": "#DD9319",
+      "ctaHoverForeground": "#1A1A1A",
+      "ctaHoverForegroundDark": "#1A1A1A",
       "ctaBorderHover": "#BC7400",
       "ctaBorderHoverDark": "#BC7400"
     },
@@ -66,6 +68,7 @@
         "ctaForeground": "ctaForeground",
         "ctaBorder": "ctaBorder",
         "ctaHover": "ctaHover",
+        "ctaHoverForeground": "ctaHoverForeground",
         "ctaBorderHover": "ctaBorderHover"
       },
       "dark": {
@@ -88,6 +91,7 @@
         "ctaForeground": "ctaForegroundDark",
         "ctaBorder": "ctaBorderDark",
         "ctaHover": "ctaHoverDark",
+        "ctaHoverForeground": "ctaHoverForegroundDark",
         "ctaBorderHover": "ctaBorderHoverDark"
       }
     },
@@ -130,6 +134,8 @@
       "ctaBorderDark": { "onSurface": "dark" },
       "ctaHover": { "onSurface": "dark" },
       "ctaHoverDark": { "onSurface": "dark" },
+      "ctaHoverForeground": { "onSurface": "dark" },
+      "ctaHoverForegroundDark": { "onSurface": "dark" },
       "ctaBorderHover": { "onSurface": "dark" },
       "ctaBorderHoverDark": { "onSurface": "dark" }
     },

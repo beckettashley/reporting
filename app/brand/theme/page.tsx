@@ -302,6 +302,7 @@ const SEMANTIC_ROLES: readonly SemanticRoleName[] = [
   "ctaForeground",
   "ctaBorder",
   "ctaHover",
+  "ctaHoverForeground",
   "ctaBorderHover",
 ];
 
@@ -335,6 +336,7 @@ const ROLE_DESCRIPTIONS: Record<SemanticRoleName, string> = {
   ctaForeground: "Text/icon color on the CTA.",
   ctaBorder: "CTA border color (deepen of cta).",
   ctaHover: "CTA hover-state background (deepen of cta; equals ctaBorder by design).",
+  ctaHoverForeground: "Text/icon color on the CTA hover surface (pairs with ctaHover; defaults to ctaForeground, overridable).",
   ctaBorderHover: "CTA border on hover (deepen of ctaHover).",
 };
 
@@ -484,7 +486,7 @@ function validateThemeForExport(t: PageStyle): {
     if (!isValidHex(hex))
       errors.push(`primitives.${name}: invalid hex "${hex}"`);
   }
-  // 2. All 20 light + 20 dark primitives present
+  // 2. All light + dark primitives present (one per role)
   for (const role of SEMANTIC_ROLES) {
     if (!primNames.has(role)) errors.push(`primitives.${role}: missing`);
     if (!primNames.has(`${role}Dark`))
@@ -495,7 +497,7 @@ function validateThemeForExport(t: PageStyle): {
     if (!ALLOWED.has(name))
       errors.push(`primitives.${name}: not in closed vocabulary`);
   }
-  // 4. semantic.light and semantic.dark identity-map all 20 roles
+  // 4. semantic.light and semantic.dark identity-map every role
   for (const role of SEMANTIC_ROLES) {
     if (semLight[role] !== role)
       errors.push(
@@ -1105,133 +1107,208 @@ function PreviewSurface({
   const midStopOklch =
     midStop && isValidHex(midStop) ? hexToOklch(midStop) : "transparent";
 
+  // The mockup is authored at a fixed 152px design width; `zoom` scales the
+  // whole tile uniformly (text, icons, padding, borders together) so it stays
+  // proportional while filling the preview container. Chromium reflows zoomed
+  // layout, so the flex row below still measures/wraps correctly.
   const wrapperStyle = {
     ...cssVars,
     backgroundColor: bgPrim("background"),
     color: "var(--foreground)",
-    width: "150px",
+    width: "152px",
+    zoom: 1.5,
   } as React.CSSProperties;
+
+  // Hex for a role's primitive at this surface — used for logo-variant
+  // selection by band luminance.
+  const roleHex = (role: SemanticRoleName): string | undefined => {
+    const p = semantic[role];
+    return p ? primitives[p] : undefined;
+  };
+
+  // Typography role → CSS, sized for the mini tile. Per-role multipliers
+  // (TYPOGRAPHY_SAMPLES) scale off a small tile base that itself tracks
+  // baseFontSize, so editing Base Font Size scales the mockup proportionally.
+  type TextRole = "title" | "h1" | "h2" | "h3" | "h4" | "body" | "ui" | "meta";
+  const tileBase = 6.5 * ((theme.baseFontSize ?? 16) / 16);
+  const typo = (role: TextRole): React.CSSProperties => {
+    const r = theme.typography?.[role] as TextRoleStyle | undefined;
+    return {
+      fontFamily: r?.family,
+      fontWeight: r?.weight,
+      lineHeight: r?.lineHeight,
+      letterSpacing: r?.letterSpacing,
+      fontSize: `${tileBase * (TYPOGRAPHY_SAMPLES[role]?.multiplier ?? 1)}px`,
+    };
+  };
+  // A typography role's color is a semantic-role reference; resolve to its
+  // CSS var, falling back to foreground.
+  const roleColor = (role: TextRole): string => {
+    const c = (theme.typography?.[role] as TextRoleStyle | undefined)?.color;
+    return c ? `var(--${c})` : "var(--foreground)";
+  };
+
+  const logoLight = theme.brandAssets?.logo?.light;
+  const logoDark = theme.brandAssets?.logo?.dark;
+  const favicon = theme.brandAssets?.favicon;
+  // Pick the logo variant readable on a given band; default by surface.
+  const pickLogo = (bandHex: string | undefined): string | undefined => {
+    const onDark = bandHex ? luminance(bandHex) < 0.45 : surface === "dark";
+    return onDark ? logoDark ?? logoLight : logoLight ?? logoDark;
+  };
+  const navLogo = pickLogo(roleHex("background"));
+  const footerLogo = pickLogo(roleHex("primary"));
 
   return (
     <div
       style={wrapperStyle}
-      className="rounded border border-border overflow-hidden text-[9px] font-sans flex flex-col flex-shrink-0"
+      className="rounded-md border border-border overflow-hidden font-sans flex flex-col flex-shrink-0 shadow-sm"
     >
+      {/* Faux browser chrome — browser UI, NOT the themed page: always a
+          neutral white tab bar (the favicon never renders on the page itself,
+          so it must not inherit any surface token). */}
       <div
-        className="px-2 py-1 text-[8px] uppercase tracking-wide font-semibold"
-        style={{
-          background: bgPrim("muted"),
-          color: "var(--mutedForeground)",
-        }}
+        className="flex items-center gap-1 px-1.5 py-1"
+        style={{ background: "#ffffff", borderBottom: "1px solid #e5e7eb" }}
       >
-        {surface} surface
-      </div>
-
-      <div
-        className="p-2 flex flex-col gap-1"
-        style={{ background: bgPrim("background") }}
-      >
-        <h3
-          style={{
-            color: "var(--textBrand)",
-            fontWeight: 700,
-            fontSize: "11px",
-            margin: 0,
-            lineHeight: 1.2,
-          }}
+        {favicon ? (
+          <img src={favicon} alt="favicon" className="w-2.5 h-2.5 rounded-sm object-contain" />
+        ) : (
+          <span
+            className="w-2.5 h-2.5 rounded-sm flex items-center justify-center"
+            style={{ background: "#e5e7eb" }}
+          >
+            <ImageIcon className="w-1.5 h-1.5" style={{ color: "#9ca3af" }} />
+          </span>
+        )}
+        <span
+          className="text-[6px] uppercase tracking-wide font-semibold"
+          style={{ color: "#6b7280" }}
         >
-          Brand Heading
-        </h3>
-        <p style={{ margin: 0, lineHeight: 1.4 }}>Lorem ipsum dolor sit.</p>
-      </div>
-
-      <div
-        className="px-2 py-1.5"
-        style={{
-          background: bgPrim("primary"),
-          color: "var(--primaryForeground)",
-        }}
-      >
-        <span style={{ fontWeight: 700 }}>Primary surface</span>
-      </div>
-
-      <div
-        className="px-2 py-1.5"
-        style={{
-          background: bgPrim("brandSubtle"),
-          color: "var(--brandSubtleForeground)",
-        }}
-      >
-        Brand subtle wash
-      </div>
-
-      <div
-        className="px-2 py-1.5"
-        style={{
-          background: bgPrim("warning"),
-          color: "var(--warningForeground)",
-        }}
-      >
-        Warning
-      </div>
-
-      <div
-        className="p-2 flex flex-col gap-1"
-        style={{ background: bgPrim("background") }}
-      >
-        <button
-          style={{
-            background: bgPrim("cta"),
-            color: "var(--ctaForeground)",
-            border: "1px solid var(--ctaBorder)",
-            padding: "4px 8px",
-            borderRadius: 3,
-            fontSize: "9px",
-            fontWeight: 700,
-            width: "100%",
-          }}
-        >
-          CTA Button
-        </button>
-        <button
-          style={{
-            background: bgPrim("ctaHover"),
-            color: "var(--ctaForeground)",
-            border: "1px solid var(--ctaBorderHover)",
-            padding: "4px 8px",
-            borderRadius: 3,
-            fontSize: "9px",
-            fontWeight: 700,
-            width: "100%",
-          }}
-        >
-          Hover state
-        </button>
-      </div>
-
-      <div
-        className="px-2 py-2 text-center"
-        style={{
-          background: `linear-gradient(to bottom, ${bgPrim("background")} 0%, ${midStopOklch} 25%, ${midStopOklch} 75%, ${bgPrim("background")} 100%)`,
-          color: "var(--foreground)",
-        }}
-      >
-        Gradient
-      </div>
-
-      <div
-        className="px-2 py-1.5 text-[8px] flex items-center gap-1.5"
-        style={{ background: bgPrim("muted"), color: "var(--mutedForeground)" }}
-      >
-        <span>Footer</span>
-        <span aria-hidden>·</span>
-        <a href="#" style={{ color: "var(--link)" }}>
-          link
-        </a>
-        <span aria-hidden>·</span>
-        <span style={{ color: "var(--textAlert)", fontWeight: 700 }}>
-          alert
+          {surface}
         </span>
+      </div>
+
+      {/* Urgency banner — primary band */}
+      <div
+        className="text-center uppercase"
+        style={{ ...typo("meta"), background: bgPrim("primary"), color: "var(--primaryForeground)", fontWeight: 800, letterSpacing: "0.04em", padding: "3px 6px" }}
+      >
+        ⚡ Spring sale — 58% off
+      </div>
+
+      {/* Promo banner — brand subtle */}
+      <div
+        className="text-center"
+        style={{ ...typo("ui"), background: bgPrim("brandSubtle"), color: "var(--brandSubtleForeground)", padding: "2px 6px" }}
+      >
+        Free shipping over $40
+      </div>
+
+      {/* Navbar — logo + menu */}
+      <div
+        className="flex items-center justify-between px-2 py-1.5"
+        style={{ background: bgPrim("background"), borderBottom: "1px solid var(--border)" }}
+      >
+        {navLogo ? (
+          <img src={navLogo} alt="logo" className="h-2.5 max-w-[48px] object-contain" />
+        ) : (
+          <span style={{ ...typo("ui"), color: "var(--textBrand)", fontWeight: 700 }}>Logo</span>
+        )}
+        <svg className="w-2.5 h-2.5" style={{ color: "var(--foreground)" }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </div>
+
+      {/* Hero */}
+      <div className="flex flex-col gap-1 p-2" style={{ background: bgPrim("background"), color: "var(--foreground)" }}>
+        <div className="w-full rounded flex items-center justify-center" style={{ aspectRatio: "16 / 10", background: bgPrim("muted") }}>
+          <ImageIcon className="w-4 h-4" style={{ color: "var(--mutedForeground)" }} />
+        </div>
+        <div className="flex items-center gap-1">
+          <div className="flex">
+            {[0, 1, 2, 3, 4].map((i) => (
+              <svg key={i} width="6" height="6" viewBox="0 0 24 24" fill="#f59e0b">
+                <path d="M12 2l2.9 6.3 6.8.6-5.1 4.5 1.5 6.7L12 17l-6 3.6 1.5-6.7L2.4 8.9l6.8-.6z" />
+              </svg>
+            ))}
+          </div>
+          <span style={{ ...typo("meta"), color: "var(--mutedForeground)" }}>18,623 reviews</span>
+        </div>
+        <h2 style={{ ...typo("title"), color: roleColor("title"), margin: 0 }}>
+          Better mornings, brewed for you.
+        </h2>
+        <p style={{ ...typo("body"), margin: 0 }}>
+          The smarter way to start your day.
+        </p>
+        <ul className="flex flex-col gap-0.5 m-0 p-0 list-none">
+          {["Real ingredients", "Loved by 18,000+", "30-day guarantee"].map((b) => (
+            <li key={b} className="flex items-center gap-1" style={typo("body")}>
+              <span
+                className="flex items-center justify-center rounded-full shrink-0"
+                style={{ width: 8, height: 8, fontSize: 6, background: bgPrim("brandSubtle"), color: "var(--textBrand)" }}
+              >
+                ✓
+              </span>
+              {b}
+            </li>
+          ))}
+        </ul>
+        <span style={{ ...typo("meta"), color: "var(--textAlert)", fontWeight: 700 }}>
+          ⏳ Only 3 left today
+        </span>
+        <button
+          style={{ ...typo("ui"), background: bgPrim("cta"), color: "var(--ctaForeground)", border: "1px solid var(--ctaBorder)", borderRadius: 3, padding: "4px", width: "100%", textAlign: "center", fontWeight: 700 }}
+        >
+          SHOP NOW →
+        </button>
+      </div>
+
+      {/* Warning notice */}
+      <div
+        className="px-2 py-1 text-center"
+        style={{ ...typo("meta"), background: bgPrim("warning"), color: "var(--warningForeground)" }}
+      >
+        ⚠ Limited stock remaining
+      </div>
+
+      {/* Brand-subtle gradient section — heading ladder + inline link */}
+      <div
+        className="flex flex-col gap-1 p-2"
+        style={{ background: `linear-gradient(to bottom, ${bgPrim("background")} 0%, ${midStopOklch} 30%, ${midStopOklch} 70%, ${bgPrim("background")} 100%)`, color: "var(--foreground)" }}
+      >
+        <div style={{ ...typo("h1"), color: roleColor("h1") }}>Heading 1</div>
+        <div style={{ ...typo("h2"), color: roleColor("h2") }}>Heading 2</div>
+        <div style={{ ...typo("h3"), color: roleColor("h3") }}>Heading 3</div>
+        <div style={{ ...typo("h4"), color: roleColor("h4") }}>Heading 4</div>
+        <p style={{ ...typo("body"), margin: 0, opacity: 0.9 }}>
+          Lorem ipsum dolor.{" "}
+          <a href="#" style={{ color: "var(--link)", fontWeight: 600 }}>Learn more</a>
+        </p>
+      </div>
+
+      {/* Secondary CTA — primary-surface button */}
+      <div className="px-2 py-2" style={{ background: bgPrim("background") }}>
+        <button
+          style={{ ...typo("ui"), background: bgPrim("primary"), color: "var(--primaryForeground)", border: "none", borderRadius: 3, padding: "4px", width: "100%", textAlign: "center", fontWeight: 700 }}
+        >
+          LEARN MORE
+        </button>
+      </div>
+
+      {/* Footer — primary band */}
+      <div className="flex flex-col gap-1 p-2" style={{ background: bgPrim("primary"), color: "var(--primaryForeground)" }}>
+        {footerLogo ? (
+          <img src={footerLogo} alt="logo" className="h-2.5 max-w-[54px] object-contain" />
+        ) : (
+          <span style={{ ...typo("ui"), fontWeight: 700 }}>Brand</span>
+        )}
+        <div className="flex gap-2 uppercase" style={typo("ui")}>
+          <span>Privacy</span>
+          <span>Terms</span>
+          <span>Contact</span>
+        </div>
+        <div style={{ ...typo("meta"), opacity: 0.8 }}>© 2026 — All rights reserved.</div>
       </div>
     </div>
   );
@@ -1380,6 +1457,24 @@ export default function ThemePage() {
 
   const setBaseFontSize = (n: number) =>
     setTheme((t) => ({ ...t, baseFontSize: n }));
+
+  // ─── Brand asset setters ─────────────────────────────────────────────────
+  // Logo variants write to brandAssets.logo.{light,dark}; favicon to
+  // brandAssets.favicon (local schema extension). Uploads stored as data-URLs.
+  const setLogo = (variant: "light" | "dark", dataUrl: string) =>
+    setTheme((t) => ({
+      ...t,
+      brandAssets: {
+        ...t.brandAssets,
+        logo: { ...t.brandAssets?.logo, [variant]: dataUrl },
+      },
+    }));
+
+  const setFavicon = (dataUrl: string) =>
+    setTheme((t) => ({
+      ...t,
+      brandAssets: { ...t.brandAssets, favicon: dataUrl },
+    }));
 
   // ─── Derivation effects ──────────────────────────────────────────────────
   // Three cta-family derivations cascade through (cta → ctaBorder, cta →
@@ -1661,6 +1756,29 @@ export default function ThemePage() {
                 <ImageIcon className="w-4 h-4 text-muted-foreground" />
                 <CardTitle className="text-base">Brand Assets</CardTitle>
               </CardHeader>
+              <CardContent className="flex flex-col gap-4">
+                <div className="flex gap-3">
+                  <ImageUploadField
+                    label="Logo — light surface"
+                    helper="Shown on light backgrounds"
+                    preview={theme.brandAssets?.logo?.light ?? null}
+                    onUpload={(d) => setLogo("light", d)}
+                  />
+                  <ImageUploadField
+                    label="Logo — dark surface"
+                    helper="Shown on dark backgrounds"
+                    preview={theme.brandAssets?.logo?.dark ?? null}
+                    onUpload={(d) => setLogo("dark", d)}
+                  />
+                </div>
+                <ImageUploadField
+                  label="Favicon"
+                  helper="Browser tab icon"
+                  preview={theme.brandAssets?.favicon ?? null}
+                  onUpload={setFavicon}
+                  accept="image/png,image/svg+xml,image/x-icon,.ico"
+                />
+              </CardContent>
             </Card>
             <Card>
               <CardHeader className="flex flex-row items-center gap-2 pb-4">
@@ -1933,7 +2051,7 @@ export default function ThemePage() {
                 <CardTitle className="text-base">Preview</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="flex justify-center gap-2">
+                <div className="flex flex-wrap justify-center gap-4">
                   <PreviewSurface theme={theme} surface="light" />
                   <PreviewSurface theme={theme} surface="dark" />
                 </div>

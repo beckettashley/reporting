@@ -4,6 +4,9 @@
 //   (1) ctaBorderHover semantic role (cta family)
 //   (2) midStopHexDark field on GradientPrimitive (dark-surface counterpart
 //       to midStopHex, mirrors the role/roleDark pattern used elsewhere)
+//   (3) brandAssets.favicon (surface-agnostic favicon URL/data-URL)
+//   (4) ctaHoverForeground semantic role (cta family; text/icon on the
+//       hover surface, pairs with ctaHover)
 // Canonical sync history:
 //   - 1b73a46 (2026-05-19) — initial vendor
 //   - cb43d51 (A2 cleanup) — TypographyMap trimmed from 13 roles to 10
@@ -110,8 +113,11 @@ export type ColorPrimitives = Record<string, string>;
  *     from `primary` because brands may use a different color for
  *     actions than for brand-surface expression (Javvy: yellow CTA vs
  *     purple brand surface; Solstice: amber CTA vs burnt-orange brand
- *     surface). Paired with `ctaForeground`. `ctaBorder` / `ctaHover`
- *     refine the action treatment.
+ *     surface). Paired with `ctaForeground`. `ctaBorder` / `ctaHover` /
+ *     `ctaBorderHover` refine the action treatment; `ctaHoverForeground`
+ *     is the text/icon color on the hover surface (pairs with `ctaHover`,
+ *     mirroring the cta/ctaForeground pairing — present so overridden or
+ *     inverted hover backgrounds keep a legible foreground).
  *   - `textBrand` is brand-tinted text in body content (extension —
  *     accents, inline brand emphasis). May share a primitive with
  *     `primary` today but kept distinct because the intent register
@@ -151,6 +157,7 @@ export type SemanticRoleName =
   | 'ctaForeground'
   | 'ctaBorder'
   | 'ctaHover'
+  | 'ctaHoverForeground'
   | 'ctaBorderHover';
 
 /**
@@ -369,6 +376,12 @@ export interface BrandAssets {
     /** URL of the asset for placement on DARK surfaces. */
     dark?: string;
   };
+  /**
+   * LOCAL EXTENSION (not in canonical schema yet). Favicon asset — a URL or
+   * data-URL. Surface-agnostic (one favicon per brand). Parallel
+   * component-demo PR pending.
+   */
+  favicon?: string;
 }
 
 // ─────────────────────────────────────────────────────────────────────
