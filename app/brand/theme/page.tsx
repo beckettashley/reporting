@@ -1235,12 +1235,12 @@ function PreviewSurface({
         <div className="flex items-center gap-1">
           <div className="flex">
             {[0, 1, 2, 3, 4].map((i) => (
-              <svg key={i} width="6" height="6" viewBox="0 0 24 24" fill="#f59e0b">
+              <svg key={i} width="9" height="9" viewBox="0 0 24 24" fill="#f59e0b">
                 <path d="M12 2l2.9 6.3 6.8.6-5.1 4.5 1.5 6.7L12 17l-6 3.6 1.5-6.7L2.4 8.9l6.8-.6z" />
               </svg>
             ))}
           </div>
-          <span style={{ ...typo("meta"), color: "var(--mutedForeground)" }}>18,623 reviews</span>
+          <span style={{ ...typo("body"), color: "var(--mutedForeground)" }}>18,623 reviews</span>
         </div>
         <h2 style={{ ...typo("title"), color: roleColor("title"), margin: 0 }}>
           Better mornings, brewed for you.
