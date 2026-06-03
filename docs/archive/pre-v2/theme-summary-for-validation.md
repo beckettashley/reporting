@@ -1,5 +1,13 @@
 # Theme Page — Current State Summary
 
+> **▲ v2 CORRECTION (2026-06-03):** The "v1" target referenced below was an
+> interim stage, now **superseded by v2** (shipped 2026-05-19). Canonical lives
+> in-repo at `lib/theme-schema/` (component-demo `2fbc394` + local
+> `ctaBorderHover`/`midStopHexDark`). The "Phase 1 / Phase 2 → v1" language below
+> did not happen that way. Current state: **`docs/THEME-STATUS.md`**.
+
+---
+
 For validation against page templates. This documents every input the portal collects, the default values, and how each maps to the live preview.
 
 ---

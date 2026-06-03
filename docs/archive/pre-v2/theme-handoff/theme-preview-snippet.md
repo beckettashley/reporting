@@ -1,10 +1,9 @@
 # Brand Theme — Live Preview Tile
 
-> **▲ v2 CORRECTION (2026-06-03):** The "v1" target referenced below was an
-> interim stage, now **superseded by v2** (shipped 2026-05-19). Canonical lives
-> in-repo at `lib/theme-schema/` (component-demo `2fbc394` + local
-> `ctaBorderHover`/`midStopHexDark`). The "Phase 2 → v1" language below did not
-> happen that way. Current state: **`docs/THEME-STATUS.md`**.
+> **▲ v2 CORRECTION (2026-06-03):** The "v1" target and "Phase 2 → v1" language
+> below were interim, now **superseded by v2** (shipped 2026-05-19). Canonical
+> lives in-repo at `lib/theme-schema/` (component-demo `2fbc394` + local
+> additions). Current state: **`docs/THEME-STATUS.md`**.
 
 ---
 
